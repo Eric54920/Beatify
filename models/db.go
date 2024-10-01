@@ -45,7 +45,7 @@ func InitDB() error {
 	}
 
 	// 迁移数据库
-	DB.AutoMigrate(&Connection{})
+	DB.AutoMigrate(&Connection{}, &Dir{})
 	fmt.Println("数据库初始化成功")
 	return nil
 }

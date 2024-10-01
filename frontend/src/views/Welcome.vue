@@ -123,7 +123,6 @@ checkConfig()
                     <FormField v-slot="{ componentField }" name="protocol">
                         <FormItem>
                             <FormLabel>Protocol</FormLabel>
-
                             <Select v-bind="componentField">
                                 <FormControl>
                                     <SelectTrigger>

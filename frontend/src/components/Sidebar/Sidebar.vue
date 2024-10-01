@@ -1,5 +1,9 @@
-<script lang="ts">
-import { defineComponent, PropType } from 'vue'
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue'
+import { GetAllDirs, DeleteDir, UpdateDir } from '../../../wailsjs/go/beatify/App'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import * as z from 'zod'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -20,40 +24,149 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
+import Toaster from '@/components/ui/toast/Toaster.vue'
+import { toast } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/toast/use-toast'
 
-export default defineComponent({
-  components: {
-    Button,
-    ScrollArea,
-    Search,
-    Input,
-    ContextMenu,
-    ContextMenuCheckboxItem,
-    ContextMenuContent,
-    ContextMenuItem,
-    ContextMenuLabel,
-    ContextMenuRadioGroup,
-    ContextMenuRadioItem,
-    ContextMenuSeparator,
-    ContextMenuShortcut,
-    ContextMenuSub,
-    ContextMenuSubContent,
-    ContextMenuSubTrigger,
-    ContextMenuTrigger
-  },
-  data() {
-    return {
-      playlists: [
-        'Recently Added',
-      ]
+interface Playlist {
+  id: number,
+  title: string,
+  url: string
+}
+
+const playlists = ref<Playlist[]>([])
+const isDialogOpen = ref(false)
+// const playlistFormSchema = toTypedSchema(z.object({
+//   title: z.string({ required_error: "title is required" }).min(2),
+//   url: z.string({ required_error: "url is required" })
+// }))
+
+// const { handleSubmit } = useForm({
+//   validationSchema: playlistFormSchema,
+// })
+const dirForm = ref({
+  id: 0,
+  title: "",
+  url: ""
+})
+
+const saveDir = () => {
+  /* 保存目录 */
+  let id = dirForm.value.id
+  let title = dirForm.value.title
+  let url = dirForm.value.url
+  if (title && url) {
+    let formData = {
+      "title": title,
+      "url": url
     }
-  },
-  methods: {
-    cn
-  },
-  props: {
-
+    UpdateDir(id, JSON.stringify(formData)).then((res: Record<string, any>) => {
+      if (res.status == 500) {
+        toast({
+          title: "Error",
+          description: "Update error",
+        })
+      } else if (res.status == 400) {
+        toast({
+          title: "Error",
+          description: "Arguments Error",
+        })
+      } else if (res.status == 404) {
+        toast({
+          title: "Error",
+          description: "Record not found",
+        })
+      } else {
+        toast({
+          title: "Success",
+          description: "Update success",
+        })
+        // 重新获取目录列表
+        getPlaylist()
+        // 关闭表单
+        isDialogOpen.value = false
+      }
+    })
   }
+}
+
+const getPlaylist = () => {
+  /* 获取所有目录 */
+  GetAllDirs().then((res: Record<string, any>) => {
+    if (res.ststus == 500) {
+      toast({
+        title: "发生了一些异常",
+        description: res.msg,
+      })
+    } else if (res.status == 404) {
+      toast({
+        title: "Success",
+        description: res.msg,
+      })
+    } else {
+      playlists.value = res.data
+      toast({
+        title: "Success",
+        description: res.msg,
+      })
+    }
+  })
+}
+
+const editDir = (id: number) => {
+  /* 编辑目录 */
+  isDialogOpen.value = true;
+  dirForm.value.id = id;
+  // 找到要更新的数据
+  playlists.value.forEach((playlist: Playlist) => {
+    if (playlist.id == id) {
+      dirForm.value.title = playlist.title;
+      dirForm.value.url = playlist.url;
+    }
+  });
+}
+
+const deleteDir = (id: number) => {
+  /* 删除目录 */
+  DeleteDir(id).then((res: Record<string, any>) => {
+    if (res.status == 200) {
+      toast({
+        title: "Success",
+        description: res.msg,
+      })
+      getPlaylist()
+    } else {
+      toast({
+        title: "发生了一些异常",
+        description: res.msg,
+      })
+    }
+  })
+}
+
+onMounted(() => {
+  const { toast } = useToast()
+
+  getPlaylist()
 })
 </script>
 
@@ -61,7 +174,7 @@ export default defineComponent({
   <div :class="cn('pb-12', $attrs.class ?? '')">
     <div class="space-y-4 py-4">
       <div class="px-3 py-2">
-        <div class="relative w-full mb-2 max-w-sm items-center">
+        <div class="relative w-full mb-2 items-center">
           <Input id="search" type="text" placeholder="Search..." class="pl-10" />
           <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
             <Search class="size-6 text-muted-foreground" />
@@ -124,10 +237,10 @@ export default defineComponent({
         </h2>
         <ScrollArea class="h-[200px] px-1">
           <div class="space-y-1 p-2">
-            <RouterLink v-for="(playlist, i) in playlists" :key="`${playlist}-${i}`" to="/aa">
+            <RouterLink v-for="(playlist, i) in playlists" :key="`${playlist}-${i}`" :to="`/songs?url=${playlist.url}`">
               <ContextMenu>
                 <ContextMenuTrigger>
-                  <Button variant="ghost" class="w-full justify-start font-normal">
+                  <Button variant="ghost" class="w-full justify-start font-normal overflow-ellipsis overflow-hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" class="mr-2 h-4 w-4">
                       <path d="M21 15V6" />
@@ -136,11 +249,11 @@ export default defineComponent({
                       <path d="M16 6H3" />
                       <path d="M12 18H3" />
                     </svg>
-                    {{ playlist }}
+                    {{ playlist.title }}
                   </Button>
                 </ContextMenuTrigger>
                 <ContextMenuContent class="w-40">
-                  <ContextMenuItem inset>
+                  <ContextMenuItem inset @click="editDir(playlist.id)">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="mr-2 h-4 w-4">
                       <path stroke-linecap="round" stroke-linejoin="round"
@@ -148,7 +261,7 @@ export default defineComponent({
                     </svg>
                     编辑
                   </ContextMenuItem>
-                  <ContextMenuItem inset>
+                  <ContextMenuItem inset @click="deleteDir(playlist.id)">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="mr-2 h-4 w-4">
                       <path stroke-linecap="round" stroke-linejoin="round"
@@ -163,5 +276,48 @@ export default defineComponent({
         </ScrollArea>
       </div>
     </div>
+    <Toaster />
+
+    <Form>
+      <Dialog v-model:open="isDialogOpen">
+        <DialogContent class="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Playlist</DialogTitle>
+          </DialogHeader>
+
+          <FormField v-slot="{ componentField }" name="title">
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="playlist name" v-bind="componentField" v-model="dirForm.title" />
+              </FormControl>
+              <FormDescription>
+                This is the playlist name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField }" name="url">
+            <FormItem>
+              <FormLabel>Url</FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="playlist url" v-bind="componentField" v-model="dirForm.url" />
+              </FormControl>
+              <FormDescription>
+                This is the playlist url.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <DialogFooter>
+            <Button @click="saveDir">
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Form>
   </div>
 </template>
