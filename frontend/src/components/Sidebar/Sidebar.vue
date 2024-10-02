@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { GetAllDirs, DeleteDir, UpdateDir } from '../../../wailsjs/go/beatify/App'
+import { GetAllDirs, DeleteDir, UpdateDir, CreateDir } from '../../../wailsjs/go/beatify/App'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -54,7 +54,8 @@ interface Playlist {
 }
 
 const playlists = ref<Playlist[]>([])
-const isDialogOpen = ref(false)
+const isDialogOpen = ref(false) // 更新表单
+const isAddDialogOpen = ref(false) // 新增表单
 // const playlistFormSchema = toTypedSchema(z.object({
 //   title: z.string({ required_error: "title is required" }).min(2),
 //   url: z.string({ required_error: "url is required" })
@@ -163,6 +164,39 @@ const deleteDir = (id: number) => {
   })
 }
 
+const addDirForm = ref({
+  title: "",
+  url: ""
+})
+
+const addDir = () => {
+  /* 添加目录 */
+  addDirForm.value = {
+    title: "",
+    url: ""
+  };
+  isAddDialogOpen.value = true;
+}
+
+const saveNewDir = () => {
+  /* 保存新增目录 */
+  CreateDir(JSON.stringify(addDirForm.value)).then((res: Record<string, any>) => {
+    if (res.status == 500) {
+      toast({
+        title: "发生了一些异常",
+        description: res.msg,
+      })
+    } else {
+      toast({
+        title: "Success",
+        description: res.msg,
+      })
+      isAddDialogOpen.value = false;
+      getPlaylist()
+    }
+  })
+}
+
 onMounted(() => {
   const { toast } = useToast()
 
@@ -232,8 +266,15 @@ onMounted(() => {
         </div>
       </div>
       <div class="py-2">
-        <h2 class="relative px-7 text-lg font-semibold tracking-tight">
-          Playlists
+        <h2 class="flex justify-between items-center relative px-7 text-lg font-semibold tracking-tight">
+          <span>Playlists</span>
+          <Button variant="link" class="p-0" @click="addDir">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+          </Button>
         </h2>
         <ScrollArea class="h-[200px] px-1">
           <div class="space-y-1 p-2">
@@ -278,6 +319,7 @@ onMounted(() => {
     </div>
     <Toaster />
 
+    <!-- 更新表单 -->
     <Form>
       <Dialog v-model:open="isDialogOpen">
         <DialogContent class="sm:max-w-[425px]">
@@ -313,6 +355,49 @@ onMounted(() => {
 
           <DialogFooter>
             <Button @click="saveDir">
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Form>
+
+    <!-- 新增表单 -->
+    <Form>
+      <Dialog v-model:open="isAddDialogOpen">
+        <DialogContent class="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Playlist</DialogTitle>
+          </DialogHeader>
+
+          <FormField v-slot="{ componentField }" name="title">
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="playlist name" v-bind="componentField" v-model="addDirForm.title" />
+              </FormControl>
+              <FormDescription>
+                This is the playlist name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField }" name="url">
+            <FormItem>
+              <FormLabel>Url</FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="playlist url" v-bind="componentField" v-model="addDirForm.url" />
+              </FormControl>
+              <FormDescription>
+                This is the playlist url.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <DialogFooter>
+            <Button @click="saveNewDir">
               Save changes
             </Button>
           </DialogFooter>

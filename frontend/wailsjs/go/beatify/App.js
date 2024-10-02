@@ -6,6 +6,10 @@ export function AddConnection(arg1) {
   return window['go']['beatify']['App']['AddConnection'](arg1);
 }
 
+export function CreateDir(arg1) {
+  return window['go']['beatify']['App']['CreateDir'](arg1);
+}
+
 export function DeleteDir(arg1) {
   return window['go']['beatify']['App']['DeleteDir'](arg1);
 }

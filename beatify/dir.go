@@ -22,6 +22,7 @@ func (a *App) GetAllDirs() Response {
 		return Response{
 			Status: 500,
 			Msg:    "异常:" + err.Error(),
+			Data:   nil,
 		}
 	}
 
@@ -121,6 +122,36 @@ func (a *App) DeleteDir(id int) Response {
 	return Response{
 		Status: 200,
 		Msg:    "删除成功",
+		Data:   nil,
+	}
+}
+
+// 新增目录
+func (a *App) CreateDir(formData string) Response {
+	var dir models.Dir
+	var err error
+
+	err = json.Unmarshal([]byte(formData), &dir)
+	if err != nil {
+		return Response{
+			Status: 500,
+			Msg:    "",
+			Data:   nil,
+		}
+	}
+
+	err = models.DB.Create(&dir).Error
+	if err != nil {
+		return Response{
+			Status: 500,
+			Msg:    "",
+			Data:   nil,
+		}
+	}
+
+	return Response{
+		Status: 200,
+		Msg:    "",
 		Data:   nil,
 	}
 }
