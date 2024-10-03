@@ -1,43 +1,65 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { GetSongs } from '../../wailsjs/go/beatify/App'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from '@/components/ui/table'
+import Toaster from '@/components/ui/toast/Toaster.vue'
+import { toast } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/toast/use-toast'
 
 
 const route = useRoute()
-const dir = ref(0);
-const songs = [
-  {
-    id: 1,
-    title: "夜曲",
-    artist: "周杰伦",
-    album: "夜曲",
-    type: "flac",
-    size: 14.3,
-    update_at: "2024-09-10 12:12:12"
-  }
-]
+const dir = ref(Number(route.query.dir));
+interface Song {
+    id: number,
+    title: string,
+    artist: string,
+    album: string,
+    type: string,
+    size: number,
+    update_at: string
+}
+const songs = ref<Song[]>([])
+
+const getSongs = () => {
+    /* 获取所有歌曲 */ 
+    GetSongs(dir.value).then((res: Record<string, any>) => {
+        if (res.status == 500) {
+            toast({
+                title: "发生了一些异常",
+                description: res.msg,
+            })
+        } else {
+            songs.value = res.data;
+        }
+    })
+}
 
 // 检测路由中参数的变化
 watch(() => route.query.dir, (newDir) => {
-    console.log(newDir)
+    // 重新获取所有歌曲
+    dir.value = Number(newDir);
+    getSongs()
+    console.log(dir.value, songs)
 })
 
 onMounted(() => {
-    dir.value = route.query.dir;
+    const { toast } = useToast()
 
-    console.log(dir.value)
+    // 获取所有歌曲
+    getSongs()
 })
 </script>
 
 <template>
+    <Toaster />
     <Table>
         <TableHeader>
             <TableRow>

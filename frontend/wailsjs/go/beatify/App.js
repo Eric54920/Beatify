@@ -18,6 +18,10 @@ export function GetAllDirs() {
   return window['go']['beatify']['App']['GetAllDirs']();
 }
 
+export function GetSongs(arg1) {
+  return window['go']['beatify']['App']['GetSongs'](arg1);
+}
+
 export function IsExistConnection() {
   return window['go']['beatify']['App']['IsExistConnection']();
 }
