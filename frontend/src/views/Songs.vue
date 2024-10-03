@@ -73,9 +73,9 @@ onMounted(() => {
             </TableRow>
         </TableHeader>
         <TableBody>
-            <TableRow v-for="song in songs" :key="song.id">
+            <TableRow v-for="(song, i) in songs" :key="song.id">
                 <TableCell class="font-medium">
-                    {{ song.id }}
+                    {{ i + 1 }}
                 </TableCell>
                 <TableCell>{{ song.title }}</TableCell>
                 <TableCell>{{ song.artist }}</TableCell>
