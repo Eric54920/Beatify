@@ -1,16 +1,26 @@
 package beatify
 
 import (
+	"Beatify/models"
 	"context"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx    context.Context
+	client Connection
 }
 
 func InitBeatify() *App {
-	return &App{}
+	// 初始化数据库
+	err := models.InitDB()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return &App{
+		client: GetClient(),
+	}
 }
 
 // startup is called when the app starts. The context is saved

@@ -2,7 +2,6 @@ package main
 
 import (
 	"Beatify/beatify"
-	"Beatify/models"
 	"embed"
 
 	"github.com/wailsapp/wails/v2"
@@ -17,13 +16,6 @@ var err error
 func main() {
 	// 初始化App
 	app := beatify.InitBeatify()
-
-	// 初始化数据库
-	err = models.InitDB()
-	if err != nil {
-		println("Error:", err.Error())
-		return
-	}
 
 	// Create application with options
 	err = wails.Run(&options.App{
