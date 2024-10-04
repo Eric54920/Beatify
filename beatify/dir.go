@@ -140,6 +140,23 @@ func (a *App) CreateDir(formData string) Response {
 		}
 	}
 
+	// 唯一校验
+	if unique, _ := models.UniqueCheck("title", dir.Title, &models.Dir{}); !unique {
+		return Response{
+			Status: 400,
+			Msg:    "",
+			Data:   nil,
+		}
+	}
+
+	if unique, _ := models.UniqueCheck("url", dir.Url, &models.Dir{}); !unique {
+		return Response{
+			Status: 400,
+			Msg:    "",
+			Data:   nil,
+		}
+	}
+
 	err = models.DB.Create(&dir).Error
 	if err != nil {
 		return Response{
