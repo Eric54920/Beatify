@@ -37,12 +37,13 @@ type Dir struct {
 
 // 歌曲
 type Song struct {
-	Title  string  `gorm:"not null" json:"title"` // 标题
-	Artist string  `json:"artist"`                // 作者
-	Album  string  `json:"album"`                 // 专辑
-	Type   string  `gorm:"not null" json:"type"`  // 问价类型
-	Size   float32 `grom:"not null" json:"size"`  // 大小
-	Dir    int     `gorm:"not null" json:"dir"`   // 目录
+	Title  string  `gorm:"not null" json:"title"`          // 标题
+	Artist string  `json:"artist"`                         // 作者
+	Album  string  `json:"album"`                          // 专辑
+	Type   string  `gorm:"not null" json:"type"`           // 文件类型
+	Size   float32 `grom:"not null" json:"size"`           // 大小
+	Dir    int     `gorm:"not null" json:"dir"`            // 目录
+	Time   int     `gorm:"not null,default=0" json:"time"` // 时长
 
 	Model
 }
