@@ -41,9 +41,10 @@ type Song struct {
 	Artist string  `json:"artist"`                         // 作者
 	Album  string  `json:"album"`                          // 专辑
 	Type   string  `gorm:"not null" json:"type"`           // 文件类型
-	Size   float32 `grom:"not null" json:"size"`           // 大小
+	Size   float64 `grom:"not null" json:"size"`           // 大小
 	Dir    int     `gorm:"not null" json:"dir"`            // 目录
 	Time   int     `gorm:"not null,default=0" json:"time"` // 时长
+	Path   string  `gorm:"not null,default=/" json:"path"` // 位置url
 
 	Model
 }
