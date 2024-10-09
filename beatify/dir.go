@@ -166,6 +166,9 @@ func (a *App) CreateDir(formData string) Response {
 		}
 	}
 
+	// 拉取歌曲列表
+	a.client.GetFileList(dir.ID)
+
 	return Response{
 		Status: 200,
 		Msg:    "",

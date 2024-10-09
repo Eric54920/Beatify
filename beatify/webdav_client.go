@@ -50,41 +50,58 @@ func (w WebDAVClient) GetFileList(dirId int) {
 			// 如果类型断言失败，跳过该文件
 			continue
 		}
-
+		fmt.Println(f.ContentType())
 		if f.ContentType() == "" {
 			continue
 		}
 
 		var fileType string // 文件类型
-		var name string     // 文件名
+		var title string    // 文件名
 		var artist string   // 歌手
 
 		// 分割文件名，去掉扩展名
 		info := strings.Split(f.Name(), ".")
 		if len(info) > 1 {
 			fileType = info[len(info)-1]
+
+			// 判断扩展名是否为音频文件后缀
+			flag := false
+			for _, audioExt := range audioExtensions {
+				if fileType == audioExt {
+					flag = true
+					break
+				}
+			}
+
+			if !flag {
+				continue
+			}
 		}
 		fullName := strings.Join(info[:len(info)-1], "")
 
 		// 按照连字符拆分 "全名"
 		nameList := strings.Split(fullName, "-")
 		for i, item := range nameList {
+			// 除去两边的空格
 			nameList[i] = strings.TrimSpace(item)
 		}
 
-		// 检查 nameList 是否有足够的元素
-		if len(nameList) > 0 {
-			name = nameList[0]
-		}
-		if len(nameList) > 1 {
-			artist = nameList[1]
+		// 获取歌曲名和歌手
+		switch len(nameList) {
+		case 1:
+			title = nameList[0]
+		case 2:
+			artist = nameList[0]
+			title = nameList[1]
+		default:
+			title = fullName
 		}
 
 		size, _ := strconv.ParseFloat(fmt.Sprintf("%.1f", float32(f.Size())/1024/1024), 64)
 		song := models.Song{
-			Title:  name,
+			Title:  title,
 			Artist: artist,
-			Path:   f.Path(),
+			Path:   f.Path(), // 文件路径
 			Dir:    dirId,
 			Size:   size,                      // 文件大小，单位 MB
 			Type:   strings.ToUpper(fileType), // 文件类型
