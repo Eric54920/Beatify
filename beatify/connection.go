@@ -3,9 +3,49 @@ package beatify
 import (
 	"Beatify/models"
 	"encoding/json"
+	"fmt"
 
 	"gorm.io/gorm"
 )
+
+type FileInfo struct {
+	Name   string  `json:"name"`
+	Artist string  `json:"artist"`
+	Isdir  bool    `json:"isdir"`
+	Path   string  `json:"path"`
+	Size   float64 `json:"size"`
+	Type   string  `json:"type"`
+	UTime  string  `json:"utime"`
+}
+
+type Connection interface {
+	GetFileList(dirId int)
+}
+
+func GetClient() Connection {
+
+	var dbConnection models.Connection
+	var err error
+	var client Connection
+
+	if err = models.DB.First(&dbConnection).Error; err != nil {
+		fmt.Println(err.Error())
+		return nil
+	}
+
+	// 创建连接
+	switch dbConnection.Protocol {
+	case "WebDAV":
+		client, err = NewWebDAVClient(dbConnection.Address, dbConnection.Username, dbConnection.Password)
+	}
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil
+	}
+
+	return client
+}
 
 // 检查连接是否存在，是否能连接到服务
 func (a *App) IsExistConnection() Response {
