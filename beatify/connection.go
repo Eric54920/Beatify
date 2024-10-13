@@ -21,7 +21,7 @@ type FileInfo struct {
 var audioExtensions = []string{"mp3", "wav", "flac", "aac", "ogg", "m4a", "wma", "alac", "aiff"}
 
 type Connection interface {
-	GetFileList(dirId int)
+	GetFileList(dirId int) ([]FileInfo, error)
 }
 
 func GetClient() Connection {

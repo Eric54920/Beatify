@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { GetAllDirs, DeleteDir, UpdateDir, CreateDir } from '../../../wailsjs/go/beatify/App'
+import { GetAllDirs, DeleteDir, UpdateDir, CreateDir, ReSyncDir } from '../../../wailsjs/go/beatify/App'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -128,6 +128,23 @@ const getPlaylist = () => {
       toast({
         title: "Success",
         description: res.msg,
+      })
+    }
+  })
+}
+
+const reSyncDir = (id: number) => {
+  /* 重新同步歌曲列表 */
+  ReSyncDir(id).then((res) => {
+    if (res.status == 500) {
+      toast({
+        title: "Error",
+        description: "ReSync error",
+      })
+    } else {
+      toast({
+        title: "Success",
+        description: "reSync success",
       })
     }
   })
@@ -285,7 +302,8 @@ onMounted(() => {
         </h2>
         <ScrollArea class="h-[200px] px-1">
           <div class="space-y-1 p-2">
-            <RouterLink v-for="(playlist, i) in playlists" :key="`${playlist}-${i}`" :to="`/main/songs?dir=${playlist.id}`">
+            <RouterLink v-for="(playlist, i) in playlists" :key="`${playlist}-${i}`"
+              :to="`/main/songs?dir=${playlist.id}`">
               <ContextMenu>
                 <ContextMenuTrigger>
                   <Button variant="ghost" class="w-full justify-start font-normal overflow-ellipsis overflow-hidden">
@@ -301,6 +319,14 @@ onMounted(() => {
                   </Button>
                 </ContextMenuTrigger>
                 <ContextMenuContent class="w-40">
+                  <ContextMenuItem inset @click="reSyncDir(playlist.id)" class="px-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                      stroke="currentColor" class="mr-2 h-4 w-4">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    Resynchronize
+                  </ContextMenuItem>
                   <ContextMenuItem inset @click="editDir(playlist.id)" class="px-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="mr-2 h-4 w-4">

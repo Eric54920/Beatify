@@ -26,6 +26,10 @@ export function IsExistConnection() {
   return window['go']['beatify']['App']['IsExistConnection']();
 }
 
+export function ReSyncDir(arg1) {
+  return window['go']['beatify']['App']['ReSyncDir'](arg1);
+}
+
 export function UpdateDir(arg1, arg2) {
   return window['go']['beatify']['App']['UpdateDir'](arg1, arg2);
 }

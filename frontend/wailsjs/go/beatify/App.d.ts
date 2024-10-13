@@ -14,4 +14,6 @@ export function GetSongs(arg1:number):Promise<beatify.Response>;
 
 export function IsExistConnection():Promise<beatify.Response>;
 
+export function ReSyncDir(arg1:number):Promise<beatify.Response>;
+
 export function UpdateDir(arg1:number,arg2:string):Promise<beatify.Response>;

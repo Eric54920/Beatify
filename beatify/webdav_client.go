@@ -35,14 +35,20 @@ func NewWebDAVClient(baseURL, Username, Password string) (*WebDAVClient, error) 
 }
 
 // 获取文件夹数据
-func (w WebDAVClient) GetFileList(dirId int) {
+func (w WebDAVClient) GetFileList(dirId int) ([]FileInfo, error) {
 	var dir models.Dir
 
 	err := models.DB.First(&dir, "id = ?", dirId).Error
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	files, _ := w.Client.ReadDir(dir.Url)
+	files, err := w.Client.ReadDir(dir.Url)
+
+	if err != nil {
+		return []FileInfo{}, err
+	}
+
+	var fileList = []FileInfo{}
 
 	for _, file := range files {
 		f, ok := file.(gowebdav.File)
@@ -50,7 +56,7 @@ func (w WebDAVClient) GetFileList(dirId int) {
 			// 如果类型断言失败，跳过该文件
 			continue
 		}
-		fmt.Println(f.ContentType())
+
 		if f.ContentType() == "" {
 			continue
 		}
@@ -98,15 +104,18 @@ func (w WebDAVClient) GetFileList(dirId int) {
 		}
 
 		size, _ := strconv.ParseFloat(fmt.Sprintf("%.1f", float32(f.Size())/1024/1024), 64)
-		song := models.Song{
-			Title:  title,
+
+		fileItem := FileInfo{
+			Name:   title,
 			Artist: artist,
-			Path:   f.Path(), // 文件路径
-			Dir:    dirId,
-			Size:   size,                      // 文件大小，单位 MB
+			Isdir:  false,
+			Path:   f.Path(),
+			Size:   size,
 			Type:   strings.ToUpper(fileType), // 文件类型
+			UTime:  f.ModTime().String(),
 		}
 
-		_ = models.DB.Create(&song).Error
+		fileList = append(fileList, fileItem)
 	}
+	return fileList, nil
 }
