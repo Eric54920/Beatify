@@ -16,16 +16,8 @@ func (a *App) GetSongs(dirId int) Response {
 	}
 
 	if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "查询数据库失败" + err.Error(),
-			Data:   nil,
-		}
+		return NewResponse(50000, nil)
 	}
 
-	return Response{
-		Status: 200,
-		Msg:    "获取成功",
-		Data:   songs,
-	}
+	return NewResponse(20000, songs)
 }

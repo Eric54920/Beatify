@@ -1,4 +1,65 @@
 {
+    "name": "简体中文",
+    "menu": {
+        "search": "搜索",
+        "discover": "发现",
+        "browse": "浏览",
+        "library": "库",
+        "songs": "歌曲",
+        "artists": "歌手",
+        "albums": "专辑",
+        "playlists": "播放列表",
+        "edit": "编辑",
+        "delete": "删除",
+        "sync": "同步"
+    },
+    "diolog": {
+        "editPlaylists": "编辑播放列表",
+        "addPlaylists": "添加播放列表",
+        "title": "标题",
+        "url": "目录",
+        "playlistName": "播放列表名称",
+        "playlistUrl": "播放列表目录",
+        "save": "保存",
+        "saveChanges": " 保存更改"
+    },
+    "notification": {
+        "errorTitle": "发生了一些异常",
+        "successTitle": "成功",
+        "checkConnectionError": "检查连接配置异常",
+        "invalidForm": "无效的表单",
+        "ParameterException": "参数校验异常",
+        "notSupportedMultiConf": "暂时不支持多个连接",
+        "createConfError": "创建配置时发生异常",
+        "queryRecordError": "查询记录时异常",
+        "RecordNotFound": "记录未找到",
+        "syncError": "同步时发生异常",
+        "syncSuccess": "同步歌曲成功",
+        "pullFileError": "拉取远程文件异常",
+        "queryMusicError": "查询歌曲时异常",
+        "saveDirError": "保存播放列表时异常",
+        "deleteDirError": "删除播放列表异常",
+        "createDirError": "创建播放列表时发生异常"
+    },
+    "configPanel": {
+        "panelName": "添加一个配置",
+        "panelDesc": "添加配置后即可开始听音乐",
+        "title": "标题",
+        "protocol": "协议",
+        "pleaseChooseProtocol": "请选择一个协议",
+        "address": "地址",
+        "username": "用户名",
+        "password": "密码",
+        "add": "添加"
+    },
+    "songInfo": {
+        "title": "标题",
+        "artist": "歌手",
+        "album": "专辑",
+        "type": "类型",
+        "size": "大小",
+        "time": "时长"
+    },
     "common": {},
     "interface": {}
 }

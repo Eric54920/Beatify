@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { GetAllDirs, DeleteDir, UpdateDir, CreateDir, ReSyncDir } from '../../../wailsjs/go/beatify/App'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -52,7 +53,7 @@ interface Playlist {
   title: string,
   url: string
 }
-
+const { t } = useI18n()
 const playlists = ref<Playlist[]>([])
 const isDialogOpen = ref(false) // 更新表单
 const isAddDialogOpen = ref(false) // 新增表单
@@ -81,30 +82,37 @@ const saveDir = () => {
       "url": url
     }
     UpdateDir(id, JSON.stringify(formData)).then((res: Record<string, any>) => {
-      if (res.status == 500) {
-        toast({
-          title: "Error",
-          description: "Update error",
-        })
-      } else if (res.status == 400) {
-        toast({
-          title: "Error",
-          description: "Arguments Error",
-        })
-      } else if (res.status == 404) {
-        toast({
-          title: "Error",
-          description: "Record not found",
-        })
-      } else {
-        toast({
-          title: "Success",
-          description: "Update success",
-        })
-        // 重新获取目录列表
-        getPlaylist()
-        // 关闭表单
-        isDialogOpen.value = false
+      switch (res.status) {
+        case 50001:
+          toast({
+            title: t("notification.errorTitle"),
+            description: t("notification.saveDirError"),
+          })
+        case 50000:
+          toast({
+            title: t("notification.errorTitle"),
+            description: t("notification.queryRecordError"),
+          })
+        case 40000:
+          toast({
+            title: t("notification.errorTitle"),
+            description: t("notification.invalidForm"),
+          })
+        case 40001:
+          toast({
+            title: t("notification.errorTitle"),
+            description: t("notification.ParameterException"),
+          })
+        case 40004:
+          toast({
+            title: t("notification.errorTitle"),
+            description: t("notification.RecordNotFound"),
+          })
+        case 20000:
+          // 重新获取目录列表
+          getPlaylist()
+          // 关闭表单
+          isDialogOpen.value = false
       }
     })
   }
@@ -113,22 +121,14 @@ const saveDir = () => {
 const getPlaylist = () => {
   /* 获取所有目录 */
   GetAllDirs().then((res: Record<string, any>) => {
-    if (res.ststus == 500) {
-      toast({
-        title: "发生了一些异常",
-        description: res.msg,
-      })
-    } else if (res.status == 404) {
-      toast({
-        title: "Success",
-        description: res.msg,
-      })
-    } else {
-      playlists.value = res.data
-      toast({
-        title: "Success",
-        description: res.msg,
-      })
+    switch (res.status) {
+      case 50000:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.queryRecordError"),
+        })
+      case 20000:
+        playlists.value = res.data
     }
   })
 }
@@ -136,16 +136,27 @@ const getPlaylist = () => {
 const reSyncDir = (id: number) => {
   /* 重新同步歌曲列表 */
   ReSyncDir(id).then((res) => {
-    if (res.status == 500) {
-      toast({
-        title: "Error",
-        description: "ReSync error",
-      })
-    } else {
-      toast({
-        title: "Success",
-        description: "reSync success",
-      })
+    switch (res.status) {
+      case 50004:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.syncError"),
+        })
+      case 50003:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.pullFileError"),
+        })
+      case 50002:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.queryMusicError"),
+        })
+      case 20000:
+        toast({
+          title: t("notification.successTitle"),
+          description: t("notification.syncSuccess"),
+        })
     }
   })
 }
@@ -166,17 +177,14 @@ const editDir = (id: number) => {
 const deleteDir = (id: number) => {
   /* 删除目录 */
   DeleteDir(id).then((res: Record<string, any>) => {
-    if (res.status == 200) {
-      toast({
-        title: "Success",
-        description: res.msg,
-      })
-      getPlaylist()
-    } else {
-      toast({
-        title: "发生了一些异常",
-        description: res.msg,
-      })
+    switch (res.status) {
+      case 50000:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.deleteDirError"),
+        })
+      case 20000:
+        getPlaylist()
     }
   })
 }
@@ -198,23 +206,29 @@ const addDir = () => {
 const saveNewDir = () => {
   /* 保存新增目录 */
   CreateDir(JSON.stringify(addDirForm.value)).then((res: Record<string, any>) => {
-    if (res.status == 500) {
-      toast({
-        title: "发生了一些异常",
-        description: res.msg,
-      })
-    } else if (res.status == 400) {
-      toast({
-        title: "Error",
-        description: res.msg,
-      })
-    } else {
-      toast({
-        title: "Success",
-        description: res.msg,
-      })
-      isAddDialogOpen.value = false;
-      getPlaylist()
+    switch (res.status) {
+      case 50000:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.createDirError"),
+        })
+      case 40001:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.ParameterException"),
+        })
+      case 40000:
+        toast({
+          title: t("notification.errorTitle"),
+          description: t("notification.invalidForm"),
+        })
+      case 20000:
+        toast({
+          title: t("notification.successTitle"),
+          description: t("notification.invalidForm"),
+        })
+        isAddDialogOpen.value = false;
+        getPlaylist()
     }
   })
 }
@@ -231,7 +245,7 @@ onMounted(() => {
     <div class="space-y-4 py-4">
       <div class="px-3 py-2">
         <div class="relative w-full mb-2 items-center">
-          <Input id="search" type="text" placeholder="Search..." class="pl-10" />
+          <Input id="search" type="text" :placeholder='`${t("menu.search")}`' class="pl-10" />
           <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
             <Search class="size-6 text-muted-foreground" />
           </span>
@@ -239,7 +253,7 @@ onMounted(() => {
       </div>
       <div class="px-3 py-2">
         <h2 class="mb-2 px-4 text-lg font-semibold tracking-tight">
-          Discover
+          {{ t("menu.discover") }}
         </h2>
         <div class="space-y-1">
           <Button variant="ghost" class="w-full justify-start">
@@ -250,13 +264,13 @@ onMounted(() => {
               <rect width="7" height="7" x="14" y="14" rx="1" />
               <rect width="7" height="7" x="3" y="14" rx="1" />
             </svg>
-            Browse
+            {{ t("menu.browse") }}
           </Button>
         </div>
       </div>
       <div class="px-3 py-2">
         <h2 class="mb-2 px-4 text-lg font-semibold tracking-tight">
-          Library
+          {{ t("menu.library") }}
         </h2>
         <div class="space-y-1">
           <RouterLink to="/main/songs?dir=0">
@@ -266,7 +280,7 @@ onMounted(() => {
                 <circle cx="8" cy="18" r="4" />
                 <path d="M12 18V2l7 4" />
               </svg>
-              Songs
+              {{ t("menu.songs") }}
             </Button>
           </RouterLink>
           <Button variant="ghost" class="w-full justify-start">
@@ -275,7 +289,7 @@ onMounted(() => {
               <path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12" />
               <circle cx="17" cy="7" r="5" />
             </svg>
-            Artists
+            {{ t("menu.artists") }}
           </Button>
           <Button variant="ghost" class="w-full justify-start">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -285,13 +299,13 @@ onMounted(() => {
               <path d="M8 8v12" />
               <path d="M4 4v16" />
             </svg>
-            Albums
+            {{ t("menu.albums") }}
           </Button>
         </div>
       </div>
       <div class="py-2">
         <h2 class="flex justify-between items-center relative px-7 text-lg font-semibold tracking-tight">
-          <span>Playlists</span>
+          <span>{{ t("menu.playlists") }}</span>
           <Button variant="link" class="p-0" @click="addDir">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="size-6">
@@ -325,7 +339,7 @@ onMounted(() => {
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                     </svg>
-                    Resynchronize
+                    {{ t("menu.sync") }}
                   </ContextMenuItem>
                   <ContextMenuItem inset @click="editDir(playlist.id)" class="px-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -333,7 +347,7 @@ onMounted(() => {
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                     </svg>
-                    Edit
+                    {{ t("menu.edit") }}
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem inset @click="deleteDir(playlist.id)" class="text-red-400 px-2">
@@ -342,7 +356,7 @@ onMounted(() => {
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
-                    Delete
+                    {{ t("menu.delete") }}
                   </ContextMenuItem>
                 </ContextMenuContent>
               </ContextMenu>
@@ -358,38 +372,34 @@ onMounted(() => {
       <Dialog v-model:open="isDialogOpen">
         <DialogContent class="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit Playlist</DialogTitle>
+            <DialogTitle>{{ t("diolog.editPlaylists") }}</DialogTitle>
           </DialogHeader>
 
           <FormField v-slot="{ componentField }" name="title">
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>{{ t("diolog.title") }}</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="playlist name" v-bind="componentField" v-model="dirForm.title" />
+                <Input type="text" :placeholder='`${t("diolog.playlistName")}`' v-bind="componentField"
+                  v-model="dirForm.title" />
               </FormControl>
-              <FormDescription>
-                This is the playlist name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>
 
           <FormField v-slot="{ componentField }" name="url">
             <FormItem>
-              <FormLabel>Url</FormLabel>
+              <FormLabel>{{ t("diolog.url") }}</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="playlist url" v-bind="componentField" v-model="dirForm.url" />
+                <Input type="text" :placeholder='`${t("diolog.playlistUrl")}`' v-bind="componentField"
+                  v-model="dirForm.url" />
               </FormControl>
-              <FormDescription>
-                This is the playlist url.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>
 
           <DialogFooter>
             <Button @click="saveDir">
-              Save changes
+              {{ t("diolog.saveChanges") }}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -401,38 +411,34 @@ onMounted(() => {
       <Dialog v-model:open="isAddDialogOpen">
         <DialogContent class="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add Playlist</DialogTitle>
+            <DialogTitle>{{ t("diolog.addPlaylists") }}</DialogTitle>
           </DialogHeader>
 
           <FormField v-slot="{ componentField }" name="title">
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>{{ t("diolog.title") }}</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="playlist name" v-bind="componentField" v-model="addDirForm.title" />
+                <Input type="text" :placeholder='`${t("diolog.playlistName")}`' v-bind="componentField"
+                  v-model="addDirForm.title" />
               </FormControl>
-              <FormDescription>
-                This is the playlist name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>
 
           <FormField v-slot="{ componentField }" name="url">
             <FormItem>
-              <FormLabel>Url</FormLabel>
+              <FormLabel>{{ t("diolog.url") }}</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="playlist url" v-bind="componentField" v-model="addDirForm.url" />
+                <Input type="text" :placeholder='`${t("diolog.playlistUrl")}`' v-bind="componentField"
+                  v-model="addDirForm.url" />
               </FormControl>
-              <FormDescription>
-                This is the playlist url.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>
 
           <DialogFooter>
             <Button @click="saveNewDir">
-              Save
+              {{ t("diolog.save") }}
             </Button>
           </DialogFooter>
         </DialogContent>

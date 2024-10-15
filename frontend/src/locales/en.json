@@ -1,4 +1,65 @@
 {
+    "name": "English",
+    "menu": {
+        "search": "Search",
+        "discover": "Discover",
+        "browse": "Broswe",
+        "library": "Library",
+        "songs": "Songs",
+        "artists": "Artists",
+        "albums": "Albums",
+        "playlists": "Playlists",
+        "edit": "Edit",
+        "delete": "Delete",
+        "sync": "Synchronize"
+    },
+    "diolog": {
+        "editPlaylists": "Edit Playlist",
+        "addPlaylists": "Add Playlist",
+        "title": "Title",
+        "url": "Url",
+        "playlistName": "playlist name",
+        "playlistUrl": "playlist url",
+        "save": "Save",
+        "saveChanges": " Save changes"
+    },
+    "notification": {
+        "errorTitle": "Something went wrong.",
+        "successTitle": "Successfully",
+        "checkConnectionError": "Check for connection configuration anomalies",
+        "invalidForm": "Invalid form",
+        "notSupportedMultiConf": "Multiple connections are not currently supported",
+        "createConfError": "An exception occurred while creating the configuration",
+        "ParameterException": "Parameter verification exception",
+        "queryRecordError": "Exception when querying records",
+        "RecordNotFound": "Record not found",
+        "syncError": "An exception occurred during synchronization",
+        "syncSuccess": "Sync songs successfully",
+        "pullFileError": "Pulling remote files is abnormal",
+        "queryMusicError": "Exception when searching for songs",
+        "saveDirError": "Exception when saving playlist",
+        "deleteDirError": "Deleting playlist abnormality",
+        "createDirError": "An exception occurred while creating a playlist"
+    },
+    "configPanel": {
+        "panelName": "Add a configuration",
+        "panelDesc": "After adding the configuration, you can start listening to music",
+        "title": "Title",
+        "protocol": "Protocol",
+        "pleaseChooseProtocol": "Please select a protocol",
+        "address": "Address",
+        "username": "Username",
+        "password": "Password",
+        "add": "Add"
+    },
+    "songInfo": {
+        "title": "Title",
+        "artist": "Artist",
+        "album": "Album",
+        "type": "Type",
+        "size": "Size",
+        "time": "Time"
+    },
     "common": {},
     "interface": {}
 }

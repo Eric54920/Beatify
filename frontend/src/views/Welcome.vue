@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -40,6 +41,7 @@ import { useToast } from '@/components/ui/toast/use-toast'
 
 let hasConfig = ref<boolean>(false)
 const router = useRouter()
+const { t } = useI18n()
 
 const formSchema = toTypedSchema(z.object({
     title: z.string({ required_error: "please type title." }),
@@ -56,17 +58,29 @@ const { handleSubmit } = useForm({
 function addConfig(values: Record<string, any>) {
     /* 添加配置 */
     AddConnection(JSON.stringify(values)).then((res: Record<string, any>) => {
-        if (res.status != 200) {
-            toast({
-                title: "发生了一些异常",
-                description: res.msg,
-            })
-        } else {
-            toast({
-                title: "Success",
-                description: res.msg,
-            })
-            router.push("/main")
+        switch (res.status) {
+            case 40000:
+                toast({
+                    title: t("notification.errorTitle"),
+                    description: t("notification.invalidForm"),
+                })
+            case 40001:
+                toast({
+                    title: t("notification.errorTitle"),
+                    description: t("notification.notSupportedMultiConf"),
+                })
+            case 50000:
+                toast({
+                    title: t("notification.errorTitle"),
+                    description: t("notification.checkConnectionError"),
+                })
+            case 50001:
+                toast({
+                    title: t("notification.errorTitle"),
+                    description: t("notification.createConfError"),
+                })
+            case 20000:
+                router.push("/main")
         }
     })
 }
@@ -74,17 +88,13 @@ function addConfig(values: Record<string, any>) {
 function checkConfig() {
     /* 检查配置 */
     IsExistConnection().then((res: Record<string, any>) => {
-        if (res.ststus == 500) {
+        if (res.ststus == 50000) {
             toast({
-                title: "发生了一些异常",
-                description: res.msg,
+                title: t("notification.errorTitle"),
+                description: t("notification.checkConnectionError"),
             })
         } else {
             if (!res.data) {
-                toast({
-                    title: "Success",
-                    description: res.msg,
-                })
                 hasConfig.value = true
             } else {
                 // 跳转到Home
@@ -95,9 +105,9 @@ function checkConfig() {
 }
 
 onMounted(() => {
-const { toast } = useToast()
+    const { toast } = useToast()
 
-checkConfig()
+    checkConfig()
 })
 </script>
 
@@ -107,13 +117,13 @@ checkConfig()
         <Form :validation-schema="formSchema" @submit="addConfig" v-if="hasConfig">
             <Card class="w-[350px]">
                 <CardHeader>
-                    <CardTitle>You have no config</CardTitle>
-                    <CardDescription>You can start listen music as soon as you add a config.</CardDescription>
+                    <CardTitle>{{ t("configPanel.panelName") }}</CardTitle>
+                    <CardDescription>{{ t("configPanel.panelDesc") }}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <FormField v-slot="{ componentField }" name="title">
                         <FormItem v-auto-animate>
-                            <FormLabel>Title</FormLabel>
+                            <FormLabel>{{ t("configPanel.title") }}</FormLabel>
                             <FormControl>
                                 <Input type="text" placeholder="My Music" v-bind="componentField" />
                             </FormControl>
@@ -122,11 +132,11 @@ checkConfig()
                     </FormField>
                     <FormField v-slot="{ componentField }" name="protocol">
                         <FormItem>
-                            <FormLabel>Protocol</FormLabel>
+                            <FormLabel>{{ t("configPanel.protocol") }}</FormLabel>
                             <Select v-bind="componentField">
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select a connect type" />
+                                        <SelectValue :placeholder='`${ t("configPanel.pleaseChooseProtocol") }`' />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -140,7 +150,7 @@ checkConfig()
                     </FormField>
                     <FormField v-slot="{ componentField }" name="address">
                         <FormItem v-auto-animate>
-                            <FormLabel>Address</FormLabel>
+                            <FormLabel>{{ t("configPanel.address") }}</FormLabel>
                             <FormControl>
                                 <Input type="text" placeholder="http://example.com/my/music" v-bind="componentField" />
                             </FormControl>
@@ -149,7 +159,7 @@ checkConfig()
                     </FormField>
                     <FormField v-slot="{ componentField }" name="username">
                         <FormItem v-auto-animate>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>{{ t("configPanel.username") }}</FormLabel>
                             <FormControl>
                                 <Input type="text" placeholder="admin" v-bind="componentField" />
                             </FormControl>
@@ -158,7 +168,7 @@ checkConfig()
                     </FormField>
                     <FormField v-slot="{ componentField }" name="password">
                         <FormItem v-auto-animate>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>{{ t("configPanel.password") }}</FormLabel>
                             <FormControl>
                                 <Input type="password" v-bind="componentField" />
                             </FormControl>
@@ -167,7 +177,7 @@ checkConfig()
                     </FormField>
                 </CardContent>
                 <CardFooter class="flex justify-between px-6 pb-6">
-                    <Button type="submit" class="w-full">Add</Button>
+                    <Button type="submit" class="w-full">{{ t("configPanel.add") }}</Button>
                 </CardFooter>
             </Card>
         </Form>

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { GetSongs } from '../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
@@ -9,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 
 const route = useRoute()
+const { t } = useI18n()
 const dir = ref(Number(route.query.dir));
 interface Song {
     id: number,
@@ -25,13 +27,14 @@ const songs = ref<Song[]>([])
 const getSongs = () => {
     /* 获取所有歌曲 */
     GetSongs(dir.value).then((res: Record<string, any>) => {
-        if (res.status == 500) {
-            toast({
-                title: "发生了一些异常",
-                description: res.msg,
-            })
-        } else {
-            songs.value = res.data;
+        switch (res.status) {
+            case 50000:
+                toast({
+                    title: t("notification.errorTitle"),
+                    description: t("notification.queryMusicError"),
+                })
+            case 20000:
+                songs.value = res.data;
         }
     })
 }
@@ -63,12 +66,12 @@ onMounted(() => {
     <ScrollArea class="h-full overflow-y-auto text-sm text-center">
         <div class="flex flex-row px-2 h-12 items-center text-stone-500 font-semibold border-b">
             <div class="basis-1/12">No.</div>
-            <div class="basis-3/12 text-left">Title</div>
-            <div class="basis-2/12 text-left">Artist</div>
-            <div class="basis-3/12 text-left">Album</div>
-            <div class="basis-1/12">Type</div>
-            <div class="basis-1/12">Size</div>
-            <div class="basis-1/12">Time</div>
+            <div class="basis-3/12 text-left">{{ t("songInfo.title") }}</div>
+            <div class="basis-2/12 text-left">{{ t("songInfo.artist") }}</div>
+            <div class="basis-3/12 text-left">{{ t("songInfo.album") }}</div>
+            <div class="basis-1/12">{{ t("songInfo.type") }}</div>
+            <div class="basis-1/12">{{ t("songInfo.size") }}</div>
+            <div class="basis-1/12">{{ t("songInfo.time") }}</div>
         </div>
         <div class="flex flex-row px-2 h-12 items-center border-b last-of-type:border-none hover:bg-stone-100 transition"
             v-for="(song, i) in songs" :key="song.id">

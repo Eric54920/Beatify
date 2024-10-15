@@ -7,71 +7,41 @@ import (
 	"gorm.io/gorm"
 )
 
-// 获取所有目录
+// 获取所有播放列表
 func (a *App) GetAllDirs() Response {
 	var dirs []models.Dir
 
 	err := models.DB.Find(&dirs).Error
-	if err != nil && err == gorm.ErrRecordNotFound {
-		return Response{
-			Status: 404,
-			Msg:    "暂时没有配置目录",
-			Data:   nil,
-		}
-	} else if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "异常:" + err.Error(),
-			Data:   nil,
-		}
+	if err != nil {
+		return NewResponse(50000, nil)
 	}
 
-	return Response{
-		Status: 200,
-		Msg:    "获取目录成功",
-		Data:   dirs,
-	}
+	return NewResponse(20000, dirs)
 }
 
-// 更新目录
+// 更新播放列表
 func (a *App) UpdateDir(id int, formData string) Response {
 	var dir models.Dir
 	var err error
 
 	// 解析数据
 	if err = json.Unmarshal([]byte(formData), &dir); err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "异常:" + err.Error(),
-			Data:   nil,
-		}
+		return NewResponse(40000, nil)
 	}
 
 	// 找到原来的记录
 	var dbDir models.Dir
 	err = models.DB.First(&dbDir, id).Error
 	if err != nil && err == gorm.ErrRecordNotFound {
-		return Response{
-			Status: 404,
-			Msg:    "没有这个目录",
-			Data:   nil,
-		}
+		return NewResponse(40004, nil)
 	} else if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "异常:" + err.Error(),
-			Data:   nil,
-		}
+		return NewResponse(50000, nil)
 	}
 
 	if dir.Title != "" && dir.Title != dbDir.Title {
 		// 唯一校验
 		if unique, _ := models.UniqueCheck("title", dir.Title, &models.Dir{}); !unique {
-			return Response{
-				Status: 400,
-				Msg:    "",
-				Data:   nil,
-			}
+			return NewResponse(40001, nil)
 		}
 		dbDir.Title = dir.Title
 	}
@@ -79,11 +49,7 @@ func (a *App) UpdateDir(id int, formData string) Response {
 	if dir.Url != "" && dir.Url != dbDir.Url {
 		// 唯一校验
 		if unique, _ := models.UniqueCheck("title", dir.Url, &models.Dir{}); !unique {
-			return Response{
-				Status: 400,
-				Msg:    "",
-				Data:   nil,
-			}
+			return NewResponse(40001, nil)
 		}
 		dbDir.Url = dir.Url
 	}
@@ -91,89 +57,53 @@ func (a *App) UpdateDir(id int, formData string) Response {
 	// 保存
 	err = models.DB.Save(&dbDir).Error
 	if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "",
-			Data:   nil,
-		}
+		return NewResponse(50001, nil)
 	}
 
-	return Response{
-		Status: 200,
-		Msg:    "",
-		Data:   nil,
-	}
+	return NewResponse(20000, nil)
 }
 
-// 删除目录
+// 删除播放列表
 func (a *App) DeleteDir(id int) Response {
 	var dir models.Dir
 	models.DB.First(&dir, id)
 
 	err := models.DB.Delete(&dir).Error
 	if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "异常:" + err.Error(),
-			Data:   nil,
-		}
+		return NewResponse(50000, nil)
 	}
 
-	return Response{
-		Status: 200,
-		Msg:    "删除成功",
-		Data:   nil,
-	}
+	return NewResponse(20000, nil)
 }
 
-// 新增目录
+// 新增播放列表
 func (a *App) CreateDir(formData string) Response {
 	var dir models.Dir
 	var err error
 
 	err = json.Unmarshal([]byte(formData), &dir)
 	if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "",
-			Data:   nil,
-		}
+		return NewResponse(40000, nil)
 	}
 
 	// 唯一校验
 	if unique, _ := models.UniqueCheck("title", dir.Title, &models.Dir{}); !unique {
-		return Response{
-			Status: 400,
-			Msg:    "",
-			Data:   nil,
-		}
+		return NewResponse(40001, nil)
 	}
 
 	if unique, _ := models.UniqueCheck("url", dir.Url, &models.Dir{}); !unique {
-		return Response{
-			Status: 400,
-			Msg:    "",
-			Data:   nil,
-		}
+		return NewResponse(40001, nil)
 	}
 
 	err = models.DB.Create(&dir).Error
 	if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "",
-			Data:   nil,
-		}
+		return NewResponse(50000, nil)
 	}
 
 	// 拉取歌曲列表
 	fileList, err := a.client.GetFileList(dir.ID)
 	if err != nil {
-		return Response{
-			Status: 500,
-			Msg:    "",
-			Data:   nil,
-		}
+		return NewResponse(50000, nil)
 	}
 
 	for _, file := range fileList {
@@ -189,11 +119,7 @@ func (a *App) CreateDir(formData string) Response {
 		_ = models.DB.Create(&song).Error
 	}
 
-	return Response{
-		Status: 200,
-		Msg:    "",
-		Data:   nil,
-	}
+	return NewResponse(20000, nil)
 }
 
 // 手动同步歌曲列表
@@ -203,23 +129,23 @@ func (a *App) ReSyncDir(id int) Response {
 
 	err := models.DB.Find(&songs, "dir = ?", id).Error
 	if err != nil {
-		return NewResponse(500, "", nil)
+		return NewResponse(50002, nil)
 	}
 
 	// 拉取服务中的歌曲列表
 	serverFileList, err := a.client.GetFileList(id)
 	if err != nil {
-		return NewResponse(500, "", nil)
+		return NewResponse(50003, nil)
 	}
 
 	// 如果服务中没有则删除数据库中已有的歌曲
 	if len(serverFileList) == 0 {
 		err := models.DB.Delete(models.Song{}, "dir = ?", id).Error
 		if err != nil {
-			return NewResponse(500, "", nil)
+			return NewResponse(50000, nil)
 		}
 
-		return NewResponse(200, "", nil)
+		return NewResponse(20000, nil)
 	}
 
 	// 检查服务中的歌曲是否存在于本地数据库，不在则添加，在则对比并更新
@@ -273,8 +199,8 @@ func (a *App) ReSyncDir(id int) Response {
 	})
 
 	if err != nil {
-		return NewResponse(500, "", nil)
+		return NewResponse(50004, nil)
 	}
 
-	return NewResponse(200, "", nil)
+	return NewResponse(20000, nil)
 }
