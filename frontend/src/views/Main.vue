@@ -1,31 +1,29 @@
 <script lang="ts" setup>
 import { defineComponent, ref } from 'vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
+import Control from '@/components/Control/Control.vue'
 
 const pageName = ref("Home")
 </script>
 
 <template>
-    <div class="flex flex-col h-screen">
-        <!-- 上面 -->
-        <div class="flex-1 flex overflow-hidden">
-            <!-- 左侧 -->
-            <Sidebar />
+    <div class="flex h-screen">
+        <!-- 左侧 -->
+        <Sidebar />
 
-            <!-- 右侧 -->
-            <div class="flex-1 flex-col overflow-y-auto bg-white border-l">
-                <div class="bg-white bg-opacity-50 backdrop-blur-lg sticky top-0 py-2 text-center font-semibold text-gray-700 leading-10 text-xl z-10">
+        <!-- 右侧 -->
+        <div class="flex-1 flex flex-col bg-white border-l h-screen">
+            <!-- 上面 -->
+            <div class="h-20 flex flex-col bg-white">
+                <Control class="h-14 border-b" />
+
+                <div class="flex-1 bg-white py-2 text-center font-semibold text-stone-700 items-center text-md">
                     {{ pageName }}
                 </div>
-                <div class="overflow-hidden">
-                    <RouterView />
-                </div>
             </div>
-        </div>
 
-        <!-- 下面 -->
-        <div class="h-24 sticky inset-x-0 bottom-0 border-t bg-slate-600">
-            footer
+            <!-- 下面 -->
+            <RouterView />
         </div>
     </div>
 </template>

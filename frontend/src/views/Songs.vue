@@ -63,16 +63,19 @@ onMounted(() => {
 <template>
     <Toaster />
 
-    <ScrollArea class="h-full overflow-y-auto text-sm text-center">
-        <div class="flex flex-row px-2 h-12 items-center text-stone-500 font-semibold border-b">
-            <div class="basis-1/12">No.</div>
-            <div class="basis-3/12 text-left">{{ t("songInfo.title") }}</div>
-            <div class="basis-2/12 text-left">{{ t("songInfo.artist") }}</div>
-            <div class="basis-3/12 text-left">{{ t("songInfo.album") }}</div>
-            <div class="basis-1/12">{{ t("songInfo.type") }}</div>
-            <div class="basis-1/12">{{ t("songInfo.size") }}</div>
-            <div class="basis-1/12">{{ t("songInfo.time") }}</div>
+    <ScrollArea class="h-full text-sm text-center">
+        <div class="sticky top-0 bg-white bg-opacity-50 backdrop-blur-lg">
+            <div class="flex flex-row px-2 h-12 items-center text-stone-500 font-semibold border-b">
+                <div class="basis-1/12">No.</div>
+                <div class="basis-3/12 text-left">{{ t("songInfo.title") }}</div>
+                <div class="basis-2/12 text-left">{{ t("songInfo.artist") }}</div>
+                <div class="basis-3/12 text-left">{{ t("songInfo.album") }}</div>
+                <div class="basis-1/12">{{ t("songInfo.type") }}</div>
+                <div class="basis-1/12">{{ t("songInfo.size") }}</div>
+                <div class="basis-1/12">{{ t("songInfo.time") }}</div>
+            </div>
         </div>
+
         <div class="flex flex-row px-2 h-12 items-center border-b last-of-type:border-none hover:bg-stone-100 transition"
             v-for="(song, i) in songs" :key="song.id">
             <div class="basis-1/12 text-stone-600">{{ i + 1 }}</div>
