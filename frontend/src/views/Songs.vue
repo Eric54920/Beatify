@@ -65,7 +65,7 @@ onMounted(() => {
 
     <ScrollArea class="h-full text-sm text-center">
         <div class="sticky top-0 bg-white bg-opacity-50 backdrop-blur-lg">
-            <div class="flex flex-row px-2 h-12 items-center text-stone-500 font-semibold border-b">
+            <div class="flex flex-row px-2 h-12 items-center text-stone-700 font-semibold border-b">
                 <div class="basis-1/12">No.</div>
                 <div class="basis-3/12 text-left">{{ t("songInfo.title") }}</div>
                 <div class="basis-2/12 text-left">{{ t("songInfo.artist") }}</div>

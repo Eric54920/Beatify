@@ -14,10 +14,10 @@ const pageName = ref("Home")
         <!-- 右侧 -->
         <div class="flex-1 flex flex-col bg-white border-l h-screen">
             <!-- 上面 -->
-            <div class="h-20 flex flex-col bg-white">
+            <div class="flex flex-col bg-white">
                 <Control class="h-14 border-b" />
 
-                <div class="flex-1 bg-white py-2 text-center font-semibold text-stone-700 items-center text-md">
+                <div class="flex-1 bg-white py-2 text-center font-semibold text-stone-700 items-center text-sm">
                     {{ pageName }}
                 </div>
             </div>

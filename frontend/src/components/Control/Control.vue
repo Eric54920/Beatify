@@ -20,16 +20,16 @@
                     <p class="text-sm text-nowrap text-stone-800">这就是爱</p>
                     <span class="text-xs text-nowrap text-stone-500">张杰</span>
                 </div>
-                <div class="h-1 w-full bg-stone-300">
-                    <div class="h-full bg-stone-900" style="width: 30%"></div>
+                <div class="h-1 w-full bg-stone-200">
+                    <div class="h-full bg-stone-500" style="width: 30%"></div>
                 </div>
             </div>
         </div>
-        <div class="w-80 flex">
+        <div class="w-60 flex">
             <div class="flex-1 flex justify-center items-center">
                 <button class="w-10 h-10"><font-awesome-icon class="text-stone-500 text-md" icon="volume-low" /></button>
-                <div class="flex-1 h-1 bg-stone-300">
-                    <div class="h-full bg-stone-900" style="width: 30%"></div>
+                <div class="flex-1 h-1 bg-stone-200">
+                    <div class="h-full bg-stone-500" style="width: 30%"></div>
                 </div>
                 <button class="w-10 h-10"><font-awesome-icon class="text-stone-500 text-md" icon="volume-high" /></button>
             </div>
