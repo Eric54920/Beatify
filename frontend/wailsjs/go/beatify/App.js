@@ -30,6 +30,10 @@ export function ReSyncDir(arg1) {
   return window['go']['beatify']['App']['ReSyncDir'](arg1);
 }
 
+export function StartServer() {
+  return window['go']['beatify']['App']['StartServer']();
+}
+
 export function UpdateDir(arg1, arg2) {
   return window['go']['beatify']['App']['UpdateDir'](arg1, arg2);
 }

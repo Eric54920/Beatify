@@ -4,24 +4,26 @@ import (
 	"Beatify/models"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"gorm.io/gorm"
 )
 
 type FileInfo struct {
-	Name   string  `json:"name"`
-	Artist string  `json:"artist"`
-	Isdir  bool    `json:"isdir"`
-	Path   string  `json:"path"`
-	Size   float64 `json:"size"`
-	Type   string  `json:"type"`
-	UTime  string  `json:"utime"`
+	Name   string `json:"name"`
+	Artist string `json:"artist"`
+	Isdir  bool   `json:"isdir"`
+	Path   string `json:"path"`
+	Size   int64  `json:"size"`
+	Type   string `json:"type"`
+	UTime  string `json:"utime"`
 }
 
 var audioExtensions = []string{"mp3", "wav", "flac", "aac", "ogg", "m4a", "wma", "alac", "aiff"}
 
 type Connection interface {
 	GetFileList(dirId int) ([]FileInfo, error)
+	GetFileStream(filePath string, start, end int64, isRange bool) (*http.Response, error)
 }
 
 func GetClient() Connection {

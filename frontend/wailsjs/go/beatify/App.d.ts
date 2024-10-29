@@ -16,4 +16,6 @@ export function IsExistConnection():Promise<beatify.Response>;
 
 export function ReSyncDir(arg1:number):Promise<beatify.Response>;
 
+export function StartServer():Promise<void>;
+
 export function UpdateDir(arg1:number,arg2:string):Promise<beatify.Response>;

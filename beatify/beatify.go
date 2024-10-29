@@ -27,4 +27,6 @@ func InitBeatify() *App {
 // so we can call the runtime methods
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
+
+	a.StartServer()
 }
