@@ -9,7 +9,7 @@ const pageName = ref("Home")
 <template>
     <div class="flex h-screen">
         <!-- 左侧 -->
-        <Sidebar />
+        <Sidebar class="min-w-52" />
 
         <!-- 右侧 -->
         <div class="flex-1 flex flex-col bg-white border-l h-screen">
