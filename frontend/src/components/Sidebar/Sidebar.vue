@@ -273,7 +273,7 @@ onMounted(() => {
           {{ t("menu.library") }}
         </h2>
         <div class="space-y-1">
-          <RouterLink to="/main/songs?dir=0">
+          <RouterLink :to="`/main/songs?dir=0&pageName=${t('menu.songs')}`">
             <Button variant="ghost" class="w-full justify-start  hover:bg-red-500 hover:text-white">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" class="mr-2 h-4 w-4">
@@ -317,7 +317,7 @@ onMounted(() => {
         <ScrollArea class="h-[200px] px-1">
           <div class="space-y-1 p-2">
             <RouterLink v-for="(playlist, i) in playlists" :key="`${playlist}-${i}`"
-              :to="`/main/songs?dir=${playlist.id}`">
+              :to="`/main/songs?dir=${playlist.id}&pageName=${playlist.title}`">
               <ContextMenu>
                 <ContextMenuTrigger>
                   <Button variant="ghost" class="w-full justify-start font-normal overflow-ellipsis overflow-hidden  hover:bg-red-500 hover:text-white">

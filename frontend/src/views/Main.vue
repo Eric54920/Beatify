@@ -1,9 +1,18 @@
 <script lang="ts" setup>
-import { defineComponent, ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import Control from '@/components/Control/Control.vue'
 
-const pageName = ref("Home")
+const route = useRoute();
+const pageName = ref<string>("Home");
+
+watch(() => route.query, (query) => {
+    pageName.value = Array.isArray(query.pageName)
+      ? query.pageName[0] || "Home"
+      : query.pageName || "Home";
+  }
+);
 </script>
 
 <template>
