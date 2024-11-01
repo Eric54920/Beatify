@@ -13,6 +13,12 @@ export default defineConfig({
     },
   },
   plugins: [vue()],
+  server: {
+    hmr: {
+      host: 'localhost',
+      protocol: 'ws',
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
