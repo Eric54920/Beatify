@@ -56,9 +56,6 @@ func (a *App) streamMusicHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 处理 Range 请求
 	rangeHeader := r.Header.Get("Range")
-	rangeHeaders := strings.Split(rangeHeader, "-")
-	rangeHeader = rangeHeaders[0] + "-"
-
 	if rangeHeader != "" {
 		// Range 请求头格式 "bytes=start-end"
 		parts := strings.Split(rangeHeader, "=")
@@ -102,7 +99,7 @@ func (a *App) streamMusicHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
-		
+
 		defer rangeResp.Body.Close()
 
 		// 将 Range 内容写入响应
