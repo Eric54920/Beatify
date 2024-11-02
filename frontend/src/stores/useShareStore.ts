@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useSharedStore = defineStore('shared', {
   state: () => ({
+    pageName: "Home", // 页面名称
     currentDirId: 0, // 当前播放的目录
     currentMusicId: 0,  // 需要共享的属性
     isPlaying: false,  // 播放状态
@@ -31,6 +32,9 @@ export const useSharedStore = defineStore('shared', {
     },
     setCurrentDir(val: number) {
       this.currentDirId = val
+    },
+    setPageName(val: string) {
+      this.pageName = val
     }
   }
 })

@@ -3,14 +3,17 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import Control from '@/components/Control/Control.vue'
+import { useSharedStore } from '@/stores/useShareStore'
 
+const store = useSharedStore()
 const route = useRoute();
-const pageName = ref<string>("Home");
 
 watch(() => route.query, (query) => {
-    pageName.value = Array.isArray(query.pageName)
+    let pageName = Array.isArray(query.pageName)
       ? query.pageName[0] || "Home"
       : query.pageName || "Home";
+
+    store.setPageName(pageName);
   }
 );
 </script>
@@ -25,10 +28,6 @@ watch(() => route.query, (query) => {
             <!-- 上面 -->
             <div class="flex flex-col bg-white">
                 <Control class="h-14 border-b" />
-
-                <div class="flex-1 bg-white py-2 text-center font-semibold text-stone-700 items-center text-sm">
-                    {{ pageName }}
-                </div>
             </div>
 
             <!-- 下面 -->
