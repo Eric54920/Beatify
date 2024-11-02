@@ -50,7 +50,7 @@ watch(() => store.currentMusicId, (id) => {
 
 onMounted(() => {
     if (audioPlayer.value) {
-        audioPlayer.value.volume = 0.1
+        audioPlayer.value.volume = store.volume
 
         // 更新播放和暂停状态
         audioPlayer.value.addEventListener('play', () => {
@@ -74,7 +74,6 @@ onMounted(() => {
         audioPlayer.value.addEventListener('loadedmetadata', () => {
             // durationEl.textContent = formatTime(audio.duration);
             let time = audioPlayer.value!.duration
-            console.log("time:", time)
             store.setCurrentTime(time)
         });
 

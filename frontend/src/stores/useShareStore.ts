@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 
 export const useSharedStore = defineStore('shared', {
   state: () => ({
-    currentMusicId: '',  // 需要共享的属性
+    currentDirId: 0, // 当前播放的目录
+    currentMusicId: 0,  // 需要共享的属性
     isPlaying: false,  // 播放状态
     currentTime: 0,  // 当前播放时间
     progress: 0,  // 进度
@@ -10,7 +11,7 @@ export const useSharedStore = defineStore('shared', {
     volume: 0.3  // 默认音量
   }),
   actions: {
-    setCurrentMusic(val: string) {
+    setCurrentMusic(val: number) {
       this.currentMusicId = val
     },
     setPlayStatus(val: boolean) {
@@ -25,8 +26,11 @@ export const useSharedStore = defineStore('shared', {
     setPlayMode(val: number) {
       this.playMode = val
     },
-    setVolume(val:number) {
+    setVolume(val: number) {
       this.volume = val
+    },
+    setCurrentDir(val: number) {
+      this.currentDirId = val
     }
   }
 })

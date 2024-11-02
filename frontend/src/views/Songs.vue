@@ -21,6 +21,7 @@ interface Song {
     type: string,
     size: number,
     time: number,
+    dir: number,
     update_at: string
 }
 const songs = ref<Song[]>([])
@@ -61,6 +62,7 @@ const formatSize = (size: number) => {
  */
 const toPlay = (song: Record<string, any>) => {
     store.setCurrentMusic(song.id)
+    store.setCurrentDir(song.dir)
 }
 
 // 检测路由中参数的变化
@@ -82,27 +84,32 @@ onMounted(() => {
     <Toaster />
 
     <ScrollArea class="h-full text-sm text-center">
-        <div class="sticky top-0 bg-white bg-opacity-50 backdrop-blur-lg">
+        <div class="sticky top-0 bg-white bg-opacity-50 backdrop-blur-lg z-10">
             <div class="flex flex-row px-2 h-12 items-center text-stone-700 font-semibold border-b">
                 <div class="basis-1/12">No.</div>
+                <div class="basis-1/12"></div>
                 <div class="basis-3/12 text-left">{{ t("songInfo.title") }}</div>
                 <div class="basis-2/12 text-left">{{ t("songInfo.artist") }}</div>
                 <div class="basis-3/12 text-left">{{ t("songInfo.album") }}</div>
                 <div class="basis-1/12">{{ t("songInfo.type") }}</div>
                 <div class="basis-1/12">{{ t("songInfo.size") }}</div>
-                <div class="basis-1/12">{{ t("songInfo.time") }}</div>
             </div>
         </div>
-
-        <div class="flex flex-row px-2 h-12 items-center border-b last-of-type:border-none hover:bg-stone-100 transition"
+        
+        <div class="flex flex-row px-2 h-12 items-center hover:bg-stone-100 transition even:bg-stone-50"
             v-for="(song, i) in songs" :key="song.id" @dblclick="toPlay(song)">
             <div class="basis-1/12 text-stone-600">{{ i + 1 }}</div>
-            <div class="basis-3/12 text-left">{{ song.title }}</div>
+            <div class="basis-1/12 text-stone-600">
+                <div class="h-10 w-10 overflow-hidden rounded bg-white">
+                    <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" v-if="store.currentDirId == song.dir && store.currentMusicId == song.id">
+                    <img src="@/assets/images/default_pic.png" v-else>
+                </div>
+            </div>
+            <div class="basis-3/12 text-left" :class="{'text-red-500': store.currentDirId == song.dir && store.currentMusicId == song.id}">{{ song.title }}</div>
             <div class="basis-2/12 text-left text-stone-600">{{ song.artist }}</div>
             <div class="basis-3/12 text-left text-stone-600">{{ song.album }}</div>
             <div class="basis-1/12 text-stone-600">{{ song.type }}</div>
             <div class="basis-1/12 text-stone-600">{{ formatSize(song.size) }} MB</div>
-            <div class="basis-1/12 text-stone-600">{{ formatTime(song.time) }}</div>
         </div>
     </ScrollArea>
 </template>
