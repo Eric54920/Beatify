@@ -8,22 +8,12 @@ import { toast } from '@/components/ui/toast'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSharedStore } from '@/stores/useShareStore'
+import { Song } from '@/schema/schema'
 
 const store = useSharedStore()
 const route = useRoute()
 const { t } = useI18n()
 const dir = ref(Number(route.query.dir));
-interface Song {
-    id: number,
-    title: string,
-    artist: string,
-    album: string,
-    type: string,
-    size: number,
-    time: number,
-    dir: number,
-    update_at: string
-}
 const songs = ref<Song[]>([])
 
 /**
@@ -60,9 +50,10 @@ const formatSize = (size: number) => {
 /**
  * 双击列表项去播放音乐
  */
-const toPlay = (song: Record<string, any>) => {
-    store.setCurrentMusic(song.id)
-    store.setCurrentDir(song.dir)
+const toPlay = (song: Song) => {
+    store.setCurrentMusicId(song.id)
+    store.setCurrentDirId(song.dir)
+    store.setCurrentMusic(song)
 }
 
 // 检测路由中参数的变化

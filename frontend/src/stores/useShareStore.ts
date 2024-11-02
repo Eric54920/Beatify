@@ -1,7 +1,10 @@
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { Song } from '../schema/schema'
 
 export const useSharedStore = defineStore('shared', {
   state: () => ({
+    currentMusic: ref<Song>(),
     pageName: "Home", // 页面名称
     currentDirId: 0, // 当前播放的目录
     currentMusicId: 0,  // 需要共享的属性
@@ -12,7 +15,7 @@ export const useSharedStore = defineStore('shared', {
     volume: 0.3  // 默认音量
   }),
   actions: {
-    setCurrentMusic(val: number) {
+    setCurrentMusicId(val: number) {
       this.currentMusicId = val
     },
     setPlayStatus(val: boolean) {
@@ -30,11 +33,14 @@ export const useSharedStore = defineStore('shared', {
     setVolume(val: number) {
       this.volume = val
     },
-    setCurrentDir(val: number) {
+    setCurrentDirId(val: number) {
       this.currentDirId = val
     },
     setPageName(val: string) {
       this.pageName = val
+    },
+    setCurrentMusic(song: Song) {
+      this.currentMusic = song
     }
   }
 })
