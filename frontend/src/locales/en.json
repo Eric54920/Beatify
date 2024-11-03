@@ -39,7 +39,8 @@
         "queryMusicError": "Exception when searching for songs",
         "saveDirError": "Exception when saving playlist",
         "deleteDirError": "Deleting playlist abnormality",
-        "createDirError": "An exception occurred while creating a playlist"
+        "createDirError": "An exception occurred while creating a playlist",
+        "errorToPlay": "Something unusual happened while playing the song"
     },
     "configPanel": {
         "panelName": "Add a configuration",

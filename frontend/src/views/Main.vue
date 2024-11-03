@@ -26,8 +26,8 @@ watch(() => route.query, (query) => {
         <!-- 右侧 -->
         <div class="flex-1 flex flex-col bg-white border-l border-stone-300 h-screen">
             <!-- 上面 -->
-            <div class="flex flex-col bg-white">
-                <Control class="h-14 border-b" />
+            <div class="flex flex-col bg-white border-b">
+                <Control class="h-14" />
             </div>
 
             <!-- 下面 -->

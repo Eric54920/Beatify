@@ -1,7 +1,13 @@
 <script lang="ts" setup>
 import { watch, ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n'
 import { useSharedStore } from '@/stores/useShareStore';
+import { PlayNext } from '../../../wailsjs/go/beatify/App'
+import Toaster from '@/components/ui/toast/Toaster.vue'
+import { toast } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/toast/use-toast'
 
+const { t } = useI18n()
 const store = useSharedStore()
 const audioPlayer = ref<HTMLAudioElement | null>(null);
 const audioUrl = ref("")
@@ -14,7 +20,9 @@ const playAndPause = () => {
     } else {
         audioPlayer.value!.play().catch((error) => {
             // 如果 play() 被中断，捕获异常处理
-            console.error("播放音频时出现问题：", error);
+            toast({
+                title: t("notification.errorToPlay")
+            })
         });
     }
 }
@@ -38,8 +46,20 @@ const changeMode = (mode: string) => {
             store.setPlayMode(1)  // 列表循环
         }
     }
+}
 
-    console.log(store.playMode)
+/**
+ * 下一首
+ */ 
+const playNext = () => {
+    PlayNext(store.sort, store.currentMusicId, 1, store.currentDirId).then((res: Record<string, any>) => {
+        if (res.status == 20000) {
+            let nextSong = res.data;
+            store.setCurrentMusicId(nextSong["id"])
+            store.setCurrentDirId(nextSong["dir"])
+            store.setCurrentMusic(nextSong)
+        }
+    })
 }
 
 // 上一首、下一首
@@ -53,7 +73,9 @@ const handleCanPlayThrough = () => {
     if (audioPlayer.value) {
         audioPlayer.value.play().catch((error) => {
             if (error.name !== "AbortError") {
-                console.error("Playback error:", error);
+                toast({
+                    title: t("notification.errorToPlay")
+                })
             }
         });
     }
@@ -62,6 +84,11 @@ const handleCanPlayThrough = () => {
 // 歌曲播完之后
 const handleAudioEnded = () => {
     /* 处理下一首、循环播放等 */
+    if (store.playMode == 2) {  // 单曲循环
+        audioPlayer.value!.play()
+    } else {
+        playNext();
+    }
 }
 
 watch(() => store.currentMusicId, (id) => {
@@ -72,6 +99,8 @@ watch(() => store.currentMusicId, (id) => {
 })
 
 onMounted(() => {
+    const { toast } = useToast()
+
     if (audioPlayer.value) {
         audioPlayer.value.volume = store.volume
 
@@ -115,6 +144,8 @@ onMounted(() => {
 </script>
 
 <template>
+    <Toaster />
+
     <div class="h-14 flex justify-center p-1">
         <div class="w-60 min-w-60 flex justify-evenly items-center">
             <audio ref="audioPlayer" :src="audioUrl" @canplaythrough="handleCanPlayThrough" @ended="handleAudioEnded"></audio>
@@ -129,7 +160,7 @@ onMounted(() => {
             <button class="w-10 h-10 flex justify-center items-center" @click="playAndPause">
                 <font-awesome-icon class="text-stone-500 text-2xl" :icon="store.isPlaying?'pause':'play'" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center"><font-awesome-icon class="text-stone-500 text-2xl" icon="forward" /></button>
+            <button class="w-10 h-10 flex justify-center items-center" @click="playNext"><font-awesome-icon class="text-stone-500 text-2xl" icon="forward" /></button>
             <!-- 循环 -->
             <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('repeat')" v-if="store.playMode == 1 || store.playMode == 3">
                 <font-awesome-icon class="text-stone-500 text-md" icon="repeat" />

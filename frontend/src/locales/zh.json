@@ -39,7 +39,8 @@
         "queryMusicError": "查询歌曲时异常",
         "saveDirError": "保存播放列表时异常",
         "deleteDirError": "删除播放列表异常",
-        "createDirError": "创建播放列表时发生异常"
+        "createDirError": "创建播放列表时发生异常",
+        "errorToPlay": "播放歌曲时发生一些异常"
     },
     "configPanel": {
         "panelName": "添加一个配置",

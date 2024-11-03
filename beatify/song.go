@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // 根据目录ID获取歌曲列表
@@ -26,6 +28,72 @@ func (a *App) GetSongs(dirId int, sort string) Response {
 	}
 
 	return NewResponse(20000, songs)
+}
+
+// findNext 找到下一个
+func findNext(slice []int, target int) (int, bool) {
+	for i, v := range slice {
+		if v == target && i+1 < len(slice) {
+			return slice[i+1], true // 找到目标值的下一个值
+		}
+	}
+	return 0, false // 如果没找到，返回false
+}
+
+// randomElement 从切片中随机返回一个元素
+func randomElement(slice []int) int {
+	// 创建一个新的随机数生成器，使用当前时间纳秒作为种子
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	randomIndex := rng.Intn(len(slice)) // 生成0到len(slice)-1的随机索引
+	return slice[randomIndex]
+}
+
+// 返回下一首要播放的歌曲
+func (a *App) PlayNext(sort string, id, mode, dirId int) Response {
+	var ids []int
+	var err error
+
+	// 根据 dirId 来查询 ids
+	if dirId == 0 {
+		err = models.DB.Model(&models.Song{}).Order(sort).Pluck("id", &ids).Error
+	} else {
+		err = models.DB.Model(&models.Song{}).Where("dir = ?", dirId).Order(sort).Pluck("id", &ids).Error
+	}
+
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	// 检查是否获取到 ids
+	if len(ids) == 0 {
+		return NewResponse(50000, nil)
+	}
+
+	var nextId int
+
+	// 根据播放模式设置 nextId
+	switch mode {
+	case 1: // 列表循环
+		if nID, ok := findNext(ids, id); ok {
+			nextId = nID
+		} else {
+			nextId = ids[0] // 找不到下一个则取第一个
+		}
+	case 2: // 单曲循环
+		nextId = id
+	case 3: // 随机播放
+		nextId = randomElement(ids)
+	default:
+		return NewResponse(40000, nil)
+	}
+
+	// 查询下一首歌曲的信息
+	var song models.Song
+	if err := models.DB.First(&song, "id = ?", nextId).Error; err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	return NewResponse(20000, song)
 }
 
 // 启动音频流端点
