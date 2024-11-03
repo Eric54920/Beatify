@@ -51,8 +51,11 @@ const changeMode = (mode: string) => {
 /**
  * 下一首
  */ 
-const playNext = () => {
-    PlayNext(store.sort, store.currentMusicId, 1, store.currentDirId).then((res: Record<string, any>) => {
+const playNext = (mode: number) => {
+    if (mode == 2) {  // 手动点击下一首，当模式为单曲循环时，要播下一首
+        mode = 1
+    }
+    PlayNext(store.sort, store.currentMusicId, mode, store.currentDirId).then((res: Record<string, any>) => {
         if (res.status == 20000) {
             let nextSong = res.data;
             store.setCurrentMusicId(nextSong["id"])
@@ -87,7 +90,7 @@ const handleAudioEnded = () => {
     if (store.playMode == 2) {  // 单曲循环
         audioPlayer.value!.play()
     } else {
-        playNext();
+        playNext(store.playMode);
     }
 }
 
