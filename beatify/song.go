@@ -40,6 +40,16 @@ func findNext(slice []int, target int) (int, bool) {
 	return 0, false // 如果没找到，返回false
 }
 
+// findPrev 找到上一个
+func findPrev(slice []int, target int) (int, bool) {
+	for i, v := range slice {
+		if v == target && i-1 >= 0 {
+			return slice[i-1], true // 找到目标值的上一个值
+		}
+	}
+	return 0, false // 如果没找到，返回 false
+}
+
 // randomElement 从切片中随机返回一个元素
 func randomElement(slice []int) int {
 	// 创建一个新的随机数生成器，使用当前时间纳秒作为种子
@@ -90,6 +100,54 @@ func (a *App) PlayNext(sort string, id, mode, dirId int) Response {
 	// 查询下一首歌曲的信息
 	var song models.Song
 	if err := models.DB.First(&song, "id = ?", nextId).Error; err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	return NewResponse(20000, song)
+}
+
+// 上一首
+func (a *App) PlayPrev(sort string, id, mode, dirId int) Response {
+	var ids []int
+	var err error
+
+	// 根据 dirId 来查询 ids
+	if dirId == 0 {
+		err = models.DB.Model(&models.Song{}).Order(sort).Pluck("id", &ids).Error
+	} else {
+		err = models.DB.Model(&models.Song{}).Where("dir = ?", dirId).Order(sort).Pluck("id", &ids).Error
+	}
+
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	// 检查是否获取到 ids
+	if len(ids) == 0 {
+		return NewResponse(50000, nil)
+	}
+
+	var prevId int
+
+	// 根据播放模式设置 prevId
+	switch mode {
+	case 1: // 列表循环
+		if nID, ok := findPrev(ids, id); ok {
+			prevId = nID
+		} else {
+			prevId = ids[len(ids)-1] // 找不到上一个则取最后一个
+		}
+	case 2: // 单曲循环
+		prevId = id
+	case 3: // 随机播放
+		prevId = randomElement(ids)
+	default:
+		return NewResponse(40000, nil)
+	}
+
+	// 查询上一首歌曲的信息
+	var song models.Song
+	if err := models.DB.First(&song, "id = ?", prevId).Error; err != nil {
 		return NewResponse(50000, nil)
 	}
 

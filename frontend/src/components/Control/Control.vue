@@ -2,7 +2,7 @@
 import { watch, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n'
 import { useSharedStore } from '@/stores/useShareStore';
-import { PlayNext } from '../../../wailsjs/go/beatify/App'
+import { PlayNext, PlayPrev } from '../../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import { useToast } from '@/components/ui/toast/use-toast'
@@ -59,17 +59,31 @@ const playNext = (mode: number) => {
         if (res.status == 20000) {
             let nextSong = res.data;
             store.setCurrentMusicId(nextSong["id"])
-            store.setCurrentDirId(nextSong["dir"])
+            // store.setCurrentDirId(nextSong["dir"])
             store.setCurrentMusic(nextSong)
         }
     })
 }
 
-// 上一首、下一首
-// 循环（单曲、列表）
+/**
+ * 上一首 
+ */ 
+const playPrev = (mode: number) => {
+    if (mode == 2) {  // 手动点击下一首，当模式为单曲循环时，要播下一首
+        mode = 1
+    }
+    PlayPrev(store.sort, store.currentMusicId, mode, store.currentDirId).then((res: Record<string, any>) => {
+        if (res.status == 20000) {
+            let nextSong = res.data;
+            store.setCurrentMusicId(nextSong["id"])
+            // store.setCurrentDirId(nextSong["dir"])
+            store.setCurrentMusic(nextSong)
+        }
+    })
+}
+
 // 进度条拖拽
 // 音量（禁音）
-
 
 // 当音频加载完毕可以播放时
 const handleCanPlayThrough = () => {
@@ -159,11 +173,15 @@ onMounted(() => {
             <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('random')" v-if="store.playMode != 3">
                 <font-awesome-icon class="text-stone-500 text-md" icon="shuffle" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center"><font-awesome-icon class="text-stone-500 text-2xl" icon="backward" /></button>
+            <button class="w-10 h-10 flex justify-center items-center" @click="playPrev(store.playMode)">
+                <font-awesome-icon class="text-stone-500 text-2xl" icon="backward" />
+            </button>
             <button class="w-10 h-10 flex justify-center items-center" @click="playAndPause">
                 <font-awesome-icon class="text-stone-500 text-2xl" :icon="store.isPlaying?'pause':'play'" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center" @click="playNext"><font-awesome-icon class="text-stone-500 text-2xl" icon="forward" /></button>
+            <button class="w-10 h-10 flex justify-center items-center" @click="playNext(store.playMode)">
+                <font-awesome-icon class="text-stone-500 text-2xl" icon="forward" />
+            </button>
             <!-- 循环 -->
             <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('repeat')" v-if="store.playMode == 1 || store.playMode == 3">
                 <font-awesome-icon class="text-stone-500 text-md" icon="repeat" />

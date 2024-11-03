@@ -53,7 +53,7 @@ const formatSize = (size: number) => {
  */
 const toPlay = (song: Song) => {
     store.setCurrentMusicId(song.id)
-    store.setCurrentDirId(song.dir)
+    store.setCurrentDirId(dir.value)
     store.setCurrentMusic(song)
 }
 
@@ -133,11 +133,11 @@ onMounted(() => {
             <div class="basis-1/12 text-stone-600">{{ i + 1 }}</div>
             <div class="basis-1/12 text-stone-600">
                 <div class="h-10 w-10 overflow-hidden rounded bg-white">
-                    <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" v-if="store.currentDirId == song.dir && store.currentMusicId == song.id">
+                    <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" v-if="store.currentMusicId == song.id">
                     <img src="@/assets/images/default_pic.png" v-else>
                 </div>
             </div>
-            <div class="basis-3/12 text-left" :class="{'text-red-500': store.currentDirId == song.dir && store.currentMusicId == song.id}">{{ song.title }}</div>
+            <div class="basis-3/12 text-left" :class="{'text-red-500': store.currentMusicId == song.id}">{{ song.title }}</div>
             <div class="basis-2/12 text-left text-stone-600">{{ song.artist }}</div>
             <div class="basis-3/12 text-left text-stone-600">{{ song.album }}</div>
             <div class="basis-1/12 text-stone-600">{{ song.type }}</div>
