@@ -11,7 +11,7 @@ export const useSharedStore = defineStore('shared', {
     isPlaying: false,  // 播放状态
     currentTime: 0,  // 当前播放时间
     progress: 0,  // 进度
-    playMode: 1,  // 播放模式
+    playMode: 1,  // 播放模式（列表循环）2: 单曲循环 3：随机
     volume: 0.3,  // 默认音量
     sort: 'title ASC'  // 排序
   }),

@@ -19,6 +19,29 @@ const playAndPause = () => {
     }
 }
 
+/**
+ * 切换播放模式 1: 列表循环 2: 单曲循环 3：随机 
+ */ 
+const changeMode = (mode: string) => {
+    if (mode == "random") {
+        if (store.playMode == 3) {
+            store.setPlayMode(1)  // 列表循环
+        } else {
+            store.setPlayMode(3)  // 随机
+        }
+    }
+
+    if (mode == "repeat") {
+        if (store.playMode == 1) {
+            store.setPlayMode(2)  // 单曲循环
+        } else if (store.playMode == 2 || store.playMode == 3) {
+            store.setPlayMode(1)  // 列表循环
+        }
+    }
+
+    console.log(store.playMode)
+}
+
 // 上一首、下一首
 // 循环（单曲、列表）
 // 进度条拖拽
@@ -93,15 +116,28 @@ onMounted(() => {
 
 <template>
     <div class="h-14 flex justify-center p-1">
-        <div class="w-60 min-w-60 flex justify-center items-center">
+        <div class="w-60 min-w-60 flex justify-evenly items-center">
             <audio ref="audioPlayer" :src="audioUrl" @canplaythrough="handleCanPlayThrough" @ended="handleAudioEnded"></audio>
-            <button class="w-10 h-10 flex justify-center items-center"><font-awesome-icon class="text-stone-500 text-md" icon="shuffle" /></button>
+            <!-- 随机 -->
+            <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('random')" v-if="store.playMode == 3">
+                <font-awesome-icon class="text-red-500 text-md" icon="shuffle" />
+            </button>
+            <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('random')" v-if="store.playMode != 3">
+                <font-awesome-icon class="text-stone-500 text-md" icon="shuffle" />
+            </button>
             <button class="w-10 h-10 flex justify-center items-center"><font-awesome-icon class="text-stone-500 text-2xl" icon="backward" /></button>
             <button class="w-10 h-10 flex justify-center items-center" @click="playAndPause">
                 <font-awesome-icon class="text-stone-500 text-2xl" :icon="store.isPlaying?'pause':'play'" />
             </button>
             <button class="w-10 h-10 flex justify-center items-center"><font-awesome-icon class="text-stone-500 text-2xl" icon="forward" /></button>
-            <button class="w-10 h-10 flex justify-center items-center"><font-awesome-icon class="text-stone-500 text-md" icon="repeat" /></button>
+            <!-- 循环 -->
+            <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('repeat')" v-if="store.playMode == 1 || store.playMode == 3">
+                <font-awesome-icon class="text-stone-500 text-md" icon="repeat" />
+            </button>
+            <button class="w-10 h-10 flex justify-center items-center relative" @click="changeMode('repeat')" v-if="store.playMode == 2">
+                <font-awesome-icon class="text-red-500 text-md" icon="repeat" />
+                <span class="absolute text-red-500" style="font-size:0.5rem;font-weight:600">1</span>
+            </button>
         </div>
         <div class="flex-1 flex border box-border w-96 max-w-96">
             <div class="h-full aspect-square overflow-hidden">
