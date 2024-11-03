@@ -11,14 +11,14 @@ import (
 )
 
 // 根据目录ID获取歌曲列表
-func (a *App) GetSongs(dirId int) Response {
+func (a *App) GetSongs(dirId int, sort string) Response {
 	var songs []models.Song
 	var err error
 
 	if dirId == 0 {
-		err = models.DB.Find(&songs).Error
+		err = models.DB.Order(sort).Find(&songs).Error
 	} else {
-		err = models.DB.Find(&songs, "dir = ?", dirId).Error
+		err = models.DB.Order(sort).Find(&songs, "dir = ?", dirId).Error
 	}
 
 	if err != nil {
