@@ -18,8 +18,8 @@ export function GetAllDirs() {
   return window['go']['beatify']['App']['GetAllDirs']();
 }
 
-export function GetSongs(arg1) {
-  return window['go']['beatify']['App']['GetSongs'](arg1);
+export function GetSongs(arg1, arg2) {
+  return window['go']['beatify']['App']['GetSongs'](arg1, arg2);
 }
 
 export function IsExistConnection() {

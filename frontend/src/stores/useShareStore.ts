@@ -12,7 +12,8 @@ export const useSharedStore = defineStore('shared', {
     currentTime: 0,  // 当前播放时间
     progress: 0,  // 进度
     playMode: 1,  // 播放模式
-    volume: 0.3  // 默认音量
+    volume: 0.3,  // 默认音量
+    sort: 'title ASC'  // 排序
   }),
   actions: {
     setCurrentMusicId(val: number) {
@@ -41,6 +42,9 @@ export const useSharedStore = defineStore('shared', {
     },
     setCurrentMusic(song: Song) {
       this.currentMusic = song
+    },
+    setSort(val: string) {
+      this.sort = val
     }
   }
 })

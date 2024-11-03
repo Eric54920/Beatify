@@ -14,13 +14,14 @@ const store = useSharedStore()
 const route = useRoute()
 const { t } = useI18n()
 const dir = ref(Number(route.query.dir));
+const sort = ref(store.sort);
 const songs = ref<Song[]>([])
 
 /**
  * 获取所有歌曲
  */ 
 const getSongs = () => {
-    GetSongs(dir.value).then((res: Record<string, any>) => {
+    GetSongs(dir.value, sort.value).then((res: Record<string, any>) => {
         switch (res.status) {
             case 50000:
                 toast({
@@ -56,10 +57,38 @@ const toPlay = (song: Song) => {
     store.setCurrentMusic(song)
 }
 
+/**
+ * 切换列表排序方式
+ */ 
+const sortChange = (sort: string) => {
+    let newSort = ""
+    switch (sort) {
+        case 'title':
+            newSort = store.sort == 'title ASC' ? 'title DESC': 'title ASC'
+            break;
+        case 'artist':
+            newSort = store.sort == 'artist ASC' ? 'artist DESC': 'artist ASC'
+            break;
+        case 'album':
+            newSort = store.sort == 'album ASC' ? 'album DESC': 'album ASC'
+            break;
+        default:
+            break;
+    }
+    store.setSort(newSort)
+}
+
 // 检测路由中参数的变化
 watch(() => route.query.dir, (newDir) => {
     // 重新获取所有歌曲
     dir.value = Number(newDir);
+    getSongs()
+})
+
+// 检测排序方式的变化
+watch(() => store.sort, (newSort) => {
+    // 重新获取所有歌曲
+    sort.value = newSort
     getSongs()
 })
 
@@ -82,9 +111,18 @@ onMounted(() => {
             <div class="flex flex-row px-2 h-12 items-center text-stone-700 font-semibold border-b">
                 <div class="basis-1/12">No.</div>
                 <div class="basis-1/12"></div>
-                <div class="basis-3/12 text-left">{{ t("songInfo.title") }}</div>
-                <div class="basis-2/12 text-left">{{ t("songInfo.artist") }}</div>
-                <div class="basis-3/12 text-left">{{ t("songInfo.album") }}</div>
+                <div class="basis-3/12 text-left" @click="sortChange('title')">{{ t("songInfo.title") }} 
+                    <font-awesome-icon icon="sort-up" v-if="store.sort == 'title ASC'"/>
+                    <font-awesome-icon icon="sort-down" v-if="store.sort == 'title DESC'"/>
+                </div>
+                <div class="basis-2/12 text-left" @click="sortChange('artist')">{{ t("songInfo.artist") }} 
+                    <font-awesome-icon icon="sort-up" v-if="store.sort == 'artist ASC'"/>
+                    <font-awesome-icon icon="sort-down" v-if="store.sort == 'artist DESC'"/>
+                </div>
+                <div class="basis-3/12 text-left" @click="sortChange('album')">{{ t("songInfo.album") }} 
+                    <font-awesome-icon icon="sort-up" v-if="store.sort == 'album ASC'"/>
+                    <font-awesome-icon icon="sort-down" v-if="store.sort == 'album DESC'"/>
+                </div>
                 <div class="basis-1/12">{{ t("songInfo.type") }}</div>
                 <div class="basis-1/12">{{ t("songInfo.size") }}</div>
             </div>

@@ -10,7 +10,7 @@ export function DeleteDir(arg1:number):Promise<beatify.Response>;
 
 export function GetAllDirs():Promise<beatify.Response>;
 
-export function GetSongs(arg1:number):Promise<beatify.Response>;
+export function GetSongs(arg1:number,arg2:string):Promise<beatify.Response>;
 
 export function IsExistConnection():Promise<beatify.Response>;
 
