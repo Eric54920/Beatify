@@ -224,30 +224,30 @@ onMounted(() => {
 <template>
     <Toaster />
 
-    <div class="h-14 flex justify-center p-1">
+    <div class="h-14 flex justify-evenly p-1">
         <div class="w-60 min-w-60 flex justify-evenly items-center">
             <audio ref="audioPlayer" :src="audioUrl" @canplaythrough="handleCanPlayThrough" @ended="handleAudioEnded"></audio>
             <!-- 随机 -->
-            <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('random')" v-if="store.playMode == 3">
+            <button class="basis-2/12 h-10 flex justify-center items-center hover:bg-stone-100 hover:rounded" @click="changeMode('random')" v-if="store.playMode == 3">
                 <font-awesome-icon class="text-red-500 text-md" icon="shuffle" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('random')" v-if="store.playMode != 3">
+            <button class="basis-2/12 h-10 flex justify-center items-center hover:bg-stone-100 hover:rounded" @click="changeMode('random')" v-if="store.playMode != 3">
                 <font-awesome-icon class="text-stone-500 text-md" icon="shuffle" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center" @click="playPrev(store.playMode)">
+            <button class="basis-2/12 h-10 flex justify-center items-center hover:bg-stone-100 hover:rounded" @click="playPrev(store.playMode)">
                 <font-awesome-icon class="text-stone-500 text-2xl" icon="backward" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center" @click="playAndPause">
+            <button class="basis-2/12 h-10 flex justify-center items-center hover:bg-stone-100 hover:rounded" @click="playAndPause">
                 <font-awesome-icon class="text-stone-500 text-2xl" :icon="store.isPlaying?'pause':'play'" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center" @click="playNext(store.playMode)">
+            <button class="basis-2/12 h-10 flex justify-center items-center hover:bg-stone-100 hover:rounded" @click="playNext(store.playMode)">
                 <font-awesome-icon class="text-stone-500 text-2xl" icon="forward" />
             </button>
             <!-- 循环 -->
-            <button class="w-10 h-10 flex justify-center items-center" @click="changeMode('repeat')" v-if="store.playMode == 1 || store.playMode == 3">
+            <button class="basis-2/12 h-10 flex justify-center items-center hover:bg-stone-100 hover:rounded" @click="changeMode('repeat')" v-if="store.playMode == 1 || store.playMode == 3">
                 <font-awesome-icon class="text-stone-500 text-md" icon="repeat" />
             </button>
-            <button class="w-10 h-10 flex justify-center items-center relative" @click="changeMode('repeat')" v-if="store.playMode == 2">
+            <button class="basis-2/12 h-10 flex justify-center items-center relative hover:bg-stone-100 hover:rounded" @click="changeMode('repeat')" v-if="store.playMode == 2">
                 <font-awesome-icon class="text-red-500 text-md" icon="repeat" />
                 <span class="absolute text-red-500" style="font-size:0.5rem;font-weight:600">1</span>
             </button>
@@ -269,17 +269,13 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div class="w-60 min-w-60 flex">
-            <div class="flex-1 flex justify-center items-center">
-                <button class="w-10 h-10" @click="minVolume"><font-awesome-icon class="text-stone-500 text-md" icon="volume-low" /></button>
-                <div class="flex-1 h-1 bg-stone-200" ref="volumeContainer">
-                    <div class="h-full bg-stone-500" :style="{ width: store.volume * 100 + '%' }"></div>
-                </div>
-                <button class="w-10 h-10" @click="maxVolume"><font-awesome-icon class="text-stone-500 text-md" icon="volume-high" /></button>
+        <div class="w-60 min-w-60 flex justify-evenly items-center">
+            <button class="basis-1/6 h-10 hover:bg-stone-100 hover:rounded" @click="minVolume"><font-awesome-icon class="text-stone-500 text-md" icon="volume-low" /></button>
+            <div class="basis-2/6 h-1 bg-stone-200" ref="volumeContainer">
+                <div class="h-full bg-stone-500" :style="{ width: store.volume * 100 + '%' }"></div>
             </div>
-            <div class="w-10  flex justify-center items-center">
-                <button class="w-10 h-10"><font-awesome-icon class="text-stone-500 text-md" icon="list-ul" /></button>
-            </div>
+            <button class="basis-1/6 h-10 hover:bg-stone-100 hover:rounded" @click="maxVolume"><font-awesome-icon class="text-stone-500 text-md" icon="volume-high" /></button>
+            <button class="basis-1/6 h-10 hover:bg-stone-100 hover:rounded"><font-awesome-icon class="text-stone-500 text-md" icon="list-ul" /></button>
         </div>
     </div>
 </template>
