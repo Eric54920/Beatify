@@ -9,10 +9,12 @@ import { useToast } from '@/components/ui/toast/use-toast'
 
 const { t } = useI18n()
 const store = useSharedStore()
-const audioPlayer = ref<HTMLAudioElement | null>(null)
+const audioPlayer = ref<HTMLAudioElement>()
 const audioUrl = ref("")
 const progressContainer = ref<HTMLDivElement>()
-let isDragging = ref(false);
+const volumeContainer = ref<HTMLDivElement>()
+let isDraggingProgress = ref(false)
+let isDraggingVolume = ref(false)
 
 
 // 暂停、播放
@@ -84,9 +86,6 @@ const playPrev = (mode: number) => {
     })
 }
 
-// 进度条拖拽
-// 音量（禁音）
-
 // 当音频加载完毕可以播放时
 const handleCanPlayThrough = () => {
     if (audioPlayer.value) {
@@ -115,26 +114,49 @@ const handleAudioEnded = () => {
  */ 
 const updateProgress = (positionX: number) => {
     const containerRect = progressContainer.value!.getBoundingClientRect();
-    console.log(positionX, containerRect.left, containerRect.width)
-
     let percentage = ((positionX - containerRect.left) / containerRect.width);
-
-    // Clamp percentage to stay within bounds
-    percentage = Math.min(Math.max(percentage, 0), 100);
-
+    percentage = Math.min(Math.max(percentage, 0), 1);
     const seekTime = percentage * store.duration;
-    console.log(percentage, seekTime)
     audioPlayer.value!.currentTime = seekTime;
 };
 
+/**
+ * 将位置转换为百分比并调整音量
+ */ 
+const updateVolume = (positionX: number) => {
+    const containerRect = volumeContainer.value!.getBoundingClientRect();
+    let percentage = ((positionX - containerRect.left) / containerRect.width);
+    percentage = Math.min(Math.max(percentage, 0), 1);
+    store.volume = percentage
+    audioPlayer.value!.volume = percentage
+};
+
+/**
+ * 最小音量 
+ */ 
+const minVolume = () => {
+    store.volume = 0
+    audioPlayer.value!.volume = 0
+}
+
+/**
+ * 最大音量 
+ */ 
+const maxVolume = () => {
+    store.volume = 1
+    audioPlayer.value!.volume = 1
+}
 
 window.addEventListener('mouseup', () => {
-    isDragging.value = false;
+    isDraggingProgress.value = false;
+    isDraggingVolume.value = false;
 });
 
 window.addEventListener('mousemove', (e) => {
-    if (isDragging.value) {
+    if (isDraggingProgress.value) {
         updateProgress(e.clientX);
+    } else if (isDraggingVolume.value) {
+        updateVolume(e.clientX);
     }
 });
 
@@ -149,12 +171,22 @@ onMounted(() => {
     const { toast } = useToast()
 
     // 音量调节
-    if (progressContainer.value) {
-        progressContainer.value!.addEventListener('mousedown', () => {
-            isDragging.value = true;
+    if (volumeContainer.value) {
+        volumeContainer.value!.addEventListener('mousedown', () => {
+            isDraggingVolume.value = true;
         });
 
-        // Handle click on progress container
+        volumeContainer.value!.addEventListener('click', (e) => {
+            updateVolume(e.clientX);
+        });
+    }
+
+    // 进度条调节
+    if (progressContainer.value) {
+        progressContainer.value!.addEventListener('mousedown', () => {
+            isDraggingProgress.value = true;
+        });
+
         progressContainer.value!.addEventListener('click', (e) => {
             updateProgress(e.clientX);
         });
@@ -185,11 +217,6 @@ onMounted(() => {
             let time = audioPlayer.value!.duration
             store.setDuration(time)
         });
-
-        
-        // volumeBar.value.addEventListener('input', (e) => {
-        //   audio.volume = e.target.value;
-        // });
     }
 })
 </script>
@@ -244,11 +271,11 @@ onMounted(() => {
         </div>
         <div class="w-60 min-w-60 flex">
             <div class="flex-1 flex justify-center items-center">
-                <button class="w-10 h-10"><font-awesome-icon class="text-stone-500 text-md" icon="volume-low" /></button>
-                <div class="flex-1 h-1 bg-stone-200">
-                    <div class="h-full bg-stone-500" style="width: 30%"></div>
+                <button class="w-10 h-10" @click="minVolume"><font-awesome-icon class="text-stone-500 text-md" icon="volume-low" /></button>
+                <div class="flex-1 h-1 bg-stone-200" ref="volumeContainer">
+                    <div class="h-full bg-stone-500" :style="{ width: store.volume * 100 + '%' }"></div>
                 </div>
-                <button class="w-10 h-10"><font-awesome-icon class="text-stone-500 text-md" icon="volume-high" /></button>
+                <button class="w-10 h-10" @click="maxVolume"><font-awesome-icon class="text-stone-500 text-md" icon="volume-high" /></button>
             </div>
             <div class="w-10  flex justify-center items-center">
                 <button class="w-10 h-10"><font-awesome-icon class="text-stone-500 text-md" icon="list-ul" /></button>
