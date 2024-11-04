@@ -256,17 +256,17 @@ onMounted(() => {
             <div class="h-full aspect-square overflow-hidden">
                 <img class="h-full" src="@/assets/images/default_pic.png">
             </div>
-            <div class="flex flex-1 flex-col overflow-hidden">
-                <div class="h-full flex flex-1 flex-col justify-center overflow-hidden px-2 text-center" v-if="store.currentMusic">
+            <div class="flex flex-1 flex-col overflow-hidden" v-if="store.currentMusic">
+                <div class="h-full flex flex-1 flex-col justify-center overflow-hidden px-2 text-center">
                     <p class="text-sm text-nowrap text-stone-800">{{ store.currentMusic?.title }}</p>
                     <span class="text-xs text-nowrap text-stone-500">{{ store.currentMusic?.artist }}</span>
-                </div>
-                <div class="h-full overflow-hidden px-2" v-else>
-                    <p class="h-full flex text-nowrap text-stone-500 items-center justify-center font-semibold">Enjoy</p>
                 </div>
                 <div class="h-1 bg-stone-200" ref="progressContainer">
                     <div class="h-full bg-stone-500" :style="{ width: store.progress + '%'}"></div>
                 </div>
+            </div>
+            <div class="flex-1" v-else>
+                <p class="h-full flex text-nowrap text-stone-500 items-center justify-center font-semibold">Listen With Beatify</p>
             </div>
         </div>
         <div class="w-60 min-w-60 flex justify-evenly items-center">
