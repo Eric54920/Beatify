@@ -9,8 +9,10 @@ import { useToast } from '@/components/ui/toast/use-toast'
 
 const { t } = useI18n()
 const store = useSharedStore()
-const audioPlayer = ref<HTMLAudioElement | null>(null);
+const audioPlayer = ref<HTMLAudioElement | null>(null)
 const audioUrl = ref("")
+const progressContainer = ref<HTMLDivElement>()
+let isDragging = ref(false);
 
 
 // 暂停、播放
@@ -108,6 +110,34 @@ const handleAudioEnded = () => {
     }
 }
 
+/**
+ * 将位置转换为百分比并更新进度条 
+ */ 
+const updateProgress = (positionX: number) => {
+    const containerRect = progressContainer.value!.getBoundingClientRect();
+    console.log(positionX, containerRect.left, containerRect.width)
+
+    let percentage = ((positionX - containerRect.left) / containerRect.width);
+
+    // Clamp percentage to stay within bounds
+    percentage = Math.min(Math.max(percentage, 0), 100);
+
+    const seekTime = percentage * store.duration;
+    console.log(percentage, seekTime)
+    audioPlayer.value!.currentTime = seekTime;
+};
+
+
+window.addEventListener('mouseup', () => {
+    isDragging.value = false;
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (isDragging.value) {
+        updateProgress(e.clientX);
+    }
+});
+
 watch(() => store.currentMusicId, (id) => {
     // 先暂停
     audioPlayer.value!.pause()
@@ -117,6 +147,18 @@ watch(() => store.currentMusicId, (id) => {
 
 onMounted(() => {
     const { toast } = useToast()
+
+    // 音量调节
+    if (progressContainer.value) {
+        progressContainer.value!.addEventListener('mousedown', () => {
+            isDragging.value = true;
+        });
+
+        // Handle click on progress container
+        progressContainer.value!.addEventListener('click', (e) => {
+            updateProgress(e.clientX);
+        });
+    }
 
     if (audioPlayer.value) {
         audioPlayer.value.volume = store.volume
@@ -132,27 +174,19 @@ onMounted(() => {
 
         // 更新进度条和时间
         audioPlayer.value.addEventListener('timeupdate', () => {
-            store.setProgress((audioPlayer.value!.currentTime / audioPlayer.value!.duration) * 100)
-
-            // 时间
-            // currentTimeEl.textContent = formatTime(audio.currentTime);
-            // durationEl.textContent = formatTime(audio.duration);
+            let current = audioPlayer.value!.currentTime
+            store.setProgress((current / audioPlayer.value!.duration) * 100)
+            store.setCurrentTime(current)
         });
 
         // 元信息重载时更新时间
         audioPlayer.value.addEventListener('loadedmetadata', () => {
             // durationEl.textContent = formatTime(audio.duration);
             let time = audioPlayer.value!.duration
-            store.setCurrentTime(time)
+            store.setDuration(time)
         });
 
-        // 进度条拖拽
-        // progressBar.value.addEventListener('input', (e) => {
-        //   const seekTime = (e.target.value / 100) * audio.value.duration;
-        //   audio.value.currentTime = seekTime;
-        // });
-
-        // 音量调节
+        
         // volumeBar.value.addEventListener('input', (e) => {
         //   audio.volume = e.target.value;
         // });
@@ -203,7 +237,7 @@ onMounted(() => {
                 <div class="h-full overflow-hidden px-2" v-else>
                     <p class="h-full flex text-nowrap text-stone-500 items-center justify-center font-semibold">Enjoy</p>
                 </div>
-                <div class="h-1 bg-stone-200">
+                <div class="h-1 bg-stone-200" ref="progressContainer">
                     <div class="h-full bg-stone-500" :style="{ width: store.progress + '%'}"></div>
                 </div>
             </div>
