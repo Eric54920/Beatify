@@ -7,6 +7,7 @@ import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Badge } from '@/components/ui/badge'
 import { useSharedStore } from '@/stores/useShareStore'
 import { Song } from '@/schema/schema'
 
@@ -140,7 +141,7 @@ onMounted(() => {
             <div class="basis-3/12 text-left" :class="{'text-red-500': store.currentMusicId == song.id}">{{ song.title }}</div>
             <div class="basis-2/12 text-left text-stone-600">{{ song.artist }}</div>
             <div class="basis-3/12 text-left text-stone-600">{{ song.album }}</div>
-            <div class="basis-1/12 text-stone-600">{{ song.type }}</div>
+            <div class="basis-1/12 text-stone-600"><Badge variant="outline">{{ song.type }}</Badge></div>
             <div class="basis-1/12 text-stone-600">{{ formatSize(song.size) }} MB</div>
         </div>
     </ScrollArea>
