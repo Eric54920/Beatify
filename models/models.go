@@ -40,6 +40,8 @@ type Song struct {
 	Title  string `gorm:"not null" json:"title"`          // 标题
 	Artist string `json:"artist"`                         // 作者
 	Album  string `json:"album"`                          // 专辑
+	Year   int    `json:"year"`                           // 发行年份
+	Genre  string `json:"genre"`                          // 歌曲类型
 	Type   string `gorm:"not null" json:"type"`           // 文件类型
 	Size   int64  `grom:"not null" json:"size"`           // 大小
 	Dir    int    `gorm:"not null" json:"dir"`            // 目录

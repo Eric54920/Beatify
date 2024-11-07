@@ -23,6 +23,7 @@ var audioExtensions = []string{"mp3", "wav", "flac", "aac", "ogg", "m4a", "wma",
 
 type Connection interface {
 	GetFileList(dirId int) ([]FileInfo, error)
+	fetchMetaData(filePath string) error
 	GetFileStream(filePath string, start, end int64, isRange bool) (*http.Response, error)
 }
 
