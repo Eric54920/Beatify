@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"path"
 	"strings"
+
+	"github.com/dhowden/tag"
 )
 
 // WebDAVClient 结构体包含连接信息
@@ -92,6 +94,45 @@ func fetchWebDAVFiles(w WebDAVClient, filePath string) ([]File, error) {
 	return multistatus.Responses, nil
 }
 
+// 获取元信息
+func (w WebDAVClient) fetchMetaData(filePath string) error {
+
+	resp, err := w.GetFileStream(filePath, 0, 1_000_000, true)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	reader := bytes.NewReader(data)
+	metaData, err := tag.ReadFrom(reader)
+	if err != nil {
+		return err
+	}
+
+	var dbSong models.Song
+
+	if err := models.DB.First(&dbSong, "path = ?", filePath).Error; err != nil {
+		return err
+	}
+
+	dbSong.Album = metaData.Album()
+	dbSong.Genre = metaData.Genre()
+	if metaData.Year() > 0 {
+		dbSong.Year = metaData.Year()
+	}
+
+	if err := models.DB.Save(&dbSong).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // 获取文件夹数据
 func (w WebDAVClient) GetFileList(dirId int) ([]FileInfo, error) {
 	var dir models.Dir
@@ -156,8 +197,6 @@ func (w WebDAVClient) GetFileList(dirId int) ([]FileInfo, error) {
 		default:
 			title = fullName
 		}
-
-		// size, _ := strconv.ParseFloat(fmt.Sprintf("%.1f", float32(f.Props.Size)/1024/1024), 64)
 
 		fileItem := FileInfo{
 			Name:   title,

@@ -140,7 +140,7 @@ func (a *App) ReSyncDir(id int) Response {
 
 	// 如果服务中没有则删除数据库中已有的歌曲
 	if len(serverFileList) == 0 {
-		err := models.DB.Delete(models.Song{}, "dir = ?", id).Error
+		err := models.DB.Delete(&models.Song{}, "dir = ?", id).Error
 		if err != nil {
 			return NewResponse(50000, nil)
 		}
@@ -170,6 +170,7 @@ func (a *App) ReSyncDir(id int) Response {
 					if err := tx.Save(&dbSong).Error; err != nil {
 						return err
 					}
+					go a.client.fetchMetaData(file.Path)
 				}
 			} else {
 				// 添加新的歌曲
@@ -184,6 +185,7 @@ func (a *App) ReSyncDir(id int) Response {
 				if err := tx.Create(&newSong).Error; err != nil {
 					return err
 				}
+				go a.client.fetchMetaData(file.Path)
 			}
 		}
 
