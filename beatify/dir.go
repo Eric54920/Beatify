@@ -117,6 +117,8 @@ func (a *App) CreateDir(formData string) Response {
 		}
 
 		_ = models.DB.Create(&song).Error
+
+		go a.client.fetchMetaData(file.Path)
 	}
 
 	return NewResponse(20000, nil)
