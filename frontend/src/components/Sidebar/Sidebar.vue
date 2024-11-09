@@ -212,23 +212,26 @@ const saveNewDir = () => {
           title: t("notification.errorTitle"),
           description: t("notification.createDirError"),
         })
+        break
       case 40001:
         toast({
           title: t("notification.errorTitle"),
           description: t("notification.ParameterException"),
         })
+        break
       case 40000:
         toast({
           title: t("notification.errorTitle"),
           description: t("notification.invalidForm"),
         })
+        break
       case 20000:
         toast({
-          title: t("notification.successTitle"),
-          description: t("notification.invalidForm"),
+          title: t("notification.successTitle")
         })
         isAddDialogOpen.value = false;
         getPlaylist()
+        break
     }
   })
 }
