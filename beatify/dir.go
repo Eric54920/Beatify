@@ -66,9 +66,20 @@ func (a *App) UpdateDir(id int, formData string) Response {
 // 删除播放列表
 func (a *App) DeleteDir(id int) Response {
 	var dir models.Dir
-	models.DB.First(&dir, id)
 
-	err := models.DB.Delete(&dir).Error
+	err := models.DB.First(&dir, id).Error
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	// 删除所有关联的歌曲
+	err = models.DB.Where("dir = ?", id).Delete(&models.Song{}).Error
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	// 删除列表
+	err = models.DB.Delete(&dir).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
