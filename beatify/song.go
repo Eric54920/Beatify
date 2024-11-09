@@ -306,6 +306,11 @@ func (a *App) getCover(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if id == "0" {
+		serveDefaultCover(w)
+		return
+	}
+
 	// 获取歌曲信息
 	var song models.Song
 	if err := models.DB.First(&song, "id = ?", id).Error; err != nil {

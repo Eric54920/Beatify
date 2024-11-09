@@ -165,6 +165,8 @@ watch(() => store.currentMusicId, (id) => {
     audioPlayer.value!.pause()
     audioUrl.value = "http://localhost:34116/stream?id=" + id
     audioPlayer.value!.load()
+    // 设置专辑封面
+    store.coverImage = "http://localhost:34116/cover?id=" + id
 })
 
 onMounted(() => {
@@ -254,7 +256,7 @@ onMounted(() => {
         </div>
         <div class="flex-1 flex border box-border w-96 max-w-96">
             <div class="h-full aspect-square overflow-hidden">
-                <img class="h-full" src="@/assets/images/default_pic.png">
+                <img class="h-full" :src="store.coverImage" alt="">
             </div>
             <div class="flex flex-1 flex-col overflow-hidden" v-if="store.currentMusic">
                 <div class="h-full flex flex-1 flex-col justify-center overflow-hidden px-2 text-center">
