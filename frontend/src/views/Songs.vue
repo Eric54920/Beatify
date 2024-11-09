@@ -138,8 +138,8 @@ onMounted(() => {
                     <img src="@/assets/images/default_pic.png" v-else>
                 </div>
             </div>
-            <div class="basis-3/12 text-left" :class="{'text-red-500': store.currentMusicId == song.id}">{{ song.title }}</div>
-            <div class="basis-2/12 text-left text-stone-600">{{ song.artist }}</div>
+            <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap" :class="{'text-red-500': store.currentMusicId == song.id}">{{ song.title }}</div>
+            <div class="basis-2/12 text-left text-stone-600 overflow-hidden overflow-ellipsis text-nowrap">{{ song.artist }}</div>
             <div class="basis-3/12 text-left text-stone-600 overflow-hidden overflow-ellipsis text-nowrap">{{ song.album }}</div>
             <div class="basis-1/12 text-stone-600"><Badge variant="outline">{{ song.type }}</Badge></div>
             <div class="basis-1/12 text-stone-600">{{ formatSize(song.size) }} MB</div>
