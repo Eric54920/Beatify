@@ -120,10 +120,22 @@ func (w WebDAVClient) fetchMetaData(filePath string) error {
 		return err
 	}
 
-	dbSong.Album = metaData.Album()
-	dbSong.Genre = metaData.Genre()
+	if metaData.Title() != "" {
+		dbSong.Title = metaData.Title()
+	}
+	if metaData.Artist() != "" {
+		dbSong.Artist = metaData.Artist()
+	}
+	if metaData.Album() != "" {
+		dbSong.Album = metaData.Album()
+	}
+	if metaData.Genre() != "" {
+		dbSong.Genre = metaData.Genre()
+	}
 	if metaData.Year() > 0 {
-		dbSong.Year = metaData.Year()
+		year := new(int)
+		*year = metaData.Year()
+		dbSong.Year = year
 	}
 
 	if err := models.DB.Save(&dbSong).Error; err != nil {

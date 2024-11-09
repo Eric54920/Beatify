@@ -12,6 +12,21 @@ import (
 	"time"
 )
 
+// CreateSong 创建一个Song记录
+func CreateSong(file FileInfo, dirId int) error {
+	song := models.Song{
+		Title:  file.Name,
+		Artist: file.Artist,
+		Path:   file.Path, // 文件路径
+		Dir:    dirId,
+		Size:   file.Size, // 文件大小，单位 MB
+		Type:   file.Type, // 文件类型
+	}
+
+	err := models.DB.Create(&song).Error
+	return err
+}
+
 // 根据目录ID获取歌曲列表
 func (a *App) GetSongs(dirId int, sort string) Response {
 	var songs []models.Song

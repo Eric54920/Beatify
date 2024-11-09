@@ -107,17 +107,12 @@ func (a *App) CreateDir(formData string) Response {
 	}
 
 	for _, file := range fileList {
-		song := models.Song{
-			Title:  file.Name,
-			Artist: file.Artist,
-			Path:   file.Path, // 文件路径
-			Dir:    dir.ID,
-			Size:   file.Size, // 文件大小，单位 MB
-			Type:   file.Type, // 文件类型
+		err := CreateSong(file, dir.ID)
+
+		if err != nil {
+			return NewResponse(50000, nil)
 		}
-
-		_ = models.DB.Create(&song).Error
-
+		// 更新元信息
 		go a.client.fetchMetaData(file.Path)
 	}
 
@@ -176,17 +171,12 @@ func (a *App) ReSyncDir(id int) Response {
 				}
 			} else {
 				// 添加新的歌曲
-				newSong := models.Song{
-					Title:  file.Name,
-					Artist: file.Artist,
-					Path:   file.Path,
-					Dir:    id,
-					Size:   file.Size,
-					Type:   file.Type,
-				}
-				if err := tx.Create(&newSong).Error; err != nil {
+				err := CreateSong(file, id)
+
+				if err != nil {
 					return err
 				}
+
 				go a.client.fetchMetaData(file.Path)
 			}
 		}
