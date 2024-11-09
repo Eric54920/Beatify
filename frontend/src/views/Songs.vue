@@ -135,7 +135,8 @@ onMounted(() => {
             <div class="basis-1/12 text-stone-600">
                 <div class="h-10 w-10 overflow-hidden rounded bg-white">
                     <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusicId == song.id">
-                    <img src="@/assets/images/default_pic.png" alt="" v-else>
+                    <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                    <!-- <img src="@/assets/images/default_pic.png" alt="" v-else> -->
                 </div>
             </div>
             <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap" :class="{'text-red-500': store.currentMusicId == song.id}">{{ song.title }}</div>
