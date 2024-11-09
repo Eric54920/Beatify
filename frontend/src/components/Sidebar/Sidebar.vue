@@ -350,7 +350,7 @@ onMounted(() => {
                     {{ t("menu.edit") }}
                   </ContextMenuItem>
                   <ContextMenuSeparator />
-                  <ContextMenuItem inset @click="deleteDir(playlist.id)" class="text-red-400 px-2">
+                  <ContextMenuItem inset @click="deleteDir(playlist.id)" class="bg-red-500 text-white px-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="mr-2 h-4 w-4">
                       <path stroke-linecap="round" stroke-linejoin="round"
