@@ -9,9 +9,9 @@
         "artists": "歌手",
         "albums": "专辑",
         "playlists": "播放列表",
-        "edit": "编辑",
+        "edit": "列表设置",
         "delete": "删除",
-        "sync": "同步"
+        "sync": "列表同步"
     },
     "diolog": {
         "editPlaylists": "编辑播放列表",
@@ -59,7 +59,9 @@
         "album": "专辑",
         "type": "类型",
         "size": "大小",
-        "time": "时长"
+        "time": "时长",
+        "viewDetail": "查看详细",
+        "addToPlaylist": "添加到播放列表"
     },
     "common": {},
     "interface": {}
