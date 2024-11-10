@@ -41,6 +41,7 @@ import {
   Library,
   ListMusic,
   CirclePlus,
+  SquarePlus,
   Trash2,
   Bolt,
   FolderSync
@@ -166,7 +167,7 @@ const reSyncDir = (id: number) => {
           title: t("notification.successTitle"),
           description: t("notification.syncSuccess"),
         })
-        break
+        
     }
   })
 }
@@ -258,7 +259,7 @@ onMounted(() => {
     <div class="space-y-4 py-4">
       <div class="px-3 py-2">
         <div class="relative w-full mb-2 items-center">
-          <Input id="search" type="text" :placeholder='`${t("menu.search")}`' class="pl-10 bg-stone-300" />
+          <Input id="search" type="text" :placeholder='`${t("menu.search")}`' class="pl-10 bg-neutral-300" />
           <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
             <Search class="size-6 text-muted-foreground" />
           </span>
@@ -300,7 +301,7 @@ onMounted(() => {
         <h2 class="flex justify-between items-center relative px-7 text-lg font-semibold tracking-tight">
           <span>{{ t("menu.playlists") }}</span>
           <Button variant="link" class="p-0" @click="addDir">
-            <CirclePlus />
+            <SquarePlus class="text-stone-800"/>
           </Button>
         </h2>
         <ScrollArea class="h-[200px] px-1">
