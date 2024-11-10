@@ -5,8 +5,22 @@ import { useRoute } from 'vue-router'
 import { GetSongs } from '../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
-import { useToast } from '@/components/ui/toast/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+    Info,
+    Ellipsis,
+    ListPlus,
+    Plus,
+    ArrowUp,
+    ArrowDown
+} from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
 import { useSharedStore } from '@/stores/useShareStore'
 import { Song } from '@/schema/schema'
@@ -20,7 +34,7 @@ const songs = ref<Song[]>([])
 
 /**
  * 获取所有歌曲
- */ 
+ */
 const getSongs = () => {
     GetSongs(dir.value, sort.value).then((res: Record<string, any>) => {
         switch (res.status) {
@@ -29,22 +43,24 @@ const getSongs = () => {
                     title: t("notification.errorTitle"),
                     description: t("notification.queryMusicError"),
                 })
+                break
             case 20000:
                 songs.value = res.data;
+                break
         }
     })
 }
 
 /**
  * 格式化时长，将秒转为分
- */ 
+ */
 const formatTime = (time: number) => {
     return `${time / 60 | 0}:${(time % 60).toString().padStart(2, '0')}`
 }
 
 /**
  * 格式化文件大小
- */ 
+ */
 const formatSize = (size: number) => {
     return (size / 1024 / 1024).toFixed(1)
 }
@@ -60,18 +76,18 @@ const toPlay = (song: Song) => {
 
 /**
  * 切换列表排序方式
- */ 
+ */
 const sortChange = (sort: string) => {
     let newSort = ""
     switch (sort) {
         case 'title':
-            newSort = store.sort == 'title ASC' ? 'title DESC': 'title ASC'
+            newSort = store.sort == 'title ASC' ? 'title DESC' : 'title ASC'
             break;
         case 'artist':
-            newSort = store.sort == 'artist ASC' ? 'artist DESC': 'artist ASC'
+            newSort = store.sort == 'artist ASC' ? 'artist DESC' : 'artist ASC'
             break;
         case 'album':
-            newSort = store.sort == 'album ASC' ? 'album DESC': 'album ASC'
+            newSort = store.sort == 'album ASC' ? 'album DESC' : 'album ASC'
             break;
         default:
             break;
@@ -94,8 +110,6 @@ watch(() => store.sort, (newSort) => {
 })
 
 onMounted(() => {
-    const { toast } = useToast()
-
     // 获取所有歌曲
     getSongs()
 })
@@ -110,39 +124,59 @@ onMounted(() => {
                 {{ store.pageName }}
             </div>
             <div class="flex flex-row px-2 h-12 items-center text-stone-700 font-semibold border-b">
-                <div class="basis-1/12">No.</div>
                 <div class="basis-1/12"></div>
-                <div class="basis-3/12 text-left" @click="sortChange('title')">{{ t("songInfo.title") }} 
-                    <font-awesome-icon icon="sort-up" v-if="store.sort == 'title ASC'"/>
-                    <font-awesome-icon icon="sort-down" v-if="store.sort == 'title DESC'"/>
+                <div class="basis-3/12 text-left flex items-center" @click="sortChange('title')">{{ t("songInfo.title") }}
+                    <ArrowDown class="ml-1 h-4 w-4 inline-block" v-if="store.sort == 'title ASC'" />
+                    <ArrowUp class="ml-1 h-4 w-4 inline-block" v-if="store.sort == 'title DESC'" />
                 </div>
-                <div class="basis-2/12 text-left" @click="sortChange('artist')">{{ t("songInfo.artist") }} 
-                    <font-awesome-icon icon="sort-up" v-if="store.sort == 'artist ASC'"/>
-                    <font-awesome-icon icon="sort-down" v-if="store.sort == 'artist DESC'"/>
+                <div class="basis-1/12"></div>
+                <div class="basis-2/12 text-left flex items-center" @click="sortChange('artist')">{{ t("songInfo.artist") }}
+                    <ArrowDown class="ml-1 h-4 w-4 inline-block" v-if="store.sort == 'artist ASC'" />
+                    <ArrowUp class="ml-1 h-4 w-4 inline-block" v-if="store.sort == 'artist DESC'" />
                 </div>
-                <div class="basis-3/12 text-left" @click="sortChange('album')">{{ t("songInfo.album") }} 
-                    <font-awesome-icon icon="sort-up" v-if="store.sort == 'album ASC'"/>
-                    <font-awesome-icon icon="sort-down" v-if="store.sort == 'album DESC'"/>
+                <div class="basis-3/12 text-left flex items-center" @click="sortChange('album')">{{ t("songInfo.album") }}
+                    <ArrowDown class="ml-1 h-4 w-4 inline-block" v-if="store.sort == 'album ASC'" />
+                    <ArrowUp class="ml-1 h-4 w-4 inline-block" v-if="store.sort == 'album DESC'" />
                 </div>
                 <div class="basis-1/12">{{ t("songInfo.type") }}</div>
                 <div class="basis-1/12">{{ t("songInfo.size") }}</div>
             </div>
         </div>
-        
+
         <div class="flex flex-row px-2 h-12 items-center hover:bg-stone-100 transition even:bg-stone-50"
             v-for="(song, i) in songs" :key="song.id" @dblclick="toPlay(song)">
-            <div class="basis-1/12 text-stone-600">{{ i + 1 }}</div>
-            <div class="basis-1/12 text-stone-600">
+            <div class="basis-1/12 flex justify-center">
                 <div class="h-10 w-10 overflow-hidden rounded bg-white">
                     <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusicId == song.id">
                     <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
-                    <!-- <img src="@/assets/images/default_pic.png" alt="" v-else> -->
                 </div>
             </div>
-            <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap" :class="{'text-red-500': store.currentMusicId == song.id}">{{ song.title }}</div>
-            <div class="basis-2/12 text-left text-stone-600 overflow-hidden overflow-ellipsis text-nowrap">{{ song.artist }}</div>
-            <div class="basis-3/12 text-left text-stone-600 overflow-hidden overflow-ellipsis text-nowrap">{{ song.album }}</div>
-            <div class="basis-1/12 text-stone-600"><Badge variant="outline">{{ song.type }}</Badge></div>
+            <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap"
+                :class="{ 'text-red-500': store.currentMusicId == song.id }">{{ song.title }}</div>
+            <div class="basis-1/12 flex justify-center text-stone-600">
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <Ellipsis class="mr-2 h-4 w-4 text-red-600" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent class="w-56">
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem>
+                                <Info class="mr-2 h-4 w-4" />
+                                <span>{{ t("songInfo.viewDetail") }}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <ListPlus class="mr-2 h-4 w-4" />
+                                <span>{{ t("songInfo.addToPlaylist") }}</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div class="basis-2/12 text-left text-stone-600 overflow-hidden overflow-ellipsis text-nowrap">{{song.artist }}</div>
+            <div class="basis-3/12 text-left text-stone-600 overflow-hidden overflow-ellipsis text-nowrap">{{ song.album}}</div>
+            <div class="basis-1/12">
+                <Badge variant="outline" class="text-stone-600">{{ song.type }}</Badge>
+            </div>
             <div class="basis-1/12 text-stone-600">{{ formatSize(song.size) }} MB</div>
         </div>
     </ScrollArea>
