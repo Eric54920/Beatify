@@ -66,9 +66,20 @@ func (a *App) UpdateDir(id int, formData string) Response {
 // 删除播放列表
 func (a *App) DeleteDir(id int) Response {
 	var dir models.Dir
-	models.DB.First(&dir, id)
 
-	err := models.DB.Delete(&dir).Error
+	err := models.DB.First(&dir, id).Error
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	// 删除所有关联的歌曲
+	err = models.DB.Where("dir = ?", id).Delete(&models.Song{}).Error
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	// 删除列表
+	err = models.DB.Delete(&dir).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
@@ -107,16 +118,13 @@ func (a *App) CreateDir(formData string) Response {
 	}
 
 	for _, file := range fileList {
-		song := models.Song{
-			Title:  file.Name,
-			Artist: file.Artist,
-			Path:   file.Path, // 文件路径
-			Dir:    dir.ID,
-			Size:   file.Size, // 文件大小，单位 MB
-			Type:   file.Type, // 文件类型
-		}
+		err := CreateSong(file, dir.ID)
 
-		_ = models.DB.Create(&song).Error
+		if err != nil {
+			return NewResponse(50000, nil)
+		}
+		// 更新元信息
+		go a.client.fetchMetaData(file.Path)
 	}
 
 	return NewResponse(20000, nil)
@@ -140,7 +148,7 @@ func (a *App) ReSyncDir(id int) Response {
 
 	// 如果服务中没有则删除数据库中已有的歌曲
 	if len(serverFileList) == 0 {
-		err := models.DB.Delete(models.Song{}, "dir = ?", id).Error
+		err := models.DB.Delete(&models.Song{}, "dir = ?", id).Error
 		if err != nil {
 			return NewResponse(50000, nil)
 		}
@@ -170,20 +178,17 @@ func (a *App) ReSyncDir(id int) Response {
 					if err := tx.Save(&dbSong).Error; err != nil {
 						return err
 					}
+					go a.client.fetchMetaData(file.Path)
 				}
 			} else {
 				// 添加新的歌曲
-				newSong := models.Song{
-					Title:  file.Name,
-					Artist: file.Artist,
-					Path:   file.Path,
-					Dir:    id,
-					Size:   file.Size,
-					Type:   file.Type,
-				}
-				if err := tx.Create(&newSong).Error; err != nil {
+				err := CreateSong(file, id)
+
+				if err != nil {
 					return err
 				}
+
+				go a.client.fetchMetaData(file.Path)
 			}
 		}
 

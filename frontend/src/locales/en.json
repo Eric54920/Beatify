@@ -9,9 +9,9 @@
         "artists": "Artists",
         "albums": "Albums",
         "playlists": "Playlists",
-        "edit": "Edit",
+        "edit": "List Config",
         "delete": "Delete",
-        "sync": "Synchronize"
+        "sync": "List Sync"
     },
     "diolog": {
         "editPlaylists": "Edit Playlist",
@@ -59,7 +59,9 @@
         "album": "Album",
         "type": "Type",
         "size": "Size",
-        "time": "Time"
+        "time": "Time",
+        "viewDetail": "View Details",
+        "addToPlaylist": "Add To Playlist"
     },
     "common": {},
     "interface": {}

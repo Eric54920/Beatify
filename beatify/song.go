@@ -2,15 +2,34 @@ package beatify
 
 import (
 	"Beatify/models"
+	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dhowden/tag"
 )
+
+// CreateSong 创建一个Song记录
+func CreateSong(file FileInfo, dirId int) error {
+	song := models.Song{
+		Title:  file.Name,
+		Artist: file.Artist,
+		Path:   file.Path, // 文件路径
+		Dir:    dirId,
+		Size:   file.Size, // 文件大小，单位 MB
+		Type:   file.Type, // 文件类型
+	}
+
+	err := models.DB.Create(&song).Error
+	return err
+}
 
 // 根据目录ID获取歌曲列表
 func (a *App) GetSongs(dirId int, sort string) Response {
@@ -156,8 +175,10 @@ func (a *App) PlayPrev(sort string, id, mode, dirId int) Response {
 
 // 启动音频流端点
 func (a *App) StartServer() {
-	// 音乐流媒体端点
+	// 音乐流媒体
 	http.HandleFunc("/stream", a.streamMusicHandler)
+	// 专辑封面
+	http.HandleFunc("/cover", a.getCover)
 
 	log.Fatal(http.ListenAndServe(":34116", nil))
 }
@@ -174,6 +195,7 @@ func (a *App) streamMusicHandler(w http.ResponseWriter, r *http.Request) {
 
 	var song models.Song
 	if err := models.DB.First(&song, "id = ?", id).Error; err != nil {
+		http.Error(w, "歌曲不存在", http.StatusNotFound)
 		return
 	}
 
@@ -254,4 +276,81 @@ func (a *App) streamMusicHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+// serveDefaultCover 返回默认图片
+func serveDefaultCover(w http.ResponseWriter) {
+	defaultImagePath := "./frontend/src/assets/images/default_pic.png"
+	data, err := os.ReadFile(defaultImagePath)
+	if err != nil {
+		http.Error(w, "无法加载默认图片", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+// 根据 ID 返回图片
+func (a *App) getCover(w http.ResponseWriter, r *http.Request) {
+	// 设置跨域头部
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Range")
+
+	// 从 URL 查询参数中获取 id
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "无效参数", http.StatusBadRequest)
+		return
+	}
+
+	if id == "0" {
+		serveDefaultCover(w)
+		return
+	}
+
+	// 获取歌曲信息
+	var song models.Song
+	if err := models.DB.First(&song, "id = ?", id).Error; err != nil {
+		http.Error(w, "歌曲不存在", http.StatusNotFound)
+		return
+	}
+
+	// 获取数据流
+	resp, err := a.client.GetFileStream(song.Path, 0, 2_000_000, true)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("读取响应体异常", err)
+		return
+	}
+
+	// 读取元数据
+	reader := bytes.NewReader(data)
+	metaData, err := tag.ReadFrom(reader)
+	if err != nil || metaData.Picture() == nil {
+		serveDefaultCover(w)
+		return
+	}
+
+	// 获取封面图像数据
+	fdata := metaData.Picture().Data
+
+	// 设置正确的 Content-Type
+	contentType := metaData.Picture().MIMEType // 从元数据中获取 MIME 类型
+	if contentType == "" {
+		contentType = "image/jpeg" // 默认值
+	}
+
+	// 写入响应头和图像数据
+	w.Header().Set("Content-Type", contentType)
+	w.WriteHeader(http.StatusOK)
+	w.Write(fdata)
 }

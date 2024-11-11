@@ -14,7 +14,8 @@ export const useSharedStore = defineStore('shared', {
     progress: 0,  // 进度
     playMode: 1,  // 播放模式（列表循环）2: 单曲循环 3：随机
     volume: 0.3,  // 默认音量
-    sort: 'title ASC'  // 排序
+    sort: 'title ASC',  // 排序
+    coverImage: "http://localhost:34116/cover?id=0"  // 专辑封面
   }),
   actions: {
     setCurrentMusicId(val: number) {
