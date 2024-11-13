@@ -180,6 +180,19 @@ watch(() => store.currentMusicId, (id) => {
     store.coverImage = "http://localhost:34116/cover?id=" + id
 })
 
+watch(() => progressContainer.value, (e) => {
+    // 进度条调节
+    if (progressContainer.value) {
+        progressContainer.value!.addEventListener('mousedown', () => {
+            isDraggingProgress.value = true;
+        });
+
+        progressContainer.value!.addEventListener('click', (e) => {
+            updateProgress(e.clientX);
+        });
+    }
+})
+
 onMounted(() => {
     // 音量调节
     if (volumeContainer.value) {
@@ -189,17 +202,6 @@ onMounted(() => {
 
         volumeContainer.value!.addEventListener('click', (e) => {
             updateVolume(e.clientX);
-        });
-    }
-
-    // 进度条调节
-    if (progressContainer.value) {
-        progressContainer.value!.addEventListener('mousedown', () => {
-            isDraggingProgress.value = true;
-        });
-
-        progressContainer.value!.addEventListener('click', (e) => {
-            updateProgress(e.clientX);
         });
     }
 
