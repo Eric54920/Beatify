@@ -2,7 +2,10 @@
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { GetSongs } from '../../wailsjs/go/beatify/App'
+import { toTypedSchema } from '@vee-validate/zod';
+import { useForm } from 'vee-validate';
+import * as z from 'zod';
+import { GetSongs, GetSong, UpdateSong } from '../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -17,11 +20,24 @@ import {
     Info,
     Ellipsis,
     ListPlus,
-    Plus,
     ArrowUp,
     ArrowDown
 } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel
+} from '@/components/ui/form'
 import { useSharedStore } from '@/stores/useShareStore'
 import { Song } from '@/schema/schema'
 
@@ -31,6 +47,89 @@ const { t } = useI18n()
 const dir = ref(Number(route.query.dir));
 const sort = ref(store.sort);
 const songs = ref<Song[]>([])
+const songDetailFormFields = [
+    { name: "title", labelKey: "songInfo.title", type: "text" },
+    { name: "artist", labelKey: "songInfo.artist", type: "text" },
+    { name: "album", labelKey: "songInfo.album", type: "text" },
+    { name: "year", labelKey: "songInfo.year", type: "number" },
+    { name: "genre", labelKey: "songInfo.genre", type: "text" },
+    { name: "cover", labelKey: "songInfo.cover", type: "text" },
+]
+const isInfoDialogOpen = ref(false)
+const songDetail = ref<Song>()
+
+const songDetailFormSchema = toTypedSchema(z.object({
+    title: z.string().min(1),
+    artist: z.string().optional(),
+    album: z.string().optional(),
+    year: z.number().optional(),
+    genre: z.string().optional(),
+    cover: z.string().optional()
+  })
+);
+
+const { handleSubmit, setValues } = useForm({
+  validationSchema: songDetailFormSchema,
+});
+
+/**
+ * 保存歌曲详细信息
+ */ 
+const saveSongDetail = handleSubmit((values) => {
+    UpdateSong(songDetail.value!.id, JSON.stringify(values)).then((res: Record<string, any>) => {
+        switch (res.status) {
+        case 50001:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.saveSongError"),
+            })
+            break
+        case 50000:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryRecordError"),
+            })
+            break
+        case 40000:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.invalidForm"),
+            })
+            break
+        case 40004:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.RecordNotFound"),
+            })
+            break
+        case 20000:
+            // 重新获取歌曲列表
+            getSongs()
+            // 关闭表单
+            isInfoDialogOpen.value = false
+            break
+        }
+    })
+});
+
+/**
+ * 展示歌曲信息 
+ */
+const showDetail = (songId: number) => {
+    GetSong(songId).then((res: Record<string, any>) => {
+        if (res.status == 50000) {
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryMusicError"),
+            })
+            return
+        }
+        songDetail.value = res.data
+        // 给表单赋值
+        setValues(res.data)
+        isInfoDialogOpen.value = true
+    })
+}
 
 /**
  * 获取所有歌曲
@@ -160,7 +259,7 @@ onMounted(() => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent class="w-56">
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem @click="showDetail(song.id)">
                                 <Info class="mr-2 h-4 w-4" />
                                 <span>{{ t("songInfo.viewDetail") }}</span>
                             </DropdownMenuItem>
@@ -180,4 +279,52 @@ onMounted(() => {
             <div class="basis-1/12 text-stone-600">{{ formatSize(song.size) }} MB</div>
         </div>
     </ScrollArea>
+
+    <!-- 更新歌曲信息 -->
+    <Dialog v-model:open="isInfoDialogOpen">
+        <DialogContent class="sm:max-w-[700px]">
+            <DialogHeader>
+                <DialogTitle>{{ t("songInfo.musicDetails") }}</DialogTitle>
+            </DialogHeader>
+            <div class="flex">
+                <div class="w-80 pr-5 flex items-center">
+                    <div class="w-full">
+                        <div class="h-52 w-52 mx-auto mb-5 overflow-hidden rounded bg-white border">
+                            <img :src="songDetail!.cover" alt="" v-if="songDetail!.cover">
+                            <img :src="`http://localhost:34116/cover?id=${songDetail!.id}`" alt="" v-else>
+                        </div>
+                        <div class="mb-3">
+                            <p class="mb-1 text-base font-medium">{{ t("songInfo.path") }}</p>
+                            <p class="text-stone-500 text-xs">{{ songDetail!.path }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <p class="mb-1 text-base font-medium">{{ t("songInfo.type") }}</p>
+                            <p class="text-stone-500 text-xs">{{ songDetail!.type }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <p class="mb-1 text-base font-medium">{{ t("songInfo.size") }}</p>
+                            <p class="text-stone-500 text-xs">{{ formatSize(songDetail!.size) }} MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1">
+                    <form id="dialogForm" @submit="saveSongDetail">
+                        <template v-for="(field, index) in songDetailFormFields" :key="index">
+                            <FormField v-slot="{ componentField }" :name="field.name">
+                                <FormItem>
+                                    <FormLabel>{{ t(field.labelKey) }}</FormLabel>
+                                    <FormControl>
+                                        <Input :type="field.type" v-bind="componentField" />
+                                    </FormControl>
+                                </FormItem>
+                            </FormField>
+                        </template>
+                        
+                        <Button type="submit" class="mt-6 w-full">{{ t("diolog.saveChanges") }}</Button>
+                    </form>
+                </div>
+            </div>
+        </DialogContent>
+    </Dialog>
 </template>

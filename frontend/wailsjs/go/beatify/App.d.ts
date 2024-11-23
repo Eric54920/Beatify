@@ -10,6 +10,8 @@ export function DeleteDir(arg1:number):Promise<beatify.Response>;
 
 export function GetAllDirs():Promise<beatify.Response>;
 
+export function GetSong(arg1:number):Promise<beatify.Response>;
+
 export function GetSongs(arg1:number,arg2:string):Promise<beatify.Response>;
 
 export function IsExistConnection():Promise<beatify.Response>;
@@ -23,3 +25,5 @@ export function ReSyncDir(arg1:number):Promise<beatify.Response>;
 export function StartServer():Promise<void>;
 
 export function UpdateDir(arg1:number,arg2:string):Promise<beatify.Response>;
+
+export function UpdateSong(arg1:number,arg2:string):Promise<beatify.Response>;

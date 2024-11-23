@@ -47,6 +47,7 @@ type Song struct {
 	Dir    int    `gorm:"not null" json:"dir"`            // 目录
 	Time   int    `gorm:"not null;default:0" json:"time"` // 时长，默认为 0
 	Path   string `gorm:"not null;default:/" json:"path"` // 位置，默认为 "/"
+	Cover  string `gorm:"default null" json:"cover"`      // 封面
 
 	Model
 }

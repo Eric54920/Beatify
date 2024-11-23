@@ -3,6 +3,7 @@ package beatify
 import (
 	"Beatify/models"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/dhowden/tag"
+	"gorm.io/gorm"
 )
 
 // CreateSong 创建一个Song记录
@@ -29,6 +31,69 @@ func CreateSong(file FileInfo, dirId int) error {
 
 	err := models.DB.Create(&song).Error
 	return err
+}
+
+// 获取歌曲信息
+func (a *App) GetSong(id int) Response {
+	var song models.Song
+
+	if err := models.DB.First(&song, "id = ?", id).Error; err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	return NewResponse(20000, song)
+}
+
+// 更新歌曲信息
+func (a *App) UpdateSong(id int, formData string) Response {
+	var song models.Song
+	var err error
+
+	// 解析数据
+	if err = json.Unmarshal([]byte(formData), &song); err != nil {
+		return NewResponse(40000, nil)
+	}
+
+	// 找到原来的歌曲
+	var dbSong models.Song
+	err = models.DB.First(&dbSong, id).Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return NewResponse(40004, nil)
+	} else if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	if dbSong.Title != song.Title {
+		dbSong.Title = song.Title
+	}
+
+	if dbSong.Artist != song.Artist {
+		dbSong.Artist = song.Artist
+	}
+
+	if dbSong.Album != song.Album {
+		dbSong.Album = song.Album
+	}
+
+	if dbSong.Genre != song.Genre {
+		dbSong.Genre = song.Genre
+	}
+
+	if dbSong.Year != song.Year {
+		dbSong.Year = song.Year
+	}
+
+	if dbSong.Cover != song.Cover {
+		dbSong.Cover = song.Cover
+	}
+
+	// 保存
+	err = models.DB.Save(&dbSong).Error
+	if err != nil {
+		return NewResponse(50001, nil)
+	}
+
+	return NewResponse(20000, nil)
 }
 
 // 根据目录ID获取歌曲列表

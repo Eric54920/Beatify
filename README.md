@@ -13,8 +13,6 @@
 
 - **Network Protocol Support**:
   - **WebDAV**
-  - **SMB**
-  - **FTP**
   
   Stream your music directly from remote servers or network shares without any hassle.
 
@@ -25,7 +23,7 @@
 - **[Golang](https://golang.org/)**: The powerful backend engine for handling streaming and performance optimizations.
 - **[Wails](https://wails.io/)**: Used for cross-platform application development with a native feel.
 - **[Vue 3](https://vuejs.org/)**: A progressive JavaScript framework for building user interfaces.
-- **[ShadCN Vue](https://shadcn.dev/)**: Provides a modern design system and styling utilities to ensure a clean, customizable UI.
+- **[ShadCN Vue](https://www.shadcn-vue.com/)**: Provides a modern design system and styling utilities to ensure a clean, customizable UI.
 
 ## Installation
 
@@ -82,7 +80,7 @@ Contributions are welcome! If you have suggestions for new features, optimizatio
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for more information.
 
 ---
 

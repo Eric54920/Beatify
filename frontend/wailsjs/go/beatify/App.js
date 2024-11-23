@@ -18,6 +18,10 @@ export function GetAllDirs() {
   return window['go']['beatify']['App']['GetAllDirs']();
 }
 
+export function GetSong(arg1) {
+  return window['go']['beatify']['App']['GetSong'](arg1);
+}
+
 export function GetSongs(arg1, arg2) {
   return window['go']['beatify']['App']['GetSongs'](arg1, arg2);
 }
@@ -44,4 +48,8 @@ export function StartServer() {
 
 export function UpdateDir(arg1, arg2) {
   return window['go']['beatify']['App']['UpdateDir'](arg1, arg2);
+}
+
+export function UpdateSong(arg1, arg2) {
+  return window['go']['beatify']['App']['UpdateSong'](arg1, arg2);
 }

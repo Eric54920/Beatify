@@ -40,7 +40,9 @@
         "saveDirError": "保存播放列表时异常",
         "deleteDirError": "删除播放列表异常",
         "createDirError": "创建播放列表时发生异常",
-        "errorToPlay": "播放歌曲时发生一些异常"
+        "errorToPlay": "播放歌曲时发生一些异常",
+        "saveSongError": "保存歌曲信息时异常",
+        "songTitleRequire": "歌曲标题不能为空"
     },
     "configPanel": {
         "panelName": "添加一个配置",
@@ -57,11 +59,16 @@
         "title": "标题",
         "artist": "歌手",
         "album": "专辑",
-        "type": "类型",
+        "type": "格式",
         "size": "大小",
         "time": "时长",
         "viewDetail": "查看详细",
-        "addToPlaylist": "添加到播放列表"
+        "addToPlaylist": "添加到播放列表",
+        "musicDetails": "歌曲详情",
+        "year": "发行年份",
+        "genre": "类型",
+        "path": "文件路径",
+        "cover": "封面"
     },
     "common": {},
     "interface": {}
