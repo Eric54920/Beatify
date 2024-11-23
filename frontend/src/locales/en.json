@@ -40,7 +40,9 @@
         "saveDirError": "Exception when saving playlist",
         "deleteDirError": "Deleting playlist abnormality",
         "createDirError": "An exception occurred while creating a playlist",
-        "errorToPlay": "Something unusual happened while playing the song"
+        "errorToPlay": "Something unusual happened while playing the song",
+        "saveSongError": "Exception when saving song detail",
+        "songTitleRequire": "Song title is require"
     },
     "configPanel": {
         "panelName": "Add a configuration",
@@ -61,7 +63,12 @@
         "size": "Size",
         "time": "Time",
         "viewDetail": "View Details",
-        "addToPlaylist": "Add To Playlist"
+        "addToPlaylist": "Add To Playlist",
+        "musicDetails": "Music Details",
+        "year": "Year",
+        "genre": "Genre",
+        "path": "Path",
+        "cover": "Cover"
     },
     "common": {},
     "interface": {}
