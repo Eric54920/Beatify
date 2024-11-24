@@ -247,6 +247,7 @@ onMounted(() => {
             <div class="basis-1/12 flex justify-center">
                 <div class="h-10 w-10 overflow-hidden rounded bg-white">
                     <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusicId == song.id">
+                    <img :src="song.cover" alt="" v-else-if="song.cover">
                     <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
                 </div>
             </div>
