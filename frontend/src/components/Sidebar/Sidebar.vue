@@ -311,7 +311,7 @@ onMounted(() => {
               <ContextMenu>
                 <ContextMenuTrigger>
                   <Button variant="ghost" class="w-full justify-start font-normal overflow-ellipsis overflow-hidden hover:bg-red-500 hover:text-white">
-                    <ListMusic class="mr-2 h-4 w-4" />
+                    <ListMusic class="mr-2 h-4 w-4 shrink-0 overflow-hidden text-ellipsis whitespace-nowrap" />
                     {{ playlist.title }}
                   </Button>
                 </ContextMenuTrigger>
