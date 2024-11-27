@@ -70,6 +70,11 @@
         "path": "Path",
         "cover": "Cover"
     },
+    "historyList": {
+        "playingNext": "Playing Next",
+        "history": "History",
+        "clear": "Clear"
+    },
     "common": {},
     "interface": {}
 }

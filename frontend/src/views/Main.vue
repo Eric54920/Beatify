@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useSharedStore } from '@/stores/useShareStore'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import Control from '@/components/Control/Control.vue'
-import { useSharedStore } from '@/stores/useShareStore'
+import NextAndHistory from '@/components/NextAndHistory/NextAndHistory.vue'
 
 const store = useSharedStore()
 const route = useRoute();
@@ -26,12 +27,15 @@ watch(() => route.query, (query) => {
         <!-- 右侧 -->
         <div class="flex-1 flex flex-col bg-white border-l border-stone-300 h-screen">
             <!-- 上面 -->
-            <div class="flex flex-col bg-white border-b">
+            <div class="flex h-14 flex-col bg-white border-b z-10">
                 <Control class="h-14" />
             </div>
 
             <!-- 下面 -->
             <RouterView />
+
+            <!-- 待播和历史列表 -->
+            <NextAndHistory />
         </div>
     </div>
 </template>

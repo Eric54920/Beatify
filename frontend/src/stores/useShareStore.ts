@@ -15,7 +15,9 @@ export const useSharedStore = defineStore('shared', {
     playMode: 1,  // 播放模式（列表循环）2: 单曲循环 3：随机
     volume: 0.3,  // 默认音量
     sort: 'title ASC',  // 排序
-    coverImage: "http://localhost:34116/cover?id=0"  // 专辑封面
+    coverImage: "http://localhost:34116/cover?id=0",  // 专辑封面
+    isShowHistory: false,  // 是否打开待播和播放历史
+    isHistoryUpdated: false  // 是否已更新历史列表
   }),
   actions: {
     setCurrentMusicId(val: number) {
