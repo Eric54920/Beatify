@@ -37,6 +37,18 @@ const toggleListMusic = () => {
 }
 
 /**
+ * 设置需要播放的歌曲的URL
+ */ 
+const setToPlay = (id: number) => {
+    // 先暂停
+    audioPlayer.value!.pause()
+    audioUrl.value = "http://localhost:34116/stream?id=" + id
+    audioPlayer.value!.load()
+    // 设置专辑封面
+    store.coverImage = store.currentMusic?.cover? store.currentMusic?.cover: "http://localhost:34116/cover?id=" + id
+}
+
+/**
  * 切换播放模式 1: 列表循环 2: 单曲循环 3：随机 
  */
 const changeMode = (mode: string) => {
@@ -55,6 +67,13 @@ const changeMode = (mode: string) => {
             store.setPlayMode(1)  // 列表循环
         }
     }
+}
+
+/**
+ * 插播
+ */
+const insertPlay = (id: number) => {
+    setToPlay(id);
 }
 
 /**
@@ -181,13 +200,13 @@ window.addEventListener('mousemove', (e) => {
     }
 });
 
-watch(() => store.currentMusicId, (id) => {
-    // 先暂停
-    audioPlayer.value!.pause()
-    audioUrl.value = "http://localhost:34116/stream?id=" + id
-    audioPlayer.value!.load()
-    // 设置专辑封面
-    store.coverImage = "http://localhost:34116/cover?id=" + id
+
+watch(() => store.insertMusicId, (id: number) => {
+    insertPlay(id)
+})
+
+watch(() => store.currentMusicId, (id: number) => {
+    setToPlay(id);
 })
 
 watch(() => progressContainer.value, (e) => {

@@ -7,7 +7,7 @@ export const useSharedStore = defineStore('shared', {
     currentMusic: ref<Song>(),
     pageName: "Home", // 页面名称
     currentDirId: 0, // 当前播放的目录
-    currentMusicId: 0,  // 需要共享的属性
+    currentMusicId: 0,  // 当前播放的音乐
     isPlaying: false,  // 播放状态
     currentTime: 0,  // 当前播放时间
     duration: 0,  // 时长
@@ -17,7 +17,8 @@ export const useSharedStore = defineStore('shared', {
     sort: 'title ASC',  // 排序
     coverImage: "http://localhost:34116/cover?id=0",  // 专辑封面
     isShowHistory: false,  // 是否打开待播和播放历史
-    isHistoryUpdated: false  // 是否已更新历史列表
+    isHistoryUpdated: false,  // 是否已更新历史列表
+	insertMusicId: 0  // 插播音乐
   }),
   actions: {
     setCurrentMusicId(val: number) {

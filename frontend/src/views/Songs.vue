@@ -234,13 +234,13 @@ onMounted(() => {
             v-for="(song, i) in songs" :key="song.id" @dblclick="toPlay(song)">
             <div class="basis-1/12 flex justify-center">
                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white">
-                    <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusicId == song.id">
+                    <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
                     <img :src="song.cover" alt="" v-else-if="song.cover">
                     <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
                 </div>
             </div>
             <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap"
-                :class="{ 'text-red-500': store.currentMusicId == song.id }">{{ song.title }}</div>
+                :class="{ 'text-red-500': store.currentMusic?.id == song.id }">{{ song.title }}</div>
             <div class="basis-1/12 flex justify-center text-stone-600">
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>

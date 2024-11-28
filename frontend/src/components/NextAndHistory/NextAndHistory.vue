@@ -33,6 +33,14 @@ const getHistoryList = () => {
     store.isHistoryUpdated = false;
 };
 
+/**
+ * 插播
+ */ 
+const insertPlay = (song: Song) => {
+    store.insertMusicId = song.id;
+    store.setCurrentMusic(song)
+}
+
 // 监控历史列表是否更新
 watch(() => store.isHistoryUpdated, (isUpdated) => {
     if (isUpdated) {
@@ -64,9 +72,9 @@ onMounted(() => {
 
                 <TabsContent value="history" class="h-full">
                     <ScrollArea class="overflow-auto" style="height: calc(100% - 40px);">
-                        <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in storedHistoryList">
+                        <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in storedHistoryList" @dblclick="insertPlay(song)">
                             <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
-                                <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusicId == song.id">
+                                <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
                                 <img :src="song.cover" alt="" v-else-if="song.cover">
                                 <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
                             </div>
@@ -79,7 +87,7 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="py-2" v-if="historyListLength > 0">
-                            <Button class="w-full" @click="clearHistory">{{ t("historyList.clear") }}（{{ historyListLength }}）</Button>
+                            <Button class="w-full" @click="clearHistory">{{ t("historyList.clear") }}（{{ historyListLength }} / 50）</Button>
                         </div>
                     </ScrollArea>
                 </TabsContent>
