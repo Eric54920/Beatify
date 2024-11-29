@@ -6,6 +6,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
 import { GetSongs, GetSong, UpdateSong } from '../../wailsjs/go/beatify/App'
+import { formatSize, addToHistory } from '@/utils/utils';
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -151,26 +152,13 @@ const getSongs = () => {
 }
 
 /**
- * 格式化时长，将秒转为分
- */
-const formatTime = (time: number) => {
-    return `${time / 60 | 0}:${(time % 60).toString().padStart(2, '0')}`
-}
-
-/**
- * 格式化文件大小
- */
-const formatSize = (size: number) => {
-    return (size / 1024 / 1024).toFixed(1)
-}
-
-/**
  * 双击列表项去播放音乐
  */
 const toPlay = (song: Song) => {
     store.setCurrentMusicId(song.id)
     store.setCurrentDirId(dir.value)
     store.setCurrentMusic(song)
+    addToHistory(song)
 }
 
 /**
@@ -218,7 +206,7 @@ onMounted(() => {
     <Toaster />
 
     <ScrollArea class="h-full text-sm text-center">
-        <div class="sticky top-0 bg-white bg-opacity-50 backdrop-blur-lg z-10">
+        <div class="sticky top-0 bg-white bg-opacity-50 backdrop-blur-lg z-[2]">
             <div class="py-2 text-center font-semibold text-stone-700 text-sm">
                 {{ store.pageName }}
             </div>
@@ -245,13 +233,14 @@ onMounted(() => {
         <div class="flex flex-row px-2 h-12 items-center hover:bg-stone-100 transition even:bg-stone-50"
             v-for="(song, i) in songs" :key="song.id" @dblclick="toPlay(song)">
             <div class="basis-1/12 flex justify-center">
-                <div class="h-10 w-10 overflow-hidden rounded bg-white">
-                    <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusicId == song.id">
+                <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white">
+                    <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
+                    <img :src="song.cover" alt="" v-else-if="song.cover">
                     <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
                 </div>
             </div>
             <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap"
-                :class="{ 'text-red-500': store.currentMusicId == song.id }">{{ song.title }}</div>
+                :class="{ 'text-red-500': store.currentMusic?.id == song.id }">{{ song.title }}</div>
             <div class="basis-1/12 flex justify-center text-stone-600">
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>

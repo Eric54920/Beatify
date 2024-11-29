@@ -2,6 +2,7 @@
 import { watch, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n'
 import { useSharedStore } from '@/stores/useShareStore';
+import { addToHistory } from '@/utils/utils';
 import { PlayNext, PlayPrev } from '../../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
@@ -28,23 +29,28 @@ let isDraggingProgress = ref(false)
 let isDraggingVolume = ref(false)
 
 
-// 暂停、播放
-const playAndPause = () => {
-    if (store.isPlaying) {
-        audioPlayer.value!.pause()
-    } else {
-        audioPlayer.value!.play().catch((error) => {
-            // 如果 play() 被中断，捕获异常处理
-            toast({
-                title: t("notification.errorToPlay")
-            })
-        });
-    }
+/**
+ * 打开或关闭播放历史 
+ */
+const toggleListMusic = () => {    
+    store.isShowHistory = !store.isShowHistory
+}
+
+/**
+ * 设置需要播放的歌曲的URL
+ */ 
+const setToPlay = (id: number) => {
+    // 先暂停
+    audioPlayer.value!.pause()
+    audioUrl.value = "http://localhost:34116/stream?id=" + id
+    audioPlayer.value!.load()
+    // 设置专辑封面
+    store.coverImage = store.currentMusic?.cover? store.currentMusic?.cover: "http://localhost:34116/cover?id=" + id
 }
 
 /**
  * 切换播放模式 1: 列表循环 2: 单曲循环 3：随机 
- */ 
+ */
 const changeMode = (mode: string) => {
     if (mode == "random") {
         if (store.playMode == 3) {
@@ -64,8 +70,15 @@ const changeMode = (mode: string) => {
 }
 
 /**
+ * 插播
+ */
+const insertPlay = (id: number) => {
+    setToPlay(id);
+}
+
+/**
  * 下一首
- */ 
+ */
 const playNext = (mode: number) => {
     if (mode == 2) {  // 手动点击下一首，当模式为单曲循环时，要播下一首
         mode = 1
@@ -76,13 +89,14 @@ const playNext = (mode: number) => {
             store.setCurrentMusicId(nextSong["id"])
             // store.setCurrentDirId(nextSong["dir"])
             store.setCurrentMusic(nextSong)
+            addToHistory(nextSong)
         }
     })
 }
 
 /**
  * 上一首 
- */ 
+ */
 const playPrev = (mode: number) => {
     if (mode == 2) {  // 手动点击下一首，当模式为单曲循环时，要播下一首
         mode = 1
@@ -93,8 +107,23 @@ const playPrev = (mode: number) => {
             store.setCurrentMusicId(nextSong["id"])
             // store.setCurrentDirId(nextSong["dir"])
             store.setCurrentMusic(nextSong)
+            addToHistory(nextSong)
         }
     })
+}
+
+// 暂停、播放
+const playAndPause = () => {
+    if (store.isPlaying) {
+        audioPlayer.value!.pause()
+    } else {
+        audioPlayer.value!.play().catch((error) => {
+            // 如果 play() 被中断，捕获异常处理
+            toast({
+                title: t("notification.errorToPlay")
+            })
+        });
+    }
 }
 
 // 当音频加载完毕可以播放时
@@ -171,13 +200,13 @@ window.addEventListener('mousemove', (e) => {
     }
 });
 
-watch(() => store.currentMusicId, (id) => {
-    // 先暂停
-    audioPlayer.value!.pause()
-    audioUrl.value = "http://localhost:34116/stream?id=" + id
-    audioPlayer.value!.load()
-    // 设置专辑封面
-    store.coverImage = "http://localhost:34116/cover?id=" + id
+
+watch(() => store.insertMusicId, (id: number) => {
+    insertPlay(id)
+})
+
+watch(() => store.currentMusicId, (id: number) => {
+    setToPlay(id);
 })
 
 watch(() => progressContainer.value, (e) => {
@@ -292,7 +321,7 @@ onMounted(() => {
             <button class="basis-1/6 h-10 flex justify-center items-center text-stone-500 hover:bg-stone-100 hover:rounded" @click="maxVolume">
                 <Volume2 :size="18" />
             </button>
-            <button class="basis-1/6 h-10 flex justify-center items-center text-stone-500 hover:bg-stone-100 hover:rounded">
+            <button class="basis-1/6 h-10 flex justify-center items-center hover:bg-stone-100 hover:rounded" :class="[ store.isShowHistory ? 'text-red-500': 'text-stone-500' ]" @click="toggleListMusic">
                 <ListMusic :size="18" />
             </button>
         </div>
