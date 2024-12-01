@@ -109,6 +109,22 @@ onMounted(() => {
                             </div>
                         </div>
 
+                        <div v-if="store.playNextList">
+                            <p class="py-2 border-b">{{ t("historyList.playingNext") }}</p>
+                            <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in store.playNextList">
+                                <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
+                                    <img :src="song.cover" alt="" v-if="song.cover">
+                                    <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ song.title }}</p>
+                                    <p class="text-xs text-stone-600 overflow-hidden text-ellipsis whitespace-nowrap">
+                                        <span>{{ song.artist }}</span>  
+                                        <span v-if="song.album"> 一 {{ song.album }}</span>  
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </ScrollArea>
                 </TabsContent>
 

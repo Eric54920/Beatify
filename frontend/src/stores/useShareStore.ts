@@ -19,7 +19,8 @@ export const useSharedStore = defineStore('shared', {
     isShowHistory: false,  // 是否打开待播和播放历史
     isHistoryUpdated: false,  // 是否已更新历史列表
 	insertMusicId: 0,  // 插播音乐
-	manuallyAddedListUpdated: false  // 是否已更新手动添加列表
+	manuallyAddedListUpdated: false,  // 是否已更新手动添加列表
+	playNextList: ref<Song[]>([])  // 待播列表
   }),
   actions: {
     setCurrentMusicId(val: number) {

@@ -3,7 +3,7 @@ import { watch, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n'
 import { useSharedStore } from '@/stores/useShareStore';
 import { addToHistory, playFromManuallyAddedList } from '@/utils/utils';
-import { PlayNext, PlayPrev } from '../../../wailsjs/go/beatify/App'
+import { PlayNext, PlayPrev, GetPlayNextList } from '../../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import {
@@ -28,6 +28,24 @@ const volumeContainer = ref<HTMLDivElement>()
 let isDraggingProgress = ref(false)
 let isDraggingVolume = ref(false)
 
+
+/**
+ * 获取 待播列表 列表
+ */
+const getPlayNextList = () => {
+    GetPlayNextList(store.currentDirId, store.currentMusicId, store.sort).then((res: Record<string, any>) => {
+        switch (res.status) {
+        case 20000:
+            store.playNextList = res.data;
+            break
+        default:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryMusicError"),
+            })
+        }
+    })
+}
 
 /**
  * 打开或关闭播放历史 
@@ -213,6 +231,7 @@ watch(() => store.insertMusicId, (id: number) => {
 
 watch(() => store.currentMusicId, (id: number) => {
     setToPlay(id);
+    getPlayNextList();
 })
 
 watch(() => progressContainer.value, (e) => {

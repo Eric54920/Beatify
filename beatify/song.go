@@ -114,6 +114,64 @@ func (a *App) GetSongs(dirId int, sort string) Response {
 	return NewResponse(20000, songs)
 }
 
+// 获取 待播列表 列表，最多展示20个，如果不足20个，择取前面的补充
+func (a *App) GetPlayNextList(dirId, id int, sort string) Response {
+	var songs []models.Song
+	var newSongs []models.Song
+	var err error
+
+	// 当 dirId 为 0 时，直接查询所有记录并返回排序后的结果
+	if dirId == 0 {
+		err = models.DB.Order(sort).Find(&songs).Error
+	} else {
+		// 获取排序后的所有记录，并根据 dirId 筛选
+		err = models.DB.Order(sort).Where("dir = ?", dirId).Find(&songs).Error
+	}
+
+	// 处理查询错误
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	// 查找目标 id 的位置
+	var startIndex int
+	for i, song := range songs {
+		if song.ID == id {
+			startIndex = i + 1 // 从 id 后面开始
+			break
+		}
+	}
+
+	// 如果没有找到指定的 id，返回空
+	if startIndex == 0 {
+		return NewResponse(40004, nil)
+	}
+
+	// 获取后续的 20 条记录
+	if startIndex+20 > len(songs) {
+		// 如果不足 20 条，取剩余的所有记录
+		newSongs = songs[startIndex:]
+	} else {
+		// 否则取后面 20 条记录
+		newSongs = songs[startIndex : startIndex+20]
+	}
+
+	// 如果获取的记录不足 20 条，补充前面的记录
+	if len(newSongs) < 20 {
+		// 计算需要补充的数量
+		remaining := 20 - len(newSongs)
+		newSongs = append(newSongs, songs[0:remaining]...)
+	}
+
+	// 如果补充后的记录还是不足 20 条，返回空列表
+	if len(songs) == 0 {
+		songs = []models.Song{}
+	}
+
+	// 返回查询结果
+	return NewResponse(20000, newSongs)
+}
+
 // findNext 找到下一个
 func findNext(slice []int, target int) (int, bool) {
 	for i, v := range slice {
