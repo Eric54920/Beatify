@@ -51,6 +51,13 @@ export const insertPlay = (song: Song, store: ReturnType<typeof useSharedStore>)
 }
 
 /**
+ * 从历史记录列表播放歌曲 
+ */
+export const playFromHistoryList = (song: Song, store: ReturnType<typeof useSharedStore>) => {
+    insertPlay(song, store)
+}
+
+/**
  * 从手动添加的列表中播放歌曲，并将列表中之前的歌曲移除
  */ 
 export const playFromManuallyAddedList = (song: Song, store: ReturnType<typeof useSharedStore>) => {

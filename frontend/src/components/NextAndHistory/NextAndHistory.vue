@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Song } from '@/schema/schema'
-import { playFromManuallyAddedList, insertPlay } from '@/utils/utils'
+import { playFromManuallyAddedList, playFromHistoryList } from '@/utils/utils'
 
 const store = useSharedStore();
 const { t } = useI18n();
@@ -114,7 +114,7 @@ onMounted(() => {
 
                 <TabsContent value="history" class="h-full">
                     <ScrollArea class="overflow-auto" style="height: calc(100% - 40px);">
-                        <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in storedHistoryList" @dblclick="insertPlay(song, store)">
+                        <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in storedHistoryList" @dblclick="playFromHistoryList(song, store)">
                             <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
                                 <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
                                 <img :src="song.cover" alt="" v-else-if="song.cover">
