@@ -63,17 +63,19 @@
         "size": "Size",
         "time": "Time",
         "viewDetail": "View Details",
-        "addToPlaylist": "Add To Playlist",
         "musicDetails": "Music Details",
         "year": "Year",
         "genre": "Genre",
         "path": "Path",
-        "cover": "Cover"
+        "cover": "Cover",
+        "playNext": "Play Next",
+        "playLast": "Play Last"
     },
     "historyList": {
         "playingNext": "Playing Next",
         "history": "History",
-        "clear": "Clear"
+        "clear": "Clear",
+        "manuallyAdded": "Manually Added"
     },
     "common": {},
     "interface": {}

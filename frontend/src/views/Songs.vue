@@ -22,7 +22,9 @@ import {
     Ellipsis,
     ListPlus,
     ArrowUp,
-    ArrowDown
+    ArrowDown,
+    ListStart,
+    ListEnd
 } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -182,6 +184,22 @@ const sortChange = (sort: string) => {
     store.setSort(newSort)
 }
 
+/**
+ * 将歌曲添加到当前播放列表
+ */
+const addToPlayNext = (song: Song, pos: number) => {
+    const manuallyAddedList = JSON.parse(localStorage.getItem('manuallyAddedList') || '[]');
+
+    if (pos == 1) {
+        manuallyAddedList.unshift(song);
+    } else {
+        manuallyAddedList.push(song);
+    }
+
+    localStorage.setItem('manuallyAddedList', JSON.stringify(manuallyAddedList));
+    store.manuallyAddedListUpdated = true;
+}
+
 // 检测路由中参数的变化
 watch(() => route.query.dir, (newDir) => {
     // 重新获取所有歌曲
@@ -246,15 +264,19 @@ onMounted(() => {
                     <DropdownMenuTrigger as-child>
                         <Ellipsis class="mr-2 h-4 w-4 text-red-600" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent class="w-56">
+                    <DropdownMenuContent class="w-40">
                         <DropdownMenuGroup>
                             <DropdownMenuItem @click="showDetail(song.id)">
                                 <Info class="mr-2 h-4 w-4" />
                                 <span>{{ t("songInfo.viewDetail") }}</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <ListPlus class="mr-2 h-4 w-4" />
-                                <span>{{ t("songInfo.addToPlaylist") }}</span>
+                            <DropdownMenuItem @click="addToPlayNext(song, 1)">
+                                <ListStart class="mr-2 h-4 w-4" />
+                                <span>{{ t("songInfo.playNext") }}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="addToPlayNext(song, 2)">
+                                <ListEnd class="mr-2 h-4 w-4" />
+                                <span>{{ t("songInfo.playLast") }}</span>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                     </DropdownMenuContent>

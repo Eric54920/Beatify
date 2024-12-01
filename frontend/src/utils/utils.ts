@@ -41,3 +41,35 @@ export const addToHistory = (song: Song) => {
     // 更新状态
     store.isHistoryUpdated = true;
 };
+
+/**
+ * 插播
+ */ 
+export const insertPlay = (song: Song, store: ReturnType<typeof useSharedStore>) => {
+    store.insertMusicId = song.id;
+    store.setCurrentMusic(song)
+}
+
+/**
+ * 从手动添加的列表中播放歌曲，并将列表中之前的歌曲移除
+ */ 
+export const playFromManuallyAddedList = (song: Song, store: ReturnType<typeof useSharedStore>) => {
+    insertPlay(song, store);
+    addToHistory(song);
+
+    // 找到这首歌曲及之前的歌曲，并移除
+    let newManuallyAddedList: Song[] = [];
+    let songFound = false;
+
+    let manuallyAddedList = JSON.parse(localStorage.getItem('manuallyAddedList') || '[]');
+    for (const value of manuallyAddedList) {
+        if (songFound) {
+            newManuallyAddedList.push(value);
+        } else if (value.id === song.id) {
+            songFound = true;
+        }
+    }
+
+    localStorage.setItem('manuallyAddedList', JSON.stringify(newManuallyAddedList));
+    store.manuallyAddedListUpdated = true;
+}
