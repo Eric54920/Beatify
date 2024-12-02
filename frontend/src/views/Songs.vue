@@ -7,7 +7,7 @@ import { useForm } from 'vee-validate';
 import * as z from 'zod';
 import { GetSongs, GetSong, UpdateSong } from '../../wailsjs/go/beatify/App'
 import { BASE_URL } from '@/config/conf';
-import { formatSize, addToHistory } from '@/utils/utils';
+import { formatSize, playFromSongList } from '@/utils/utils';
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -154,16 +154,6 @@ const getSongs = () => {
 }
 
 /**
- * 双击列表项去播放音乐
- */
-const toPlay = (song: Song) => {
-    store.setCurrentMusicId(song.id)
-    store.setCurrentDirId(dir.value)
-    store.setCurrentMusic(song)
-    addToHistory(song)
-}
-
-/**
  * 切换列表排序方式
  */
 const sortChange = (sort: string) => {
@@ -249,7 +239,7 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-row px-2 h-12 items-center hover:bg-stone-100 transition even:bg-stone-50"
-            v-for="(song, i) in songs" :key="song.id" @dblclick="toPlay(song)">
+            v-for="(song, i) in songs" :key="song.id" @dblclick="playFromSongList(song, dir, store)">
             <div class="basis-1/12 flex justify-center">
                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white">
                     <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">

@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Song } from '@/schema/schema'
 import { BASE_URL } from '@/config/conf'
-import { playFromManuallyAddedList, playFromHistoryList } from '@/utils/utils'
+import { playFromManuallyAddedList, playFromHistoryList, playFromPlayingNextList } from '@/utils/utils'
 
 const store = useSharedStore();
 const { t } = useI18n();
@@ -112,7 +112,8 @@ onMounted(() => {
 
                         <div v-if="store.playNextList">
                             <p class="py-2 border-b">{{ t("historyList.playingNext") }}</p>
-                            <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in store.playNextList">
+                            <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in store.playNextList"
+                                @dblclick="playFromPlayingNextList(song, store)">
                                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
                                     <img :src="song.cover" alt="" v-if="song.cover">
                                     <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>

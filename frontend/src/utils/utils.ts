@@ -16,6 +16,23 @@ export const formatSize = (size: number) => {
 }
 
 /**
+ * 双击列表项去播放音乐
+ */
+export const toPlay = (song: Song, store: ReturnType<typeof useSharedStore>) => {
+    store.setCurrentMusicId(song.id)
+    store.setCurrentMusic(song)
+    addToHistory(song)
+}
+
+/**
+ * 从歌曲列表中播放
+*/
+export const playFromSongList = (song: Song, dir: number, store: ReturnType<typeof useSharedStore>) => {
+    store.setCurrentDirId(dir);
+    toPlay(song, store);
+}
+
+/**
  * 添加到历史记录，最多保存50个
  */
 export const addToHistory = (song: Song) => {
@@ -79,4 +96,11 @@ export const playFromManuallyAddedList = (song: Song, store: ReturnType<typeof u
 
     localStorage.setItem('manuallyAddedList', JSON.stringify(newManuallyAddedList));
     store.manuallyAddedListUpdated = true;
+}
+
+/**
+ * 从待播列表播放
+ */
+export const playFromPlayingNextList = (song: Song, store: ReturnType<typeof useSharedStore>) => {
+    toPlay(song, store);
 }
