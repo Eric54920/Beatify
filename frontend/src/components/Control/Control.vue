@@ -2,8 +2,9 @@
 import { watch, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n'
 import { useSharedStore } from '@/stores/useShareStore';
-import { addToHistory } from '@/utils/utils';
-import { PlayNext, PlayPrev } from '../../../wailsjs/go/beatify/App'
+import { BASE_URL } from '@/config/conf';
+import { addToHistory, playFromManuallyAddedList } from '@/utils/utils';
+import { PlayNext, PlayPrev, GetPlayNextList } from '../../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import {
@@ -30,6 +31,24 @@ let isDraggingVolume = ref(false)
 
 
 /**
+ * 获取 待播列表 列表
+ */
+const getPlayNextList = () => {
+    GetPlayNextList(store.currentDirId, store.currentMusicId, store.sort).then((res: Record<string, any>) => {
+        switch (res.status) {
+        case 20000:
+            store.playNextList = res.data;
+            break
+        default:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryMusicError"),
+            })
+        }
+    })
+}
+
+/**
  * 打开或关闭播放历史 
  */
 const toggleListMusic = () => {    
@@ -42,10 +61,17 @@ const toggleListMusic = () => {
 const setToPlay = (id: number) => {
     // 先暂停
     audioPlayer.value!.pause()
-    audioUrl.value = "http://localhost:34116/stream?id=" + id
+    audioUrl.value = `${BASE_URL}/stream?id=${id}`
     audioPlayer.value!.load()
     // 设置专辑封面
-    store.coverImage = store.currentMusic?.cover? store.currentMusic?.cover: "http://localhost:34116/cover?id=" + id
+    store.coverImage = store.currentMusic?.cover? store.currentMusic?.cover: `${BASE_URL}/cover?id=${id}`
+}
+
+/**
+ * 插播
+ */
+ const insertPlay = (id: number) => {
+    setToPlay(id);
 }
 
 /**
@@ -70,18 +96,17 @@ const changeMode = (mode: string) => {
 }
 
 /**
- * 插播
- */
-const insertPlay = (id: number) => {
-    setToPlay(id);
-}
-
-/**
  * 下一首
  */
 const playNext = (mode: number) => {
     if (mode == 2) {  // 手动点击下一首，当模式为单曲循环时，要播下一首
         mode = 1
+    }
+    let manuallyAddedList = JSON.parse(localStorage.getItem('manuallyAddedList') || '[]');
+    // 当手动添加列表中有歌曲时，从手动添加列表播放
+    if (manuallyAddedList.length > 0) {
+        playFromManuallyAddedList(manuallyAddedList[0], store);
+        return
     }
     PlayNext(store.sort, store.currentMusicId, mode, store.currentDirId).then((res: Record<string, any>) => {
         if (res.status == 20000) {
@@ -207,6 +232,7 @@ watch(() => store.insertMusicId, (id: number) => {
 
 watch(() => store.currentMusicId, (id: number) => {
     setToPlay(id);
+    getPlayNextList();
 })
 
 watch(() => progressContainer.value, (e) => {

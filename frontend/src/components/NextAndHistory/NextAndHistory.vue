@@ -11,11 +11,15 @@ import {
 } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Song } from '@/schema/schema'
+import { BASE_URL } from '@/config/conf'
+import { playFromManuallyAddedList, playFromHistoryList, playFromPlayingNextList } from '@/utils/utils'
 
 const store = useSharedStore();
 const { t } = useI18n();
 let storedHistoryList = ref<Song[]>([]);
 let historyListLength = computed(() => storedHistoryList.value.length);
+let manuallyAddedList = ref<Song[]>([]);
+let manuallyAddedListLength = computed(() => manuallyAddedList.value.length);
 
 /**
  * 清空播放历史 
@@ -34,11 +38,19 @@ const getHistoryList = () => {
 };
 
 /**
- * 插播
+ * 清空手动添加的列表 
  */ 
-const insertPlay = (song: Song) => {
-    store.insertMusicId = song.id;
-    store.setCurrentMusic(song)
+ const clearManuallyAddedList = () => {
+    localStorage.removeItem('manuallyAddedList');
+    getManuallyAddedList();
+}
+
+/**
+ * 获取手动添加的歌曲列表
+ */ 
+const getManuallyAddedList = () => {
+    manuallyAddedList.value = JSON.parse(localStorage.getItem('manuallyAddedList') || '[]');
+    store.manuallyAddedListUpdated = false;
 }
 
 // 监控历史列表是否更新
@@ -48,8 +60,16 @@ watch(() => store.isHistoryUpdated, (isUpdated) => {
     }
 })
 
+// 监控手动添加列表是否更新
+watch(() => store.manuallyAddedListUpdated, (isUpdated) => {
+    if (isUpdated) {
+        getManuallyAddedList()
+    }
+})
+
 onMounted(() => {
     getHistoryList();
+    getManuallyAddedList();
 });
 </script>
 
@@ -67,16 +87,56 @@ onMounted(() => {
                     </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="playingNext">
+                <TabsContent value="playingNext" class="h-full">
+                    <ScrollArea class="overflow-auto" style="height: calc(100% - 40px);">
+                        <div v-if="manuallyAddedListLength">
+                            <div class="flex justify-between items-center pb-2 border-b">
+                                <p>{{ t("historyList.manuallyAdded") }}（{{ manuallyAddedListLength }}）</p>
+                                <Button class="h-7 text-center text-red-500" variant="secondary" @click="clearManuallyAddedList()">{{ t("historyList.clear") }}</Button>
+                            </div>
+                            <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in manuallyAddedList"
+                                @dblclick="playFromManuallyAddedList(song, store)">
+                                <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
+                                    <img :src="song.cover" alt="" v-if="song.cover">
+                                    <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ song.title }}</p>
+                                    <p class="text-xs text-stone-600 overflow-hidden text-ellipsis whitespace-nowrap">
+                                        <span>{{ song.artist }}</span>  
+                                        <span v-if="song.album"> 一 {{ song.album }}</span>  
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="store.playNextList">
+                            <p class="py-2 border-b">{{ t("historyList.playingNext") }}</p>
+                            <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in store.playNextList"
+                                @dblclick="playFromPlayingNextList(song, store)">
+                                <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
+                                    <img :src="song.cover" alt="" v-if="song.cover">
+                                    <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ song.title }}</p>
+                                    <p class="text-xs text-stone-600 overflow-hidden text-ellipsis whitespace-nowrap">
+                                        <span>{{ song.artist }}</span>  
+                                        <span v-if="song.album"> 一 {{ song.album }}</span>  
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </ScrollArea>
                 </TabsContent>
 
                 <TabsContent value="history" class="h-full">
                     <ScrollArea class="overflow-auto" style="height: calc(100% - 40px);">
-                        <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in storedHistoryList" @dblclick="insertPlay(song)">
+                        <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in storedHistoryList" @dblclick="playFromHistoryList(song, store)">
                             <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
                                 <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
                                 <img :src="song.cover" alt="" v-else-if="song.cover">
-                                <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                                <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ song.title }}</p>

@@ -6,7 +6,8 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
 import { GetSongs, GetSong, UpdateSong } from '../../wailsjs/go/beatify/App'
-import { formatSize, addToHistory } from '@/utils/utils';
+import { BASE_URL } from '@/config/conf';
+import { formatSize, playFromSongList } from '@/utils/utils';
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -20,9 +21,10 @@ import {
 import {
     Info,
     Ellipsis,
-    ListPlus,
     ArrowUp,
-    ArrowDown
+    ArrowDown,
+    ListStart,
+    ListEnd
 } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -152,16 +154,6 @@ const getSongs = () => {
 }
 
 /**
- * 双击列表项去播放音乐
- */
-const toPlay = (song: Song) => {
-    store.setCurrentMusicId(song.id)
-    store.setCurrentDirId(dir.value)
-    store.setCurrentMusic(song)
-    addToHistory(song)
-}
-
-/**
  * 切换列表排序方式
  */
 const sortChange = (sort: string) => {
@@ -180,6 +172,22 @@ const sortChange = (sort: string) => {
             break;
     }
     store.setSort(newSort)
+}
+
+/**
+ * 将歌曲添加到当前播放列表
+ */
+const addToPlayNext = (song: Song, pos: number) => {
+    const manuallyAddedList = JSON.parse(localStorage.getItem('manuallyAddedList') || '[]');
+
+    if (pos == 1) {
+        manuallyAddedList.unshift(song);
+    } else {
+        manuallyAddedList.push(song);
+    }
+
+    localStorage.setItem('manuallyAddedList', JSON.stringify(manuallyAddedList));
+    store.manuallyAddedListUpdated = true;
 }
 
 // 检测路由中参数的变化
@@ -231,12 +239,12 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-row px-2 h-12 items-center hover:bg-stone-100 transition even:bg-stone-50"
-            v-for="(song, i) in songs" :key="song.id" @dblclick="toPlay(song)">
+            v-for="(song, i) in songs" :key="song.id" @dblclick="playFromSongList(song, dir, store)">
             <div class="basis-1/12 flex justify-center">
                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white">
                     <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
                     <img :src="song.cover" alt="" v-else-if="song.cover">
-                    <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                    <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
                 </div>
             </div>
             <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap"
@@ -246,15 +254,19 @@ onMounted(() => {
                     <DropdownMenuTrigger as-child>
                         <Ellipsis class="mr-2 h-4 w-4 text-red-600" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent class="w-56">
+                    <DropdownMenuContent class="w-40">
                         <DropdownMenuGroup>
                             <DropdownMenuItem @click="showDetail(song.id)">
                                 <Info class="mr-2 h-4 w-4" />
                                 <span>{{ t("songInfo.viewDetail") }}</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <ListPlus class="mr-2 h-4 w-4" />
-                                <span>{{ t("songInfo.addToPlaylist") }}</span>
+                            <DropdownMenuItem @click="addToPlayNext(song, 1)">
+                                <ListStart class="mr-2 h-4 w-4" />
+                                <span>{{ t("songInfo.playNext") }}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="addToPlayNext(song, 2)">
+                                <ListEnd class="mr-2 h-4 w-4" />
+                                <span>{{ t("songInfo.playLast") }}</span>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -280,7 +292,7 @@ onMounted(() => {
                     <div class="w-full">
                         <div class="h-52 w-52 mx-auto mb-5 overflow-hidden rounded bg-white border">
                             <img :src="songDetail!.cover" alt="" v-if="songDetail!.cover">
-                            <img :src="`http://localhost:34116/cover?id=${songDetail!.id}`" alt="" v-else>
+                            <img :src="`${BASE_URL}/cover?id=${songDetail!.id}`" alt="" v-else>
                         </div>
                         <div class="mb-3">
                             <p class="mb-1 text-base font-medium">{{ t("songInfo.path") }}</p>

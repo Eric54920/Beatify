@@ -63,17 +63,19 @@
         "size": "大小",
         "time": "时长",
         "viewDetail": "查看详细",
-        "addToPlaylist": "添加到播放列表",
         "musicDetails": "歌曲详情",
         "year": "发行年份",
         "genre": "类型",
         "path": "文件路径",
-        "cover": "封面"
+        "cover": "封面",
+        "playNext": "优先播放",
+        "playLast": "最后播放"
     },
     "historyList": {
         "playingNext": "正在播放",
         "history": "播放历史",
-        "clear": "清空"
+        "clear": "清空",
+        "manuallyAdded": "手动添加"
     },
     "common": {},
     "interface": {}
