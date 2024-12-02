@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Song } from '@/schema/schema'
+import { BASE_URL } from '@/config/conf'
 import { playFromManuallyAddedList, playFromHistoryList } from '@/utils/utils'
 
 const store = useSharedStore();
@@ -97,7 +98,7 @@ onMounted(() => {
                                 @dblclick="playFromManuallyAddedList(song, store)">
                                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
                                     <img :src="song.cover" alt="" v-if="song.cover">
-                                    <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                                    <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ song.title }}</p>
@@ -114,7 +115,7 @@ onMounted(() => {
                             <div class="flex py-2 items-center cursor-pointer hover:text-red-500" v-for="(song, i) in store.playNextList">
                                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
                                     <img :src="song.cover" alt="" v-if="song.cover">
-                                    <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                                    <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ song.title }}</p>
@@ -134,7 +135,7 @@ onMounted(() => {
                             <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white mr-2">
                                 <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
                                 <img :src="song.cover" alt="" v-else-if="song.cover">
-                                <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                                <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm overflow-hidden text-ellipsis whitespace-nowrap">{{ song.title }}</p>

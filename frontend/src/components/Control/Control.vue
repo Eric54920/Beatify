@@ -2,6 +2,7 @@
 import { watch, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n'
 import { useSharedStore } from '@/stores/useShareStore';
+import { BASE_URL } from '@/config/conf';
 import { addToHistory, playFromManuallyAddedList } from '@/utils/utils';
 import { PlayNext, PlayPrev, GetPlayNextList } from '../../../wailsjs/go/beatify/App'
 import Toaster from '@/components/ui/toast/Toaster.vue'
@@ -60,10 +61,10 @@ const toggleListMusic = () => {
 const setToPlay = (id: number) => {
     // 先暂停
     audioPlayer.value!.pause()
-    audioUrl.value = "http://localhost:34116/stream?id=" + id
+    audioUrl.value = `${BASE_URL}/stream?id=${id}`
     audioPlayer.value!.load()
     // 设置专辑封面
-    store.coverImage = store.currentMusic?.cover? store.currentMusic?.cover: "http://localhost:34116/cover?id=" + id
+    store.coverImage = store.currentMusic?.cover? store.currentMusic?.cover: `${BASE_URL}/cover?id=${id}`
 }
 
 /**

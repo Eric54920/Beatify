@@ -6,6 +6,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
 import { GetSongs, GetSong, UpdateSong } from '../../wailsjs/go/beatify/App'
+import { BASE_URL } from '@/config/conf';
 import { formatSize, addToHistory } from '@/utils/utils';
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { toast } from '@/components/ui/toast'
@@ -20,7 +21,6 @@ import {
 import {
     Info,
     Ellipsis,
-    ListPlus,
     ArrowUp,
     ArrowDown,
     ListStart,
@@ -254,7 +254,7 @@ onMounted(() => {
                 <div class="h-10 w-10 shrink-0 overflow-hidden rounded bg-white">
                     <img class="p-2" src="@/assets/images/icons8-audio-wave.gif" alt="" v-if="store.currentMusic?.id == song.id">
                     <img :src="song.cover" alt="" v-else-if="song.cover">
-                    <img :src="`http://localhost:34116/cover?id=${song.id}`" alt="" v-else>
+                    <img :src="`${BASE_URL}/cover?id=${song.id}`" alt="" v-else>
                 </div>
             </div>
             <div class="basis-3/12 text-left overflow-hidden overflow-ellipsis text-nowrap"
@@ -302,7 +302,7 @@ onMounted(() => {
                     <div class="w-full">
                         <div class="h-52 w-52 mx-auto mb-5 overflow-hidden rounded bg-white border">
                             <img :src="songDetail!.cover" alt="" v-if="songDetail!.cover">
-                            <img :src="`http://localhost:34116/cover?id=${songDetail!.id}`" alt="" v-else>
+                            <img :src="`${BASE_URL}/cover?id=${songDetail!.id}`" alt="" v-else>
                         </div>
                         <div class="mb-3">
                             <p class="mb-1 text-base font-medium">{{ t("songInfo.path") }}</p>
