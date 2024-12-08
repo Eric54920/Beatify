@@ -19,6 +19,18 @@ func (a *App) GetAllDirs() Response {
 	return NewResponse(20000, dirs)
 }
 
+// 根据id获取播放列表
+func (a *App) GetDir(id int) Response {
+	var dir models.Dir
+
+	err := models.DB.First(&dir, id).Error
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	return NewResponse(20000, dir)
+}
+
 // 更新播放列表
 func (a *App) UpdateDir(id int, formData string) Response {
 	var dir models.Dir
@@ -114,14 +126,14 @@ func (a *App) CreateDir(formData string) Response {
 	// 拉取歌曲列表
 	fileList, err := a.client.GetFileList(dir.ID)
 	if err != nil {
-		return NewResponse(50000, nil)
+		return NewResponse(50004, nil)
 	}
 
 	for _, file := range fileList {
 		err := CreateSong(file, dir.ID)
 
 		if err != nil {
-			return NewResponse(50000, nil)
+			return NewResponse(50005, nil)
 		}
 		// 更新元信息
 		go a.client.fetchMetaData(file.Path)
