@@ -1,3 +1,9 @@
+export interface Playlist {
+    id: number,
+    title: string,
+    url: string
+}
+
 export interface Song {
     id: number,
     title: string,

@@ -18,6 +18,10 @@ export function GetAllDirs() {
   return window['go']['beatify']['App']['GetAllDirs']();
 }
 
+export function GetDir(arg1) {
+  return window['go']['beatify']['App']['GetDir'](arg1);
+}
+
 export function GetPlayNextList(arg1, arg2, arg3) {
   return window['go']['beatify']['App']['GetPlayNextList'](arg1, arg2, arg3);
 }
