@@ -22,7 +22,7 @@ watch(() => route.query, (query) => {
 <template>
     <div class="flex h-screen">
         <!-- 左侧 -->
-        <Sidebar class="min-w-52 bg-stone-100" />
+        <Sidebar class="bg-stone-100" />
 
         <!-- 右侧 -->
         <div class="flex-1 flex flex-col bg-white border-l border-stone-300 h-screen">

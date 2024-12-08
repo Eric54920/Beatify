@@ -268,10 +268,10 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="h-full flex-col justify-between bg-stone-100">
+    <div class="w-52 h-full flex-col justify-between bg-stone-100">
         <!-- 头部 -->
         <div class="h-14 p-2 px-3">
-            <div class="relative w-full max-w-sm items-center">
+            <div class="relative w-full items-center">
                 <Input id="search" type="text" :placeholder='`${t("menu.search")}`' class="pl-10" />
                 <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
                     <Search class="size-6 text-muted-foreground" />
@@ -312,7 +312,7 @@ onMounted(() => {
                         <div v-for="(playlist, i) in playlists" :key="`${playlist}-${i}`" 
                             class="flex justify-between items-center hover:bg-stone-200 hover:text-stone-900 cursor-pointer p-2 rounded">
                             <RouterLink :to="`/main/songs?dir=${playlist.id}&pageName=${playlist.title}`" class="flex-1 ">
-                                <div class="w-full text-sm text-stone-600 ">{{ playlist.title }}</div>
+                                <div class="w-full text-sm text-stone-600">{{ playlist.title }}</div>
                             </RouterLink>
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
