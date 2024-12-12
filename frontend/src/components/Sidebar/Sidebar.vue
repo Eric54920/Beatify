@@ -1,6 +1,7 @@
 <script setup lang=ts>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import i18n from '@/i18n'
 import { GetAllDirs, GetDir, DeleteDir, UpdateDir, CreateDir, ReSyncDir } from '../../../wailsjs/go/beatify/App'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -17,6 +18,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem
 } from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Toaster from '@/components/ui/toast/Toaster.vue'
@@ -43,7 +53,9 @@ import {
     Ellipsis,
     FolderSync,
     Bolt,
-    Trash2
+    Trash2,
+    Server,
+    Languages
 } from 'lucide-vue-next'
 import { Playlist } from '@/schema/schema'
 
@@ -57,6 +69,11 @@ const dirFormFields = [
     { name: "title", labelKey: "diolog.title", type: "text" },
     { name: "url", labelKey: "diolog.url", type: "text" }
 ]
+const language = [
+    {"title": "English", "key": "en"},
+    {"title": "简体中文", "key": "zh"}
+]
+const lang = ref("en")
 
 const playlistFormSchema = toTypedSchema(z.object({
     title: z.string().min(2),
@@ -262,8 +279,21 @@ const deleteDir = (id: number) => {
     })
 }
 
+/**
+ * 设置语言
+ */ 
+const setUserLanguage = (lang: string) => {
+  localStorage.setItem('user-lang', lang); // 存储到 localStorage
+  i18n.global.locale = lang;
+}
+
+watch(() => lang.value, (value) => {
+    setUserLanguage(value)
+})
+
 onMounted(() => {
     getPlaylist()
+    lang.value = localStorage.getItem('user-lang') || "en"
 })
 </script>
 
@@ -341,9 +371,38 @@ onMounted(() => {
 
         <!-- 底部 -->
         <div class="h-14 p-2 px-3">
-            <Button variant="ghost" size="sm" class="w-full flex items-center justify-start p-2 hover:bg-red-500 hover:text-white">
-                <Settings class="h-4 w-4 mr-2" /> <span>{{ t("menu.settings") }}</span>
-            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                    <Button variant="ghost" size="sm" class="w-full flex items-center justify-start p-2 hover:bg-red-500 hover:text-white">
+                        <Settings class="h-4 w-4 mr-2" /> <span>{{ t("menu.settings") }}</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent class="w-40">
+                    <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                            <Server class="mr-2 h-4 w-4" />
+                            <span>{{ t("menu.conSetting") }}</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                                <Languages class="mr-4 h-4 w-4" />
+                                <span>{{ t("menu.langSetting") }}</span>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                                <DropdownMenuSubContent>
+                                    <DropdownMenuLabel>{{ t("menu.selectLang") }}</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuRadioGroup v-model="lang">
+                                        <DropdownMenuRadioItem :value="`${item.key}`" v-for="(item, index) in language">
+                                        {{ item.title }}
+                                        </DropdownMenuRadioItem>
+                                    </DropdownMenuRadioGroup>
+                                </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                    </DropdownMenuGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
     </div>
 

@@ -12,7 +12,10 @@
         "edit": "Config",
         "delete": "Delete",
         "sync": "Sync",
-        "settings": "Settings"
+        "settings": "Settings",
+        "langSetting": "Language",
+        "selectLang": "Select Language",
+        "conSetting": "Connection"
     },
     "diolog": {
         "editPlaylists": "Edit Playlist",

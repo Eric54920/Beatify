@@ -8,9 +8,9 @@ import zh from '@/locales/zh.json';
 type MessageSchema = typeof en;
 
 // 创建 i18n 实例
-const i18n = createI18n<[MessageSchema], 'en' | 'zh'>({
+const i18n = createI18n<[MessageSchema], string>({
   legacy: false, // 使用 Composition API
-  locale: 'en',  // 默认语言
+  locale: localStorage.getItem('user-lang') || 'en',  // 默认语言
   fallbackLocale: 'en', // 回退语言
   globalInjection: true, // 全局模式，允许使用 $t
   messages: {

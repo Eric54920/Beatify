@@ -12,7 +12,10 @@
         "edit": "编辑",
         "delete": "删除",
         "sync": "同步",
-        "settings": "设置"
+        "settings": "设置",
+        "langSetting": "语言设置",
+        "selectLang": "选择语言",
+        "conSetting": "连接设置"
     },
     "diolog": {
         "editPlaylists": "编辑播放列表",
