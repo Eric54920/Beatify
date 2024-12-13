@@ -49,10 +49,12 @@
         "createDirError": "创建播放列表时发生异常",
         "errorToPlay": "播放歌曲时发生一些异常",
         "saveSongError": "保存歌曲信息时异常",
-        "songTitleRequire": "歌曲标题不能为空"
+        "songTitleRequire": "歌曲标题不能为空",
+        "updateRecordError": "更新记录时异常"
     },
     "configPanel": {
-        "panelName": "添加一个配置",
+        "panelName": "添加一个连接配置",
+        "editConn": "编辑连接",
         "panelDesc": "添加配置后即可开始听音乐",
         "title": "标题",
         "protocol": "协议",

@@ -2,7 +2,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import i18n from '@/i18n'
-import { GetAllDirs, GetDir, DeleteDir, UpdateDir, CreateDir, ReSyncDir } from '../../../wailsjs/go/beatify/App'
+import { GetAllDirs, GetDir, DeleteDir, UpdateDir, CreateDir, ReSyncDir, GetAllConnections, UpdateConnection } from 'wailsjs/go/beatify/App'
+import { WindowReload } from 'wailsjs/runtime/runtime'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -44,6 +45,14 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
     Music2,
     Search,
     ChevronsUpDown,
@@ -74,6 +83,8 @@ const language = [
     {"title": "简体中文", "key": "zh"}
 ]
 const lang = ref("en")
+const isConnectionSettingDialogOpen = ref(false); // 设置面板
+const connectionId = ref();
 
 const playlistFormSchema = toTypedSchema(z.object({
     title: z.string().min(2),
@@ -287,6 +298,91 @@ const setUserLanguage = (lang: string) => {
   i18n.global.locale = lang;
 }
 
+const connectionFormFields = [
+    { name: "title", labelKey: "configPanel.title", type: "text" },
+    { name: "protocol", labelKey: "configPanel.protocol", type: "text" },
+    { name: "address", labelKey: "configPanel.address", type: "text" },
+    { name: "username", labelKey: "configPanel.username", type: "text" },
+    { name: "password", labelKey: "configPanel.password", type: "text" },
+]
+
+const ConnectionFormSchema = toTypedSchema(z.object({
+    title: z.string().min(1),
+    protocol: z.string().min(1),
+    address: z.string(),
+    username: z.string(),
+    password: z.string()
+}))
+
+const GeneralSettingsForm = useForm({
+    validationSchema: ConnectionFormSchema,
+})
+
+/**
+ * 打开连接设置面板
+ */ 
+const openSettingPanel = () => {
+    GetAllConnections().then((res: Record<string, any>) => {
+        if (res.status == 50000) {
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryRecordError"),
+            })
+            return
+        }
+
+        if (!res.data) {
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.RecordNotFound"),
+            })
+            return
+        }
+        let connectionData = res.data[0];
+        GeneralSettingsForm.setValues(connectionData);
+        connectionId.value = connectionData.id;
+    })
+
+    isConnectionSettingDialogOpen.value = true;
+}
+
+/**
+ * 更新连接配置
+ */ 
+const updateConnectionSetting = GeneralSettingsForm.handleSubmit((values) => {
+    UpdateConnection(connectionId.value, JSON.stringify(values)).then((res: Record<string, any>) => {
+        switch (res.status) {
+        case 40000:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.invalidForm"),
+            })
+            break
+        case 40004:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.RecordNotFound"),
+            })
+            break
+        case 50000:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryRecordError"),
+            })
+            break
+        case 50001:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.updateRecordError"),
+            })
+            break
+        case 20000:
+            WindowReload();
+        }
+        
+    })
+})
+
 watch(() => lang.value, (value) => {
     setUserLanguage(value)
 })
@@ -381,7 +477,7 @@ onMounted(() => {
                     <DropdownMenuGroup>
                         <DropdownMenuItem>
                             <Server class="mr-2 h-4 w-4" />
-                            <span>{{ t("menu.conSetting") }}</span>
+                            <span @click="openSettingPanel">{{ t("menu.conSetting") }}</span>
                         </DropdownMenuItem>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
@@ -451,6 +547,47 @@ onMounted(() => {
                 
                 <Button type="submit" class="mt-6 w-full">{{ t("diolog.save") }}</Button>
             </form>
+        </DialogContent>
+    </Dialog>
+
+    <!-- 连接设置 -->
+    <Dialog v-model:open="isConnectionSettingDialogOpen">
+        <DialogContent class="w-[350px]">
+            <DialogHeader>
+                <DialogTitle>{{ t("configPanel.editConn") }}</DialogTitle>
+            </DialogHeader>
+
+            <form id="connectionForm" @submit="updateConnectionSetting" class="space-y-2">
+                <template v-for="(field, index) in connectionFormFields" :key="index">
+                    <FormField v-slot="{ componentField }" name="protocol" v-if="field.name == 'protocol'">
+                        <FormItem>
+                            <FormLabel>{{ t("configPanel.protocol") }}</FormLabel>
+                            <Select v-bind="componentField">
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue :placeholder='`${ t("configPanel.pleaseChooseProtocol") }`' />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value="WebDAV">WebDAV</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </FormItem>
+                    </FormField>
+                    <FormField v-slot="{ componentField }" :name="field.name" v-else>
+                        <FormItem>
+                            <FormLabel>{{ t(field.labelKey) }}</FormLabel>
+                            <FormControl>
+                                <Input :type="field.type" v-bind="componentField" />
+                            </FormControl>
+                        </FormItem>
+                    </FormField>
+                </template>
+                <Button type="submit" class="mt-6 w-full">{{ t("diolog.saveChanges") }}</Button>
+            </form>
+
         </DialogContent>
     </Dialog>
 </template>
