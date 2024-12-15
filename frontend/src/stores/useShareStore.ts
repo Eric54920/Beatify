@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { BASE_URL } from '@/config/conf'
 import { Song } from '@/schema/schema'
+import { lang, setUserLanguage } from '@/i18n'
 
 export const useSharedStore = defineStore('shared', {
   state: () => ({
@@ -19,9 +20,10 @@ export const useSharedStore = defineStore('shared', {
     coverImage: `${BASE_URL}/cover?id=0`,   // 专辑封面
     isShowHistory: false,                   // 是否打开待播和播放历史
     isHistoryUpdated: false,                // 是否已更新历史列表
-	insertMusicId: 0,                       // 插播音乐
-	manuallyAddedListUpdated: false,        // 是否已更新手动添加列表
-	playNextList: ref<Song[]>([])           // 待播列表
+    insertMusicId: 0,                       // 插播音乐
+    manuallyAddedListUpdated: false,        // 是否已更新手动添加列表
+    playNextList: ref<Song[]>([]),          // 待播列表
+    lang: lang                              // 语言
   }),
   actions: {
     setCurrentMusicId(val: number) {
@@ -56,6 +58,10 @@ export const useSharedStore = defineStore('shared', {
     },
     setSort(val: string) {
       this.sort = val
+    },
+    setLanguage(val: string) {
+      this.lang = val;
+      setUserLanguage(val)
     }
   }
 })
