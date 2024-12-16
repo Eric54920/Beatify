@@ -59,9 +59,9 @@
         "setLangSuccDesc": "Restart is required to take effect"
     },
     "configPanel": {
-        "panelName": "Add a connection configuration",
+        "panelName": "Connect to server",
         "editConn": "Edit Connection",
-        "panelDesc": "After adding the configuration, you can start listening to music",
+        "panelDesc": "After connect to server, you can start listening to music.",
         "title": "Title",
         "protocol": "Protocol",
         "pleaseChooseProtocol": "Please select a protocol",

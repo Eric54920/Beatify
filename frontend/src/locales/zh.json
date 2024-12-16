@@ -59,9 +59,9 @@
         "setLangSuccDesc": "需要重启才能生效"
     },
     "configPanel": {
-        "panelName": "添加一个连接配置",
+        "panelName": "连接到服务器",
         "editConn": "编辑连接",
-        "panelDesc": "添加配置后即可开始听音乐",
+        "panelDesc": "连接成功后即可开始听音乐",
         "title": "标题",
         "protocol": "协议",
         "pleaseChooseProtocol": "请选择一个协议",

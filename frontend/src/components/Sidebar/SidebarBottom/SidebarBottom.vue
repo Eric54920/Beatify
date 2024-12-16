@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { language } from '@/i18n'
 import { useSharedStore } from '@/stores/useShareStore'
 import { ConnectionFormSchema } from "@/schema/schema"
+import { connectionFormFields } from "@/constants/fields"
 import { WindowReload } from 'wailsjs/runtime/runtime'
 import { GetAllConnections, UpdateConnection } from 'wailsjs/go/beatify/App'
 import { Input } from '@/components/ui/input'
@@ -57,13 +58,6 @@ const lang = ref("en")
 const store = useSharedStore();
 const isConnectionSettingDialogOpen = ref(false); // 设置面板
 const connectionId = ref();
-const connectionFormFields = [
-    { name: "title", labelKey: "configPanel.title", type: "text" },
-    { name: "protocol", labelKey: "configPanel.protocol", type: "text" },
-    { name: "address", labelKey: "configPanel.address", type: "text" },
-    { name: "username", labelKey: "configPanel.username", type: "text" },
-    { name: "password", labelKey: "configPanel.password", type: "text" }
-]
 const ConnSettingsForm = useForm({
     validationSchema: ConnectionFormSchema,
 })
