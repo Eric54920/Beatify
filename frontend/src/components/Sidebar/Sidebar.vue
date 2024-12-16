@@ -35,6 +35,17 @@ import {
     DialogTitle
 } from '@/components/ui/dialog'
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import {
     Music2,
     Search,
     ChevronsUpDown,
@@ -319,25 +330,41 @@ onMounted(() => {
                                 class="flex-1 ">
                                 <div class="w-full text-sm text-stone-600">{{ playlist.title }}</div>
                             </RouterLink>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <Ellipsis class="h-4 w-4" />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem @click="reSyncPlaylist(playlist.id)">
-                                        <FolderSync class="mr-2 h-4 w-4" />
-                                        {{ t("menu.sync") }}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem @click="editPlaylist(playlist.id)">
-                                        <Bolt class="mr-2 h-4 w-4" />
-                                        {{ t("menu.edit") }}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem @click="deletePlaylist(playlist.id)">
-                                        <Trash2 class="mr-2 h-4 w-4" />
-                                        {{ t("menu.delete") }}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <AlertDialog>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger>
+                                        <Ellipsis class="h-4 w-4" />
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem @click="reSyncPlaylist(playlist.id)">
+                                            <FolderSync class="mr-2 h-4 w-4" />
+                                            {{ t("menu.sync") }}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="editPlaylist(playlist.id)">
+                                            <Bolt class="mr-2 h-4 w-4" />
+                                            {{ t("menu.edit") }}
+                                        </DropdownMenuItem>
+                                        <AlertDialogTrigger as-child>
+                                            <DropdownMenuItem>
+                                                <Trash2 class="mr-2 h-4 w-4" />
+                                                {{ t("menu.delete") }}
+                                            </DropdownMenuItem>
+                                        </AlertDialogTrigger>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>{{ t("diolog.deleteConfirm") }}</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                        {{ t("diolog.deleteConfirmDesc") }}
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>{{ t("diolog.cancel") }}</AlertDialogCancel>
+                                        <AlertDialogAction @click="deletePlaylist(playlist.id)">{{ t("diolog.continue") }}</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     </div>
                 </CollapsibleContent>

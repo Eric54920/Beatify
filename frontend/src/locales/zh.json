@@ -25,7 +25,11 @@
         "playlistName": "播放列表名称",
         "playlistUrl": "播放列表目录",
         "save": "保存",
-        "saveChanges": " 保存更改"
+        "saveChanges": " 保存更改",
+        "deleteConfirm": "确定要删除这个播放列表吗？",
+        "deleteConfirmDesc": "删除之后依然可以通过创建新的播放列表同步服务器上的歌曲",
+        "cancel": "取消",
+        "continue": "继续"
     },
     "notification": {
         "errorTitle": "发生了一些异常",
@@ -85,7 +89,5 @@
         "history": "播放历史",
         "clear": "清空",
         "manuallyAdded": "手动添加"
-    },
-    "common": {},
-    "interface": {}
+    }
 }

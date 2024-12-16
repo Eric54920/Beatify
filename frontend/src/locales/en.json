@@ -25,7 +25,11 @@
         "playlistName": "playlist name",
         "playlistUrl": "playlist url",
         "save": "Save",
-        "saveChanges": " Save changes"
+        "saveChanges": " Save changes",
+        "deleteConfirm": "Are you sure you want to delete this playlist?",
+        "deleteConfirmDesc": "After deleting, you can still sync the songs on the server by creating a new playlist.",
+        "cancel": "Cancel",
+        "continue": "Continue"
     },
     "notification": {
         "errorTitle": "Something went wrong.",
@@ -85,7 +89,5 @@
         "history": "History",
         "clear": "Clear",
         "manuallyAdded": "Manually Added"
-    },
-    "common": {},
-    "interface": {}
+    }
 }
