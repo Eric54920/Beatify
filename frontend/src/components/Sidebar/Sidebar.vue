@@ -1,5 +1,6 @@
 <script setup lang=ts>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { useI18n } from 'vue-i18n'
 import { Playlist } from '@/schema/schema'
@@ -58,6 +59,7 @@ import {
 import SidebarBottom from '@/components/Sidebar/SidebarBottom/SidebarBottom.vue'
 
 const { t } = useI18n()
+const router = useRouter()
 const playlists = ref<Playlist[]>([])
 const isPlaylistsOpen = ref(false); // 是否展开播放列表
 const isPlaylistAddDialogOpen = ref(false); // 新增表单
@@ -267,7 +269,11 @@ const deletePlaylist = (id: number) => {
 }
 
 onMounted(() => {
-    getPlaylist()
+    if (router.currentRoute.value.path === "/main") {
+        router.push("/main/songs?dir=0");
+    }
+
+    getPlaylist()    
 })
 </script>
 
