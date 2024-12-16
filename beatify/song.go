@@ -114,6 +114,19 @@ func (a *App) GetSongs(dirId int, sort string) Response {
 	return NewResponse(20000, songs)
 }
 
+// 搜索歌曲
+func (a *App) SearchSongs(sort, searchContent string) Response {
+	var songs []models.Song
+
+	content := fmt.Sprintf("%%%s%%", searchContent)
+	err := models.DB.Order(sort).Where("title like ? or artist like ? or album like ?", content, content, content).Find(&songs).Error
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	return NewResponse(20000, songs)
+}
+
 // 获取 待播列表 列表，最多展示20个，如果不足20个，择取前面的补充
 func (a *App) GetPlayNextList(dirId, id int, sort string) Response {
 	var songs []models.Song

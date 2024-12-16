@@ -23,7 +23,8 @@ export const useSharedStore = defineStore('shared', {
     insertMusicId: 0,                       // 插播音乐
     manuallyAddedListUpdated: false,        // 是否已更新手动添加列表
     playNextList: ref<Song[]>([]),          // 待播列表
-    lang: lang                              // 语言
+    lang: lang,                             // 语言
+    searchContent: ""                       // 搜索内容
   }),
   actions: {
     setCurrentMusicId(val: number) {
@@ -62,6 +63,9 @@ export const useSharedStore = defineStore('shared', {
     setLanguage(val: string) {
       this.lang = val;
       setUserLanguage(val)
+    },
+    setSearchContent(val: string) {
+      this.searchContent = val;
     }
   }
 })

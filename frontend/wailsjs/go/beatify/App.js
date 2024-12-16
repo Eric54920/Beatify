@@ -54,6 +54,10 @@ export function ReSyncDir(arg1) {
   return window['go']['beatify']['App']['ReSyncDir'](arg1);
 }
 
+export function SearchSongs(arg1, arg2) {
+  return window['go']['beatify']['App']['SearchSongs'](arg1, arg2);
+}
+
 export function StartServer() {
   return window['go']['beatify']['App']['StartServer']();
 }

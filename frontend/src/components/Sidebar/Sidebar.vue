@@ -1,8 +1,9 @@
 <script setup lang=ts>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { useI18n } from 'vue-i18n'
+import { useSharedStore } from "@/stores/useShareStore"
 import { Playlist } from '@/schema/schema'
 import { playlistFormSchema } from "@/schema/schema"
 import { playlistFormFields } from "@/constants/fields"
@@ -61,6 +62,8 @@ import SidebarBottom from '@/components/Sidebar/SidebarBottom/SidebarBottom.vue'
 
 const { t } = useI18n()
 const router = useRouter()
+const store = useSharedStore()
+let searchContent = ref("")
 const playlists = ref<Playlist[]>([])
 const isPlaylistsOpen = ref(false); // 是否展开播放列表
 const isPlaylistAddDialogOpen = ref(false); // 新增表单
@@ -265,6 +268,10 @@ const deletePlaylist = (id: number) => {
     })
 }
 
+watch(() => searchContent.value, (value) => {
+    store.setSearchContent(value)
+})
+
 onMounted(() => {
     if (router.currentRoute.value.path === "/main") {
         router.push("/main/songs?dir=0");
@@ -279,7 +286,7 @@ onMounted(() => {
         <!-- 头部 -->
         <div class="h-14 p-2 px-3">
             <div class="relative w-full items-center">
-                <Input id="search" type="text" :placeholder='`${t("menu.search")}`' class="pl-10" />
+                <Input id="search" type="text" v-model="searchContent" :placeholder='`${t("menu.search")}`' class="pl-10" />
                 <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
                     <Search class="size-6 text-muted-foreground" />
                 </span>
