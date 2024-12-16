@@ -39,3 +39,13 @@ export const ConnectionFormSchema = toTypedSchema(
         password: z.string().min(1)
     }
 ))
+
+export const songDetailFormSchema = toTypedSchema(z.object({
+    title: z.string().min(1),
+    artist: z.string().optional(),
+    album: z.string().optional(),
+    year: z.number().optional(),
+    genre: z.string().optional(),
+    cover: z.string().optional()
+  })
+);

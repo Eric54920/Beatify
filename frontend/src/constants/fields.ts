@@ -10,3 +10,12 @@ export const connectionFormFields = [
     { name: "username", labelKey: "configPanel.username", type: "text" },
     { name: "password", labelKey: "configPanel.password", type: "password" }
 ]
+
+export const songDetailFormFields = [
+    { name: "title", labelKey: "songInfo.title", type: "text" },
+    { name: "artist", labelKey: "songInfo.artist", type: "text" },
+    { name: "album", labelKey: "songInfo.album", type: "text" },
+    { name: "year", labelKey: "songInfo.year", type: "number" },
+    { name: "genre", labelKey: "songInfo.genre", type: "text" },
+    { name: "cover", labelKey: "songInfo.cover", type: "text" },
+]
