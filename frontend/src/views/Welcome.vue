@@ -69,7 +69,7 @@ const addConnection = connFrom.handleSubmit((values) => {
     })
 })
 
-function checkConfig() {
+const checkConfig = () => {
     /* 检查配置 */
     IsExistConnection().then((res: Record<string, any>) => {
         if (res.ststus == 50000) {
