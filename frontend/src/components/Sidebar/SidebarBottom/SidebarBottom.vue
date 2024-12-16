@@ -53,6 +53,7 @@ import {
     Languages
 } from 'lucide-vue-next'
 
+let initialized = true;
 const { t } = useI18n()
 const lang = ref("en")
 const store = useSharedStore();
@@ -135,11 +136,14 @@ const getLanguage = () => {
 }
 
 watch(() => lang.value, (value) => {
-    store.setLanguage(value);
-    toast({
-        title: t("notification.setLangSucc"),
-        description: t("notification.setLangSuccDesc"),
-    });
+    if (!initialized) {
+        store.setLanguage(value);
+        toast({
+            title: t("notification.setLangSucc"),
+            description: t("notification.setLangSuccDesc"),
+        });
+    }
+    initialized = false;
 })
 
 onMounted(() => {
