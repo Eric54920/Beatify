@@ -34,8 +34,18 @@ export const ConnectionFormSchema = toTypedSchema(
     z.object({
         title: z.string().min(1),
         protocol: z.string().min(1),
-        address: z.string(),
-        username: z.string(),
-        password: z.string()
+        address: z.string().min(1),
+        username: z.string().min(1),
+        password: z.string().min(1)
     }
 ))
+
+export const songDetailFormSchema = toTypedSchema(z.object({
+    title: z.string().min(1),
+    artist: z.string().optional(),
+    album: z.string().optional(),
+    year: z.number().optional(),
+    genre: z.string().optional(),
+    cover: z.string().optional()
+  })
+);

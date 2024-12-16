@@ -1,10 +1,11 @@
 <script setup lang=ts>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { useI18n } from 'vue-i18n'
-import { useSharedStore } from '@/stores/useShareStore'
 import { Playlist } from '@/schema/schema'
 import { playlistFormSchema } from "@/schema/schema"
+import { playlistFormFields } from "@/constants/fields"
 import { GetAllDirs, GetDir, DeleteDir, UpdateDir, CreateDir, ReSyncDir } from 'wailsjs/go/beatify/App'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button';
@@ -59,17 +60,12 @@ import {
 import SidebarBottom from '@/components/Sidebar/SidebarBottom/SidebarBottom.vue'
 
 const { t } = useI18n()
-const lang = ref("en")
-const store = useSharedStore();
+const router = useRouter()
 const playlists = ref<Playlist[]>([])
 const isPlaylistsOpen = ref(false); // 是否展开播放列表
 const isPlaylistAddDialogOpen = ref(false); // 新增表单
 const isPlaylistUpdateDialogOpen = ref(false); // 更新表单
 const playlistDetail = ref<Playlist>(); // 播放列表详情 
-const playlistFormFields = [
-    { name: "title", labelKey: "diolog.title", type: "text" },
-    { name: "url", labelKey: "diolog.url", type: "text" }
-]
 const playlistForm = useForm({
     validationSchema: playlistFormSchema,
 })
@@ -269,12 +265,12 @@ const deletePlaylist = (id: number) => {
     })
 }
 
-watch(() => lang.value, (value) => {
-    store.setLanguage(value);
-})
-
 onMounted(() => {
-    getPlaylist()
+    if (router.currentRoute.value.path === "/main") {
+        router.push("/main/songs?dir=0");
+    }
+
+    getPlaylist()    
 })
 </script>
 

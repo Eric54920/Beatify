@@ -2,9 +2,9 @@
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import * as z from 'zod';
+import { songDetailFormFields } from "@/constants/fields"
+import { songDetailFormSchema } from "@/schema/schema"
 import { GetSongs, GetSong, UpdateSong } from '../../wailsjs/go/beatify/App'
 import { BASE_URL } from '@/config/conf';
 import { formatSize, playFromSongList } from '@/utils/utils';
@@ -50,26 +50,8 @@ const { t } = useI18n()
 const dir = ref(Number(route.query.dir));
 const sort = ref(store.sort);
 const songs = ref<Song[]>([])
-const songDetailFormFields = [
-    { name: "title", labelKey: "songInfo.title", type: "text" },
-    { name: "artist", labelKey: "songInfo.artist", type: "text" },
-    { name: "album", labelKey: "songInfo.album", type: "text" },
-    { name: "year", labelKey: "songInfo.year", type: "number" },
-    { name: "genre", labelKey: "songInfo.genre", type: "text" },
-    { name: "cover", labelKey: "songInfo.cover", type: "text" },
-]
 const isInfoDialogOpen = ref(false)
 const songDetail = ref<Song>()
-
-const songDetailFormSchema = toTypedSchema(z.object({
-    title: z.string().min(1),
-    artist: z.string().optional(),
-    album: z.string().optional(),
-    year: z.number().optional(),
-    genre: z.string().optional(),
-    cover: z.string().optional()
-  })
-);
 
 const { handleSubmit, setValues } = useForm({
   validationSchema: songDetailFormSchema,
@@ -140,15 +122,15 @@ const showDetail = (songId: number) => {
 const getSongs = () => {
     GetSongs(dir.value, sort.value).then((res: Record<string, any>) => {
         switch (res.status) {
-            case 50000:
-                toast({
-                    title: t("notification.errorTitle"),
-                    description: t("notification.queryMusicError"),
-                })
-                break
-            case 20000:
-                songs.value = res.data;
-                break
+        case 50000:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryMusicError"),
+            })
+            break
+        case 20000:
+            songs.value = res.data;
+            break
         }
     })
 }

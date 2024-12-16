@@ -54,12 +54,14 @@
         "errorToPlay": "Something unusual happened while playing the song",
         "saveSongError": "Exception when saving song detail",
         "songTitleRequire": "Song title is require",
-        "updateRecordError": "Exception when updating record"
+        "updateRecordError": "Exception when updating record",
+        "setLangSucc": "Setting language successfully",
+        "setLangSuccDesc": "Restart is required to take effect"
     },
     "configPanel": {
-        "panelName": "Add a connection configuration",
+        "panelName": "Connect to server",
         "editConn": "Edit Connection",
-        "panelDesc": "After adding the configuration, you can start listening to music",
+        "panelDesc": "After connect to server, you can start listening to music.",
         "title": "Title",
         "protocol": "Protocol",
         "pleaseChooseProtocol": "Please select a protocol",
