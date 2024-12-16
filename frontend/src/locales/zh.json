@@ -9,9 +9,13 @@
         "artists": "歌手",
         "albums": "专辑",
         "playlists": "播放列表",
-        "edit": "列表设置",
+        "edit": "编辑",
         "delete": "删除",
-        "sync": "列表同步"
+        "sync": "同步",
+        "settings": "设置",
+        "langSetting": "语言设置",
+        "selectLang": "选择语言",
+        "conSetting": "连接设置"
     },
     "diolog": {
         "editPlaylists": "编辑播放列表",
@@ -21,7 +25,11 @@
         "playlistName": "播放列表名称",
         "playlistUrl": "播放列表目录",
         "save": "保存",
-        "saveChanges": " 保存更改"
+        "saveChanges": " 保存更改",
+        "deleteConfirm": "确定要删除这个播放列表吗？",
+        "deleteConfirmDesc": "删除之后依然可以通过创建新的播放列表同步服务器上的歌曲",
+        "cancel": "取消",
+        "continue": "继续"
     },
     "notification": {
         "errorTitle": "发生了一些异常",
@@ -29,6 +37,7 @@
         "checkConnectionError": "检查连接配置异常",
         "invalidForm": "无效的表单",
         "ParameterException": "参数校验异常",
+        "TitleOrUrlExisted": "标题或URL已经存在",
         "notSupportedMultiConf": "暂时不支持多个连接",
         "createConfError": "创建配置时发生异常",
         "queryRecordError": "查询记录时异常",
@@ -37,15 +46,19 @@
         "syncSuccess": "同步歌曲成功",
         "pullFileError": "拉取远程文件异常",
         "queryMusicError": "查询歌曲时异常",
+        "queryDirError": "查询播放列表时异常",
         "saveDirError": "保存播放列表时异常",
         "deleteDirError": "删除播放列表异常",
+        "deleteExistingSongError": "删除已存在的歌曲时异常",
         "createDirError": "创建播放列表时发生异常",
         "errorToPlay": "播放歌曲时发生一些异常",
         "saveSongError": "保存歌曲信息时异常",
-        "songTitleRequire": "歌曲标题不能为空"
+        "songTitleRequire": "歌曲标题不能为空",
+        "updateRecordError": "更新记录时异常"
     },
     "configPanel": {
-        "panelName": "添加一个配置",
+        "panelName": "添加一个连接配置",
+        "editConn": "编辑连接",
         "panelDesc": "添加配置后即可开始听音乐",
         "title": "标题",
         "protocol": "协议",
@@ -76,7 +89,5 @@
         "history": "播放历史",
         "clear": "清空",
         "manuallyAdded": "手动添加"
-    },
-    "common": {},
-    "interface": {}
+    }
 }

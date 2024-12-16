@@ -14,8 +14,16 @@ export function DeleteDir(arg1) {
   return window['go']['beatify']['App']['DeleteDir'](arg1);
 }
 
+export function GetAllConnections() {
+  return window['go']['beatify']['App']['GetAllConnections']();
+}
+
 export function GetAllDirs() {
   return window['go']['beatify']['App']['GetAllDirs']();
+}
+
+export function GetDir(arg1) {
+  return window['go']['beatify']['App']['GetDir'](arg1);
 }
 
 export function GetPlayNextList(arg1, arg2, arg3) {
@@ -48,6 +56,10 @@ export function ReSyncDir(arg1) {
 
 export function StartServer() {
   return window['go']['beatify']['App']['StartServer']();
+}
+
+export function UpdateConnection(arg1, arg2) {
+  return window['go']['beatify']['App']['UpdateConnection'](arg1, arg2);
 }
 
 export function UpdateDir(arg1, arg2) {

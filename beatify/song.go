@@ -147,25 +147,19 @@ func (a *App) GetPlayNextList(dirId, id int, sort string) Response {
 		return NewResponse(40004, nil)
 	}
 
-	// 获取后续的 20 条记录
-	if startIndex+20 > len(songs) {
-		// 如果不足 20 条，取剩余的所有记录
-		newSongs = songs[startIndex:]
-	} else {
-		// 否则取后面 20 条记录
+	// 最多获取20个
+	if len(songs[startIndex:]) > 20 {
 		newSongs = songs[startIndex : startIndex+20]
+	} else {
+		newSongs = songs[startIndex:]
 	}
 
-	// 如果获取的记录不足 20 条，补充前面的记录
-	if len(newSongs) < 20 {
-		// 计算需要补充的数量
-		remaining := 20 - len(newSongs)
-		newSongs = append(newSongs, songs[0:remaining]...)
-	}
-
-	// 如果补充后的记录还是不足 20 条，返回空列表
-	if len(songs) == 0 {
-		songs = []models.Song{}
+	if len(newSongs) == 0 {
+		if len(songs) > 20 {
+			newSongs = songs[:20]
+		} else {
+			newSongs = songs
+		}
 	}
 
 	// 返回查询结果

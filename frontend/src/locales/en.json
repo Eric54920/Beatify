@@ -9,9 +9,13 @@
         "artists": "Artists",
         "albums": "Albums",
         "playlists": "Playlists",
-        "edit": "List Config",
+        "edit": "Config",
         "delete": "Delete",
-        "sync": "List Sync"
+        "sync": "Sync",
+        "settings": "Settings",
+        "langSetting": "Language",
+        "selectLang": "Select Language",
+        "conSetting": "Connection"
     },
     "diolog": {
         "editPlaylists": "Edit Playlist",
@@ -21,7 +25,11 @@
         "playlistName": "playlist name",
         "playlistUrl": "playlist url",
         "save": "Save",
-        "saveChanges": " Save changes"
+        "saveChanges": " Save changes",
+        "deleteConfirm": "Are you sure you want to delete this playlist?",
+        "deleteConfirmDesc": "After deleting, you can still sync the songs on the server by creating a new playlist.",
+        "cancel": "Cancel",
+        "continue": "Continue"
     },
     "notification": {
         "errorTitle": "Something went wrong.",
@@ -31,21 +39,26 @@
         "notSupportedMultiConf": "Multiple connections are not currently supported",
         "createConfError": "An exception occurred while creating the configuration",
         "ParameterException": "Parameter verification exception",
+        "TitleOrUrlExisted": "Title or URL already exists",
         "queryRecordError": "Exception when querying records",
         "RecordNotFound": "Record not found",
         "syncError": "An exception occurred during synchronization",
         "syncSuccess": "Sync songs successfully",
-        "pullFileError": "Pulling remote files is abnormal",
+        "pullFileError": "Pulling remote data is abnormal",
         "queryMusicError": "Exception when searching for songs",
+        "queryDirError": "Exception when searching for playlist",
         "saveDirError": "Exception when saving playlist",
         "deleteDirError": "Deleting playlist abnormality",
+        "deleteExistingSongError": "Exception when deleting existing songs",
         "createDirError": "An exception occurred while creating a playlist",
         "errorToPlay": "Something unusual happened while playing the song",
         "saveSongError": "Exception when saving song detail",
-        "songTitleRequire": "Song title is require"
+        "songTitleRequire": "Song title is require",
+        "updateRecordError": "Exception when updating record"
     },
     "configPanel": {
-        "panelName": "Add a configuration",
+        "panelName": "Add a connection configuration",
+        "editConn": "Edit Connection",
         "panelDesc": "After adding the configuration, you can start listening to music",
         "title": "Title",
         "protocol": "Protocol",
@@ -76,7 +89,5 @@
         "history": "History",
         "clear": "Clear",
         "manuallyAdded": "Manually Added"
-    },
-    "common": {},
-    "interface": {}
+    }
 }

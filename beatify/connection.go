@@ -95,3 +95,63 @@ func (a *App) AddConnection(formData string) Response {
 
 	return NewResponse(20000, conf)
 }
+
+// 获取所有连接配置
+func (a *App) GetAllConnections() Response {
+	var connections []models.Connection
+
+	err := models.DB.Find(&connections).Error
+	if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	return NewResponse(20000, connections)
+}
+
+// 更新连接配置
+func (a *App) UpdateConnection(id int, formData string) Response {
+	var connection models.Connection
+	var err error
+
+	// 解析数据
+	if err = json.Unmarshal([]byte(formData), &connection); err != nil {
+		return NewResponse(40000, nil)
+	}
+
+	// 获取原数据
+	var dbConnection models.Connection
+	err = models.DB.First(&dbConnection, "id = ?", id).Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return NewResponse(40004, nil)
+	} else if err != nil {
+		return NewResponse(50000, nil)
+	}
+
+	if connection.Title != "" && dbConnection.Title != connection.Title {
+		dbConnection.Title = connection.Title
+	}
+
+	if connection.Protocol != "" && dbConnection.Protocol != connection.Protocol {
+		dbConnection.Protocol = connection.Protocol
+	}
+
+	if connection.Address != "" && dbConnection.Address != connection.Address {
+		dbConnection.Address = connection.Address
+	}
+
+	if connection.Username != "" && dbConnection.Username != connection.Username {
+		dbConnection.Username = connection.Username
+	}
+
+	if connection.Password != "" && dbConnection.Password != connection.Password {
+		dbConnection.Password = connection.Password
+	}
+
+	// 保存
+	err = models.DB.Save(&dbConnection).Error
+	if err != nil {
+		return NewResponse(50001, nil)
+	}
+
+	return NewResponse(20000, nil)
+}
