@@ -54,7 +54,9 @@
         "errorToPlay": "播放歌曲时发生一些异常",
         "saveSongError": "保存歌曲信息时异常",
         "songTitleRequire": "歌曲标题不能为空",
-        "updateRecordError": "更新记录时异常"
+        "updateRecordError": "更新记录时异常",
+        "setLangSucc": "设置语言成功",
+        "setLangSuccDesc": "需要重启才能生效"
     },
     "configPanel": {
         "panelName": "添加一个连接配置",

@@ -142,6 +142,10 @@ const getLanguage = () => {
 
 watch(() => lang.value, (value) => {
     store.setLanguage(value);
+    toast({
+        title: t("notification.setLangSucc"),
+        description: t("notification.setLangSuccDesc"),
+    });
 })
 
 onMounted(() => {

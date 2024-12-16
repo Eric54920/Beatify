@@ -1,8 +1,7 @@
 <script setup lang=ts>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useForm } from 'vee-validate'
 import { useI18n } from 'vue-i18n'
-import { useSharedStore } from '@/stores/useShareStore'
 import { Playlist } from '@/schema/schema'
 import { playlistFormSchema } from "@/schema/schema"
 import { GetAllDirs, GetDir, DeleteDir, UpdateDir, CreateDir, ReSyncDir } from 'wailsjs/go/beatify/App'
@@ -59,8 +58,6 @@ import {
 import SidebarBottom from '@/components/Sidebar/SidebarBottom/SidebarBottom.vue'
 
 const { t } = useI18n()
-const lang = ref("en")
-const store = useSharedStore();
 const playlists = ref<Playlist[]>([])
 const isPlaylistsOpen = ref(false); // 是否展开播放列表
 const isPlaylistAddDialogOpen = ref(false); // 新增表单
@@ -268,10 +265,6 @@ const deletePlaylist = (id: number) => {
         }
     })
 }
-
-watch(() => lang.value, (value) => {
-    store.setLanguage(value);
-})
 
 onMounted(() => {
     getPlaylist()
