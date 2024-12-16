@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 import { useForm } from 'vee-validate';
 import { songDetailFormFields } from "@/constants/fields"
 import { songDetailFormSchema } from "@/schema/schema"
-import { GetSongs, GetSong, UpdateSong } from '../../wailsjs/go/beatify/App'
+import { GetSongs, GetSong, UpdateSong, SearchSongs } from 'wailsjs/go/beatify/App'
 import { BASE_URL } from '@/config/conf';
 import { formatSize, playFromSongList } from '@/utils/utils';
 import Toaster from '@/components/ui/toast/Toaster.vue'
@@ -172,6 +172,25 @@ const addToPlayNext = (song: Song, pos: number) => {
     store.manuallyAddedListUpdated = true;
 }
 
+/**
+ * 搜索歌曲
+ */
+const searchSongs = (content: string) => {
+    SearchSongs(sort.value, content).then((res: Record<string, any>) => {
+        switch (res.status) {
+        case 50000:
+            toast({
+                title: t("notification.errorTitle"),
+                description: t("notification.queryMusicError"),
+            })
+            break
+        case 20000:
+            songs.value = res.data;
+            break
+        }
+    })
+} 
+
 // 检测路由中参数的变化
 watch(() => route.query.dir, (newDir) => {
     // 重新获取所有歌曲
@@ -184,6 +203,14 @@ watch(() => store.sort, (newSort) => {
     // 重新获取所有歌曲
     sort.value = newSort
     getSongs()
+})
+
+watch(() => store.searchContent, (content) => {
+    if (content) {
+        searchSongs(content);
+    } else {
+        getSongs();
+    }
 })
 
 onMounted(() => {
