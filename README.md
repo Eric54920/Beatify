@@ -1,3 +1,5 @@
+[简体中文](./README-zh.md) | English
+
 # Beatify
 
 **Beatify** is a modern, feature-rich streaming media player designed for high-quality music playback. Built with **Golang**, **Wails**, **Vue 3**, and **ShadCN Vue**, Beatify offers an immersive audio experience with support for various audio formats and seamless integration with popular network protocols.
@@ -6,17 +8,16 @@
 
 - **High-Quality Audio Playback**: Supports a variety of audio formats, including:
   - **FLAC**
+  - **ALAC**
   - **MP3**
+  - **WAV**
+  - **AAC**
   - and more.
-
-- **Lyrics Display**: Enjoy synchronized lyrics support to enhance your listening experience.
 
 - **Network Protocol Support**:
   - **WebDAV**
   
   Stream your music directly from remote servers or network shares without any hassle.
-
-- **Responsive Interface**: With a modern and responsive UI, Beatify provides a sleek, user-friendly interface designed to adapt to various screen sizes.
 
 ## Technologies Used
 
@@ -56,9 +57,8 @@
 ## Usage
 
 Once the application is running, you can:
+- **Connect to Remote Servers**: Set up connections using WebDAV for seamless streaming from your personal music server or network.
 - **Play Audio Files**: Load and play high-quality FLAC, MP3, and other supported audio formats.
-- **View Lyrics**: Toggle lyrics display to sync with the current track.
-- **Connect to Remote Servers**: Set up connections using WebDAV, SMB, or FTP for seamless streaming from your personal music server or network.
 
 ## Contributing
 
