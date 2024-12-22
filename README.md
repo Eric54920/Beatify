@@ -1,8 +1,10 @@
-[简体中文](./README-zh.md) | English
+<h1 align="center">Beatify</h1>
 
-# Beatify
+<h4 align="center"><strong>English</strong> | <a href="https://github.com/Eric54920/Beatify/blob/main/README-zh.md">简体中文</a></h4>
 
 **Beatify** is a modern, feature-rich streaming media player designed for high-quality music playback. Built with **Golang**, **Wails**, **Vue 3**, and **ShadCN Vue**, Beatify offers an immersive audio experience with support for various audio formats and seamless integration with popular network protocols.
+
+![cover](./docs/cover.jpg) 
 
 ## Features
 

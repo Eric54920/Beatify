@@ -1,8 +1,10 @@
-[English](./README.md) | 简体中文
+<h1 align="center">Beatify</h1>
 
-# Beatify
+<h4 align="center"><strong>简体中文</strong> | <a href="https://github.com/Eric54920/Beatify/blob/main/README.md">English</a></h4>
 
 **Beatify** 是一款现代化、功能丰富的流媒体播放器，专为高质量音乐播放而设计。它采用 **Golang**、**Wails**、**Vue 3** 和 **ShadCN Vue** 构建，提供沉浸式音频体验，支持多种音频格式以及与流行网络协议的无缝集成。
+
+![cover](./docs/cover.jpg) 
 
 ## 功能特性
 
