@@ -13,7 +13,7 @@
   - **ALAC**
   - **MP3**
   - **WAV**
-  - **AAC**
+  - **ACC**
   - and more.
 
 - **Network Protocol Support**:
