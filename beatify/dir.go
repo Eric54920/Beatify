@@ -1,7 +1,6 @@
 package beatify
 
 import (
-	"Beatify/models"
 	"encoding/json"
 
 	"gorm.io/gorm"
@@ -9,9 +8,9 @@ import (
 
 // 获取所有播放列表
 func (a *App) GetAllDirs() Response {
-	var dirs []models.Dir
+	var dirs []Dir
 
-	err := models.DB.Find(&dirs).Error
+	err := DB.Find(&dirs).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
@@ -21,9 +20,9 @@ func (a *App) GetAllDirs() Response {
 
 // 根据id获取播放列表
 func (a *App) GetDir(id int) Response {
-	var dir models.Dir
+	var dir Dir
 
-	err := models.DB.First(&dir, id).Error
+	err := DB.First(&dir, id).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
@@ -33,7 +32,7 @@ func (a *App) GetDir(id int) Response {
 
 // 更新播放列表
 func (a *App) UpdateDir(id int, formData string) Response {
-	var dir models.Dir
+	var dir Dir
 	var err error
 
 	// 解析数据
@@ -42,8 +41,8 @@ func (a *App) UpdateDir(id int, formData string) Response {
 	}
 
 	// 找到原来的记录
-	var dbDir models.Dir
-	err = models.DB.First(&dbDir, id).Error
+	var dbDir Dir
+	err = DB.First(&dbDir, id).Error
 	if err != nil && err == gorm.ErrRecordNotFound {
 		return NewResponse(40004, nil)
 	} else if err != nil {
@@ -52,7 +51,7 @@ func (a *App) UpdateDir(id int, formData string) Response {
 
 	if dir.Title != "" && dir.Title != dbDir.Title {
 		// 唯一校验
-		if unique, _ := models.UniqueCheck("title", dir.Title, &models.Dir{}); !unique {
+		if unique, _ := UniqueCheck("title", dir.Title, &Dir{}); !unique {
 			return NewResponse(40001, nil)
 		}
 		dbDir.Title = dir.Title
@@ -60,14 +59,14 @@ func (a *App) UpdateDir(id int, formData string) Response {
 
 	if dir.Url != "" && dir.Url != dbDir.Url {
 		// 唯一校验
-		if unique, _ := models.UniqueCheck("title", dir.Url, &models.Dir{}); !unique {
+		if unique, _ := UniqueCheck("title", dir.Url, &Dir{}); !unique {
 			return NewResponse(40001, nil)
 		}
 		dbDir.Url = dir.Url
 	}
 
 	// 保存
-	err = models.DB.Save(&dbDir).Error
+	err = DB.Save(&dbDir).Error
 	if err != nil {
 		return NewResponse(50001, nil)
 	}
@@ -77,21 +76,21 @@ func (a *App) UpdateDir(id int, formData string) Response {
 
 // 删除播放列表
 func (a *App) DeleteDir(id int) Response {
-	var dir models.Dir
+	var dir Dir
 
-	err := models.DB.First(&dir, id).Error
+	err := DB.First(&dir, id).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
 
 	// 删除所有关联的歌曲
-	err = models.DB.Where("dir = ?", id).Delete(&models.Song{}).Error
+	err = DB.Where("dir = ?", id).Delete(&Song{}).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
 
 	// 删除列表
-	err = models.DB.Delete(&dir).Error
+	err = DB.Delete(&dir).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
@@ -101,7 +100,7 @@ func (a *App) DeleteDir(id int) Response {
 
 // 新增播放列表
 func (a *App) CreateDir(formData string) Response {
-	var dir models.Dir
+	var dir Dir
 	var err error
 
 	err = json.Unmarshal([]byte(formData), &dir)
@@ -110,15 +109,15 @@ func (a *App) CreateDir(formData string) Response {
 	}
 
 	// 唯一校验
-	if unique, _ := models.UniqueCheck("title", dir.Title, &models.Dir{}); !unique {
+	if unique, _ := UniqueCheck("title", dir.Title, &Dir{}); !unique {
 		return NewResponse(40001, nil)
 	}
 
-	if unique, _ := models.UniqueCheck("url", dir.Url, &models.Dir{}); !unique {
+	if unique, _ := UniqueCheck("url", dir.Url, &Dir{}); !unique {
 		return NewResponse(40001, nil)
 	}
 
-	err = models.DB.Create(&dir).Error
+	err = DB.Create(&dir).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
@@ -145,9 +144,9 @@ func (a *App) CreateDir(formData string) Response {
 // 手动同步歌曲列表
 func (a *App) ReSyncDir(id int) Response {
 	// 获取数据库中已存在的歌曲
-	var songs []models.Song
+	var songs []Song
 
-	err := models.DB.Find(&songs, "dir = ?", id).Error
+	err := DB.Find(&songs, "dir = ?", id).Error
 	if err != nil {
 		return NewResponse(50002, nil)
 	}
@@ -160,7 +159,7 @@ func (a *App) ReSyncDir(id int) Response {
 
 	// 如果服务中没有则删除数据库中已有的歌曲
 	if len(serverFileList) == 0 {
-		err := models.DB.Delete(&models.Song{}, "dir = ?", id).Error
+		err := DB.Delete(&Song{}, "dir = ?", id).Error
 		if err != nil {
 			return NewResponse(50000, nil)
 		}
@@ -169,7 +168,7 @@ func (a *App) ReSyncDir(id int) Response {
 	}
 
 	// 检查服务中的歌曲是否存在于本地数据库，不在则添加，在则对比并更新
-	dbPathMap := map[string]models.Song{}
+	dbPathMap := map[string]Song{}
 	for _, song := range songs {
 		dbPathMap[song.Path] = song
 	}
@@ -179,7 +178,7 @@ func (a *App) ReSyncDir(id int) Response {
 	}
 
 	// 同步逻辑
-	err = models.DB.Transaction(func(tx *gorm.DB) error {
+	err = DB.Transaction(func(tx *gorm.DB) error {
 		// 更新或添加新的歌曲
 		for _, file := range serverFileList {
 			if dbSong, exists := dbPathMap[file.Path]; exists {

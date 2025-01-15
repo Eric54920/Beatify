@@ -1,7 +1,6 @@
 package beatify
 
 import (
-	"Beatify/models"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -21,19 +20,19 @@ type FileInfo struct {
 
 var audioExtensions = []string{"mp3", "wav", "flac", "aac", "ogg", "m4a", "wma", "alac", "aiff"}
 
-type Connection interface {
+type Connector interface {
 	GetFileList(dirId int) ([]FileInfo, error)
 	fetchMetaData(filePath string) error
 	GetFileStream(filePath string, start, end int64, isRange bool) (*http.Response, error)
 }
 
-func GetClient() Connection {
+func GetClient() Connector {
 
-	var dbConnection models.Connection
+	var dbConnection Connection
 	var err error
-	var client Connection
+	var client Connector
 
-	if err = models.DB.First(&dbConnection).Error; err != nil {
+	if err = DB.First(&dbConnection).Error; err != nil {
 		fmt.Println(err.Error())
 		return nil
 	}
@@ -54,8 +53,8 @@ func GetClient() Connection {
 
 // 检查连接是否存在，是否能连接到服务
 func (a *App) IsExistConnection() Response {
-	var connections []models.Connection
-	err := models.DB.Find(&connections).Error
+	var connections []Connection
+	err := DB.Find(&connections).Error
 
 	switch {
 	case err != nil:
@@ -69,7 +68,7 @@ func (a *App) IsExistConnection() Response {
 
 // 添加一个连接配置
 func (a *App) AddConnection(formData string) Response {
-	var conf models.Connection
+	var conf Connection
 	var err error
 
 	// 解析 formData 为连接配置
@@ -79,7 +78,7 @@ func (a *App) AddConnection(formData string) Response {
 	}
 
 	// 检查是否已经有连接配置
-	if err = models.DB.First(&conf).Error; err != nil && err != gorm.ErrRecordNotFound {
+	if err = DB.First(&conf).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return NewResponse(50000, nil)
 	}
 
@@ -89,7 +88,7 @@ func (a *App) AddConnection(formData string) Response {
 	}
 
 	// 创建新的连接配置
-	if err := models.DB.Create(&conf).Error; err != nil {
+	if err := DB.Create(&conf).Error; err != nil {
 		return NewResponse(50001, nil)
 	}
 
@@ -98,9 +97,9 @@ func (a *App) AddConnection(formData string) Response {
 
 // 获取所有连接配置
 func (a *App) GetAllConnections() Response {
-	var connections []models.Connection
+	var connections []Connection
 
-	err := models.DB.Find(&connections).Error
+	err := DB.Find(&connections).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
@@ -110,7 +109,7 @@ func (a *App) GetAllConnections() Response {
 
 // 更新连接配置
 func (a *App) UpdateConnection(id int, formData string) Response {
-	var connection models.Connection
+	var connection Connection
 	var err error
 
 	// 解析数据
@@ -119,8 +118,8 @@ func (a *App) UpdateConnection(id int, formData string) Response {
 	}
 
 	// 获取原数据
-	var dbConnection models.Connection
-	err = models.DB.First(&dbConnection, "id = ?", id).Error
+	var dbConnection Connection
+	err = DB.First(&dbConnection, "id = ?", id).Error
 	if err != nil && err == gorm.ErrRecordNotFound {
 		return NewResponse(40004, nil)
 	} else if err != nil {
@@ -148,7 +147,7 @@ func (a *App) UpdateConnection(id int, formData string) Response {
 	}
 
 	// 保存
-	err = models.DB.Save(&dbConnection).Error
+	err = DB.Save(&dbConnection).Error
 	if err != nil {
 		return NewResponse(50001, nil)
 	}

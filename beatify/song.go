@@ -1,7 +1,6 @@
 package beatify
 
 import (
-	"Beatify/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -20,7 +19,7 @@ import (
 
 // CreateSong 创建一个Song记录
 func CreateSong(file FileInfo, dirId int) error {
-	song := models.Song{
+	song := Song{
 		Title:  file.Name,
 		Artist: file.Artist,
 		Path:   file.Path, // 文件路径
@@ -29,15 +28,15 @@ func CreateSong(file FileInfo, dirId int) error {
 		Type:   file.Type, // 文件类型
 	}
 
-	err := models.DB.Create(&song).Error
+	err := DB.Create(&song).Error
 	return err
 }
 
 // 获取歌曲信息
 func (a *App) GetSong(id int) Response {
-	var song models.Song
+	var song Song
 
-	if err := models.DB.First(&song, "id = ?", id).Error; err != nil {
+	if err := DB.First(&song, "id = ?", id).Error; err != nil {
 		return NewResponse(50000, nil)
 	}
 
@@ -46,7 +45,7 @@ func (a *App) GetSong(id int) Response {
 
 // 更新歌曲信息
 func (a *App) UpdateSong(id int, formData string) Response {
-	var song models.Song
+	var song Song
 	var err error
 
 	// 解析数据
@@ -55,8 +54,8 @@ func (a *App) UpdateSong(id int, formData string) Response {
 	}
 
 	// 找到原来的歌曲
-	var dbSong models.Song
-	err = models.DB.First(&dbSong, id).Error
+	var dbSong Song
+	err = DB.First(&dbSong, id).Error
 	if err != nil && err == gorm.ErrRecordNotFound {
 		return NewResponse(40004, nil)
 	} else if err != nil {
@@ -88,7 +87,7 @@ func (a *App) UpdateSong(id int, formData string) Response {
 	}
 
 	// 保存
-	err = models.DB.Save(&dbSong).Error
+	err = DB.Save(&dbSong).Error
 	if err != nil {
 		return NewResponse(50001, nil)
 	}
@@ -98,13 +97,13 @@ func (a *App) UpdateSong(id int, formData string) Response {
 
 // 根据目录ID获取歌曲列表
 func (a *App) GetSongs(dirId int, sort string) Response {
-	var songs []models.Song
+	var songs []Song
 	var err error
 
 	if dirId == 0 {
-		err = models.DB.Order(sort).Find(&songs).Error
+		err = DB.Order(sort).Find(&songs).Error
 	} else {
-		err = models.DB.Order(sort).Find(&songs, "dir = ?", dirId).Error
+		err = DB.Order(sort).Find(&songs, "dir = ?", dirId).Error
 	}
 
 	if err != nil {
@@ -116,10 +115,10 @@ func (a *App) GetSongs(dirId int, sort string) Response {
 
 // 搜索歌曲
 func (a *App) SearchSongs(sort, searchContent string) Response {
-	var songs []models.Song
+	var songs []Song
 
 	content := fmt.Sprintf("%%%s%%", searchContent)
-	err := models.DB.Order(sort).Where("title like ? or artist like ? or album like ?", content, content, content).Find(&songs).Error
+	err := DB.Order(sort).Where("title like ? or artist like ? or album like ?", content, content, content).Find(&songs).Error
 	if err != nil {
 		return NewResponse(50000, nil)
 	}
@@ -129,16 +128,16 @@ func (a *App) SearchSongs(sort, searchContent string) Response {
 
 // 获取 待播列表 列表，最多展示20个，如果不足20个，择取前面的补充
 func (a *App) GetPlayNextList(dirId, id int, sort string) Response {
-	var songs []models.Song
-	var newSongs []models.Song
+	var songs []Song
+	var newSongs []Song
 	var err error
 
 	// 当 dirId 为 0 时，直接查询所有记录并返回排序后的结果
 	if dirId == 0 {
-		err = models.DB.Order(sort).Find(&songs).Error
+		err = DB.Order(sort).Find(&songs).Error
 	} else {
 		// 获取排序后的所有记录，并根据 dirId 筛选
-		err = models.DB.Order(sort).Where("dir = ?", dirId).Find(&songs).Error
+		err = DB.Order(sort).Where("dir = ?", dirId).Find(&songs).Error
 	}
 
 	// 处理查询错误
@@ -214,9 +213,9 @@ func (a *App) PlayNext(sort string, id, mode, dirId int) Response {
 
 	// 根据 dirId 来查询 ids
 	if dirId == 0 {
-		err = models.DB.Model(&models.Song{}).Order(sort).Pluck("id", &ids).Error
+		err = DB.Model(&Song{}).Order(sort).Pluck("id", &ids).Error
 	} else {
-		err = models.DB.Model(&models.Song{}).Where("dir = ?", dirId).Order(sort).Pluck("id", &ids).Error
+		err = DB.Model(&Song{}).Where("dir = ?", dirId).Order(sort).Pluck("id", &ids).Error
 	}
 
 	if err != nil {
@@ -247,8 +246,8 @@ func (a *App) PlayNext(sort string, id, mode, dirId int) Response {
 	}
 
 	// 查询下一首歌曲的信息
-	var song models.Song
-	if err := models.DB.First(&song, "id = ?", nextId).Error; err != nil {
+	var song Song
+	if err := DB.First(&song, "id = ?", nextId).Error; err != nil {
 		return NewResponse(50000, nil)
 	}
 
@@ -262,9 +261,9 @@ func (a *App) PlayPrev(sort string, id, mode, dirId int) Response {
 
 	// 根据 dirId 来查询 ids
 	if dirId == 0 {
-		err = models.DB.Model(&models.Song{}).Order(sort).Pluck("id", &ids).Error
+		err = DB.Model(&Song{}).Order(sort).Pluck("id", &ids).Error
 	} else {
-		err = models.DB.Model(&models.Song{}).Where("dir = ?", dirId).Order(sort).Pluck("id", &ids).Error
+		err = DB.Model(&Song{}).Where("dir = ?", dirId).Order(sort).Pluck("id", &ids).Error
 	}
 
 	if err != nil {
@@ -295,8 +294,8 @@ func (a *App) PlayPrev(sort string, id, mode, dirId int) Response {
 	}
 
 	// 查询上一首歌曲的信息
-	var song models.Song
-	if err := models.DB.First(&song, "id = ?", prevId).Error; err != nil {
+	var song Song
+	if err := DB.First(&song, "id = ?", prevId).Error; err != nil {
 		return NewResponse(50000, nil)
 	}
 
@@ -323,8 +322,8 @@ func (a *App) streamMusicHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	id := q.Get("id")
 
-	var song models.Song
-	if err := models.DB.First(&song, "id = ?", id).Error; err != nil {
+	var song Song
+	if err := DB.First(&song, "id = ?", id).Error; err != nil {
 		http.Error(w, "歌曲不存在", http.StatusNotFound)
 		return
 	}
@@ -442,8 +441,8 @@ func (a *App) getCover(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 获取歌曲信息
-	var song models.Song
-	if err := models.DB.First(&song, "id = ?", id).Error; err != nil {
+	var song Song
+	if err := DB.First(&song, "id = ?", id).Error; err != nil {
 		http.Error(w, "歌曲不存在", http.StatusNotFound)
 		return
 	}
