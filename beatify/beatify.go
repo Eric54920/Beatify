@@ -1,19 +1,18 @@
 package beatify
 
 import (
-	"Beatify/models"
 	"context"
 )
 
 // App struct
 type App struct {
 	ctx    context.Context
-	client Connection
+	client Connector
 }
 
 func InitBeatify() *App {
 	// 初始化数据库
-	err := models.InitDB()
+	err := InitDB()
 	if err != nil {
 		panic(err.Error())
 	}

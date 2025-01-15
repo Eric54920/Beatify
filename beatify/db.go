@@ -1,4 +1,4 @@
-package models
+package beatify
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const path = "./db"
+const dbDir = "./db"
 const dbPath = "./db/music.db"
 
 var DB *gorm.DB
@@ -20,9 +20,9 @@ func IsExist(path string) bool {
 
 func InitDB() error {
 	// 检查数据库文件是否存在
-	if !IsExist(path) {
+	if !IsExist(dbDir) {
 		// 创建目录
-		if err := os.Mkdir(path, 0755); err != nil {
+		if err := os.Mkdir(dbDir, 0755); err != nil {
 			return err
 		}
 	}

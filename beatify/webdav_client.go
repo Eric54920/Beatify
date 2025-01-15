@@ -1,7 +1,6 @@
 package beatify
 
 import (
-	"Beatify/models"
 	"bytes"
 	"encoding/xml"
 	"fmt"
@@ -114,9 +113,9 @@ func (w WebDAVClient) fetchMetaData(filePath string) error {
 		return err
 	}
 
-	var dbSong models.Song
+	var dbSong Song
 
-	if err := models.DB.First(&dbSong, "path = ?", filePath).Error; err != nil {
+	if err := DB.First(&dbSong, "path = ?", filePath).Error; err != nil {
 		return err
 	}
 
@@ -138,7 +137,7 @@ func (w WebDAVClient) fetchMetaData(filePath string) error {
 		dbSong.Year = year
 	}
 
-	if err := models.DB.Save(&dbSong).Error; err != nil {
+	if err := DB.Save(&dbSong).Error; err != nil {
 		return err
 	}
 
@@ -147,10 +146,10 @@ func (w WebDAVClient) fetchMetaData(filePath string) error {
 
 // 获取文件夹数据
 func (w WebDAVClient) GetFileList(dirId int) ([]FileInfo, error) {
-	var dir models.Dir
+	var dir Dir
 
 	// 查询目录信息
-	err := models.DB.First(&dir, "id = ?", dirId).Error
+	err := DB.First(&dir, "id = ?", dirId).Error
 	if err != nil {
 		return []FileInfo{}, err
 	}
