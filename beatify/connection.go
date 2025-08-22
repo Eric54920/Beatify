@@ -72,7 +72,6 @@ func (a *App) AddConnection(formData string) Response {
 	var err error
 
 	// 解析 formData 为连接配置
-	// 假设 formData 是 JSON 格式的数据，使用 json.Unmarshal 将其解析为 models.Connection 结构
 	if err = json.Unmarshal([]byte(formData), &conf); err != nil {
 		return NewResponse(40000, nil)
 	}
