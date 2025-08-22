@@ -27,7 +27,7 @@ watch(() => route.query, (query) => {
         <!-- 右侧 -->
         <div class="flex-1 flex flex-col bg-white border-l border-stone-300 h-screen">
             <!-- 上面 -->
-            <div class="flex h-14 flex-col bg-white border-b z-10">
+            <div class="flex h-14 flex-col bg-white border-b z-10" style="--wails-draggable: drag;">
                 <Control class="h-14" />
             </div>
 

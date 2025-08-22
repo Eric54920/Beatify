@@ -23,6 +23,9 @@ func main() {
 		Width:    1150,
 		MinWidth: 1150,
 		Height:   710,
+		Frameless: true,
+		CSSDragProperty: "--wails-draggable",
+		CSSDragValue: "drag",
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
