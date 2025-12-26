@@ -282,7 +282,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="w-52 h-full flex-col justify-between bg-stone-100">
+    <div class="w-52 h-full pt-7 flex-col justify-between bg-stone-100">
         <!-- 头部 -->
         <div class="h-14 p-2 px-3">
             <div class="relative w-full items-center">
