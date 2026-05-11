@@ -1,0 +1,304 @@
+import { useCallback } from "react";
+import { useSettings, type Locale } from "@/store/settings";
+
+const en: Record<string, string> = {
+  "app.name": "Beatify",
+
+  "nav.library": "Library",
+  "nav.albums": "Albums",
+  "nav.artists": "Artists",
+  "nav.sources": "Sources",
+  "nav.settings": "Settings",
+
+  "page.library.title": "Library",
+  "page.library.tracks": "{n} tracks",
+  "page.library.remoteSuffix": "· {n} remote",
+  "page.library.empty": "Add a folder or WebDAV server in Sources to populate your library.",
+  "page.library.noMatch": "No matches.",
+
+  "page.albums.title": "Albums",
+  "page.albums.count": "{n} albums",
+  "page.albums.empty": "No albums yet.",
+  "page.albums.trackCount": "{n} tracks",
+
+  "page.artists.title": "Artists",
+  "page.artists.count": "{n} artists",
+  "page.artists.empty": "No artists yet.",
+  "page.artists.albumsTracks": "{albums} albums · {tracks} tracks",
+
+  "page.sources.title": "Sources",
+  "page.sources.subtitle": "{folders} local · {servers} remote",
+  "page.sources.localFolders": "Local folders",
+  "page.sources.remote": "Remote (WebDAV)",
+  "page.sources.emptyFolders": "No folders yet.",
+  "page.sources.emptyRemote": "Add a WebDAV server with the \"Add WebDAV\" button.",
+  "page.sources.added": "added {date}",
+
+  "page.settings.title": "Settings",
+  "page.settings.appearance": "Appearance",
+  "page.settings.theme": "Theme",
+  "page.settings.themeLight": "Light",
+  "page.settings.themeDark": "Dark",
+  "page.settings.themeSystem": "System",
+  "page.settings.themeLightHint": "Always use a light interface.",
+  "page.settings.themeDarkHint": "Always use a dark interface.",
+  "page.settings.themeSystemHint": "Follow your macOS appearance.",
+  "page.settings.language": "Language",
+  "page.settings.about": "About",
+  "page.settings.version": "Beatify v0.1.0",
+
+  "side.combined.title": "Up Next & History",
+  "side.queue.title": "Up Next",
+  "side.history.title": "Recently Played",
+  "side.queue.empty": "Queue is empty. Play a track or queue songs from the library.",
+  "side.history.empty": "No play history yet.",
+
+  "col.title": "Title",
+  "col.artist": "Artist",
+  "col.album": "Album",
+  "col.genre": "Genre",
+  "col.format": "Format",
+  "col.size": "Size",
+  "col.time": "Time",
+  "col.plays": "Plays",
+
+  "search.placeholder": "Search title, artist, album",
+
+  "action.addFolder": "Add folder",
+  "action.addWebdav": "Add WebDAV",
+  "action.sync": "Sync",
+  "action.clear": "Clear",
+  "action.cancel": "Cancel",
+  "action.save": "Save",
+  "action.add": "Add",
+  "action.adding": "Adding…",
+  "action.saving": "Saving…",
+  "action.addToQueue": "Add to queue",
+  "action.editInfo": "Edit info",
+  "action.removeFromQueue": "Remove from queue",
+  "action.back": "Back",
+  "action.confirm": "Confirm",
+  "action.delete": "Delete",
+  "action.remove": "Remove",
+
+  "confirm.removeFolder.title": "Remove this folder?",
+  "confirm.removeFolder.description": "{n} tracks from this folder will be removed from your library.",
+  "confirm.removeRemote.title": "Remove this WebDAV server?",
+  "confirm.removeRemote.description": "{n} tracks and their cached cover art will be removed.",
+  "confirm.clearQueue.title": "Clear Up Next?",
+  "confirm.clearQueue.description": "All queued tracks will be removed. Playback continues.",
+  "confirm.clearHistory.title": "Clear play history?",
+  "confirm.clearHistory.description": "All play history will be erased. This can't be undone.",
+
+  "tooltip.previous": "Previous",
+  "tooltip.next": "Next",
+  "tooltip.play": "Play",
+  "tooltip.pause": "Pause",
+  "tooltip.mute": "Mute",
+  "tooltip.unmute": "Unmute",
+  "tooltip.lyrics": "Lyrics",
+  "tooltip.upNext": "Up Next",
+  "tooltip.recentlyPlayed": "Recently Played",
+  "tooltip.airplay": "AirPlay",
+  "tooltip.shuffleOn": "Shuffle on",
+  "tooltip.shuffleOff": "Shuffle off",
+  "tooltip.repeatOff": "Repeat off",
+  "tooltip.repeatAll": "Repeat all",
+  "tooltip.repeatOne": "Repeat one",
+
+  "form.displayName": "Display name (optional)",
+  "form.serverUrl": "Server URL",
+  "form.username": "Username",
+  "form.password": "Password",
+  "form.title": "Title",
+  "form.artist": "Artist",
+  "form.album": "Album",
+  "form.albumArtist": "Album artist",
+  "form.genre": "Genre",
+  "form.year": "Year",
+  "form.trackNumber": "Track #",
+  "form.file": "File",
+
+  "dialog.webdav.title": "Add WebDAV server",
+  "dialog.webdav.desc": "Beatify will list audio files on the server and add them to your library.",
+  "dialog.webdav.note": "For SMB or other protocols on macOS, mount the share in Finder (⌘K) and add it as a local folder.",
+
+  "dialog.editInfo.title": "Edit info",
+  "dialog.editInfo.local": "Changes are written to the file's tags.",
+  "dialog.editInfo.remote": "Changes are saved to the local library only (remote source).",
+
+  "lyrics.notFound": "No lyrics for this track.",
+  "lyrics.close": "Close lyrics",
+
+  "common.nothingPlaying": "Nothing playing",
+  "common.startHint": "Add a folder or WebDAV server to start",
+  "common.unknownArtist": "Unknown Artist",
+  "common.unknownAlbum": "Unknown Album",
+  "common.variousArtists": "Various Artists",
+  "common.dash": "—",
+};
+
+const zh: Record<string, string> = {
+  "app.name": "Beatify",
+
+  "nav.library": "资料库",
+  "nav.albums": "专辑",
+  "nav.artists": "艺人",
+  "nav.sources": "媒体源",
+  "nav.settings": "设置",
+
+  "page.library.title": "资料库",
+  "page.library.tracks": "{n} 首",
+  "page.library.remoteSuffix": "· 远程 {n} 首",
+  "page.library.empty": "在 媒体源 中添加文件夹或 WebDAV 服务器来填充资料库。",
+  "page.library.noMatch": "没有匹配项。",
+
+  "page.albums.title": "专辑",
+  "page.albums.count": "{n} 张专辑",
+  "page.albums.empty": "暂无专辑。",
+  "page.albums.trackCount": "{n} 首",
+
+  "page.artists.title": "艺人",
+  "page.artists.count": "{n} 位艺人",
+  "page.artists.empty": "暂无艺人。",
+  "page.artists.albumsTracks": "{albums} 张专辑 · {tracks} 首",
+
+  "page.sources.title": "媒体源",
+  "page.sources.subtitle": "本地 {folders} · 远程 {servers}",
+  "page.sources.localFolders": "本地文件夹",
+  "page.sources.remote": "远程 (WebDAV)",
+  "page.sources.emptyFolders": "暂无文件夹。",
+  "page.sources.emptyRemote": "通过\"添加 WebDAV\"按钮新增一个服务器。",
+  "page.sources.added": "添加于 {date}",
+
+  "page.settings.title": "设置",
+  "page.settings.appearance": "外观",
+  "page.settings.theme": "主题",
+  "page.settings.themeLight": "浅色",
+  "page.settings.themeDark": "深色",
+  "page.settings.themeSystem": "跟随系统",
+  "page.settings.themeLightHint": "始终使用浅色界面。",
+  "page.settings.themeDarkHint": "始终使用深色界面。",
+  "page.settings.themeSystemHint": "跟随系统外观偏好。",
+  "page.settings.language": "语言",
+  "page.settings.about": "关于",
+  "page.settings.version": "Beatify v0.1.0",
+
+  "side.combined.title": "待播与历史",
+  "side.queue.title": "待播",
+  "side.history.title": "最近播放",
+  "side.queue.empty": "待播列表为空。播放一首或将歌曲加入待播。",
+  "side.history.empty": "暂无播放记录。",
+
+  "col.title": "标题",
+  "col.artist": "艺人",
+  "col.album": "专辑",
+  "col.genre": "流派",
+  "col.format": "格式",
+  "col.size": "大小",
+  "col.time": "时长",
+  "col.plays": "播放次数",
+
+  "search.placeholder": "搜索 标题、艺人、专辑",
+
+  "action.addFolder": "添加文件夹",
+  "action.addWebdav": "添加 WebDAV",
+  "action.sync": "同步",
+  "action.clear": "清空",
+  "action.cancel": "取消",
+  "action.save": "保存",
+  "action.add": "添加",
+  "action.adding": "添加中…",
+  "action.saving": "保存中…",
+  "action.addToQueue": "加入待播",
+  "action.editInfo": "编辑信息",
+  "action.removeFromQueue": "从待播移除",
+  "action.back": "返回",
+  "action.confirm": "确认",
+  "action.delete": "删除",
+  "action.remove": "移除",
+
+  "confirm.removeFolder.title": "确认移除此文件夹？",
+  "confirm.removeFolder.description": "此文件夹下的 {n} 首歌曲将从资料库中移除。",
+  "confirm.removeRemote.title": "确认移除此 WebDAV 服务器？",
+  "confirm.removeRemote.description": "{n} 首歌曲及其缓存的封面将被删除。",
+  "confirm.clearQueue.title": "清空待播列表？",
+  "confirm.clearQueue.description": "所有待播曲目将被移除，当前播放不受影响。",
+  "confirm.clearHistory.title": "清空播放记录？",
+  "confirm.clearHistory.description": "所有播放记录将被清除，此操作无法撤销。",
+
+  "tooltip.previous": "上一曲",
+  "tooltip.next": "下一曲",
+  "tooltip.play": "播放",
+  "tooltip.pause": "暂停",
+  "tooltip.mute": "静音",
+  "tooltip.unmute": "取消静音",
+  "tooltip.lyrics": "歌词",
+  "tooltip.upNext": "待播列表",
+  "tooltip.recentlyPlayed": "最近播放",
+  "tooltip.airplay": "AirPlay",
+  "tooltip.shuffleOn": "随机播放：开",
+  "tooltip.shuffleOff": "随机播放：关",
+  "tooltip.repeatOff": "循环：关",
+  "tooltip.repeatAll": "列表循环",
+  "tooltip.repeatOne": "单曲循环",
+
+  "form.displayName": "显示名称（可选）",
+  "form.serverUrl": "服务器地址",
+  "form.username": "用户名",
+  "form.password": "密码",
+  "form.title": "标题",
+  "form.artist": "艺人",
+  "form.album": "专辑",
+  "form.albumArtist": "专辑艺人",
+  "form.genre": "流派",
+  "form.year": "年份",
+  "form.trackNumber": "曲目号",
+  "form.file": "文件",
+
+  "dialog.webdav.title": "添加 WebDAV 服务器",
+  "dialog.webdav.desc": "Beatify 会列出服务器上的音频文件并添加到资料库。",
+  "dialog.webdav.note": "macOS 上 SMB 等协议可通过 Finder (⌘K) 挂载后作为本地文件夹添加。",
+
+  "dialog.editInfo.title": "编辑信息",
+  "dialog.editInfo.local": "更改会写入文件标签。",
+  "dialog.editInfo.remote": "更改只会保存在本地资料库（远程源）。",
+
+  "lyrics.notFound": "该曲目暂无歌词。",
+  "lyrics.close": "关闭歌词",
+
+  "common.nothingPlaying": "暂未播放",
+  "common.startHint": "添加文件夹或 WebDAV 服务器以开始",
+  "common.unknownArtist": "未知艺人",
+  "common.unknownAlbum": "未知专辑",
+  "common.variousArtists": "群星",
+  "common.dash": "—",
+};
+
+const dictionaries: Record<Locale, Record<string, string>> = { en, zh };
+
+function format(s: string, params?: Record<string, string | number>): string {
+  if (!params) return s;
+  return s.replace(/\{(\w+)\}/g, (_, k) =>
+    params[k] !== undefined ? String(params[k]) : `{${k}}`
+  );
+}
+
+/** React hook returning a translate fn that re-renders when locale changes. */
+export function useT() {
+  const locale = useSettings((s) => s.locale);
+  return useCallback(
+    (key: string, params?: Record<string, string | number>): string => {
+      const s = dictionaries[locale][key] ?? key;
+      return format(s, params);
+    },
+    [locale]
+  );
+}
+
+/** Imperative version when outside a React component. */
+export function t(key: string, params?: Record<string, string | number>): string {
+  const locale = useSettings.getState().locale;
+  const s = dictionaries[locale][key] ?? key;
+  return format(s, params);
+}

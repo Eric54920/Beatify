@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo --version)",
+      "Bash(npm --version)",
+      "Bash(bun --version)",
+      "Bash(pnpm --version)",
+      "Bash(cargo install *)",
+      "Bash(npm install *)",
+      "Bash(cat)",
+      "Bash(python3 /tmp/make_icons.py)",
+      "Bash(cargo build *)",
+      "Bash(npx tsc *)",
+      "Bash(grep -r \"OutputStream\" /Users/maguodong/.cargo/registry/src 2>/dev/null | grep -i \"send\\\\|impl Send\" | head -20; echo \"---\"; ls /Users/maguodong/.cargo/registry/src/ | head -5)",
+      "Read(//Users/maguodong/.cargo/registry/src/**)",
+      "Bash(npm run *)",
+      "Bash(pkill -f \"target/debug/beatify\")",
+      "Bash(pkill -f \"cargo run\")",
+      "Bash(pkill -f \"vite\")",
+      "Bash(echo \"EXIT=$?\")"
+    ]
+  }
+}

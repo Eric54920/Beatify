@@ -1,0 +1,52 @@
+# ─── Node ─────────────────────────────────────────────────────────
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.tsbuildinfo
+
+# ─── Logs ─────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ─── Rust / Cargo ────────────────────────────────────────────────
+target/
+**/*.rs.bk
+
+# ─── Tauri ───────────────────────────────────────────────────────
+# Generated capability / schema files
+src-tauri/gen/
+# Build output
+src-tauri/target/
+# Local cargo overrides
+src-tauri/.cargo/
+
+# ─── Env files ───────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.envrc
+
+# ─── Editors & IDEs ──────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+*.swp
+*.swo
+
+# ─── Operating system ────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ─── Test / coverage ─────────────────────────────────────────────
+coverage/
+.nyc_output/

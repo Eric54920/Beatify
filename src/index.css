@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 30% 12%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 30% 12%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 222 30% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 222 47% 11%;
+    --radius: 0.75rem;
+
+    --sidebar: 220 14% 97%;
+    --panel: 0 0% 100%;
+    --titlebar-height: 38px;
+  }
+  .dark {
+    --background: 220 18% 8%;
+    --foreground: 210 30% 96%;
+    --card: 220 18% 11%;
+    --card-foreground: 210 30% 96%;
+    --popover: 220 18% 11%;
+    --popover-foreground: 210 30% 96%;
+    --primary: 210 30% 96%;
+    --primary-foreground: 220 18% 8%;
+    --secondary: 220 14% 16%;
+    --secondary-foreground: 210 30% 96%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 220 8% 65%;
+    --accent: 220 14% 18%;
+    --accent-foreground: 210 30% 96%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 210 30% 96%;
+    --border: 220 14% 18%;
+    --input: 220 14% 18%;
+    --ring: 215 18% 70%;
+
+    --sidebar: 220 18% 7%;
+    --panel: 220 18% 9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    background: hsl(var(--background));
+  }
+  body {
+    @apply text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  button, [role="button"] { cursor: default; }
+  input { cursor: text; user-select: text; }
+}
+
+/* Subtle scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Panel slide-in animation */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes slide-out-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+.panel-enter { animation: slide-in-right 240ms cubic-bezier(0.32, 0.72, 0, 1); }
+.panel-exit { animation: slide-out-right 200ms cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+
+/* Lyrics overlay slide-up animation */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+.lyrics-enter { animation: slide-up 360ms cubic-bezier(0.32, 0.72, 0, 1); }
+.lyrics-exit { animation: slide-down 320ms cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+
+/* Glassy backdrop */
+.glass {
+  background: hsl(var(--sidebar) / 0.78);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+
+/* Floating player bar */
+.glass-floating {
+  background: hsl(var(--card) / 0.72);
+  backdrop-filter: saturate(180%) blur(28px);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  box-shadow:
+    0 1px 0 hsl(var(--foreground) / 0.04) inset,
+    0 0 0 0.5px hsl(var(--foreground) / 0.06),
+    0 18px 40px -16px rgb(0 0 0 / 0.55),
+    0 6px 18px -6px rgb(0 0 0 / 0.3);
+}
+
+/* Now-playing accent gradient */
+.now-playing-glow {
+  background: linear-gradient(135deg, hsl(0 75% 60% / 0.12), hsl(280 70% 60% / 0.12));
+}
