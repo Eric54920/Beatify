@@ -45,7 +45,7 @@ const en: Record<string, string> = {
   "page.settings.themeSystemHint": "Follow your macOS appearance.",
   "page.settings.language": "Language",
   "page.settings.about": "About",
-  "page.settings.version": "Beatify v0.1.0",
+  "page.settings.version": "Beatify v0.1.4",
 
   "side.combined.title": "Up Next & History",
   "side.queue.title": "Up Next",
@@ -57,8 +57,6 @@ const en: Record<string, string> = {
   "col.artist": "Artist",
   "col.album": "Album",
   "col.genre": "Genre",
-  "col.format": "Format",
-  "col.size": "Size",
   "col.time": "Time",
   "col.plays": "Plays",
 
@@ -117,7 +115,6 @@ const en: Record<string, string> = {
   "form.genre": "Genre",
   "form.year": "Year",
   "form.trackNumber": "Track #",
-  "form.file": "File",
 
   "dialog.webdav.title": "Add WebDAV server",
   "dialog.webdav.desc": "Beatify will list audio files on the server and add them to your library.",
@@ -194,8 +191,6 @@ const zh: Record<string, string> = {
   "col.artist": "艺人",
   "col.album": "专辑",
   "col.genre": "流派",
-  "col.format": "格式",
-  "col.size": "大小",
   "col.time": "时长",
   "col.plays": "播放次数",
 
@@ -254,7 +249,6 @@ const zh: Record<string, string> = {
   "form.genre": "流派",
   "form.year": "年份",
   "form.trackNumber": "曲目号",
-  "form.file": "文件",
 
   "dialog.webdav.title": "添加 WebDAV 服务器",
   "dialog.webdav.desc": "Beatify 会列出服务器上的音频文件并添加到资料库。",
@@ -263,9 +257,6 @@ const zh: Record<string, string> = {
   "dialog.editInfo.title": "编辑信息",
   "dialog.editInfo.local": "更改会写入文件标签。",
   "dialog.editInfo.remote": "更改只会保存在本地资料库（远程源）。",
-
-  "lyrics.notFound": "该曲目暂无歌词。",
-  "lyrics.close": "关闭歌词",
 
   "common.nothingPlaying": "暂未播放",
   "common.startHint": "添加文件夹或 WebDAV 服务器以开始",
