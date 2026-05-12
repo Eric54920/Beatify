@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "echo 'No tests specified'"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
