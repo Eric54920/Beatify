@@ -62,7 +62,7 @@
   html, body, #root {
     height: 100%;
     margin: 0;
-    background: hsl(var(--background));
+    background: transparent;
   }
   body {
     @apply text-foreground;
@@ -124,21 +124,19 @@
 
 /* Glassy backdrop */
 .glass {
-  background: hsl(var(--sidebar) / 0.78);
-  backdrop-filter: saturate(180%) blur(24px);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  background: hsl(var(--sidebar) / 0.55);
+  backdrop-filter: saturate(200%) blur(40px);
+  -webkit-backdrop-filter: saturate(200%) blur(40px);
 }
 
 /* Floating player bar */
 .glass-floating {
-  background: hsl(var(--card) / 0.72);
-  backdrop-filter: saturate(180%) blur(28px);
-  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  background: rgb(255 255 255 / 0.35);
+  backdrop-filter: saturate(200%) blur(40px);
+  -webkit-backdrop-filter: saturate(200%) blur(40px);
   box-shadow:
     0 1px 0 hsl(var(--foreground) / 0.04) inset,
-    0 0 0 0.5px hsl(var(--foreground) / 0.06),
-    0 18px 40px -16px rgb(0 0 0 / 0.55),
-    0 6px 18px -6px rgb(0 0 0 / 0.3);
+    0 0 0 0.5px hsl(var(--foreground) / 0.08);
 }
 
 /* Now-playing accent gradient */

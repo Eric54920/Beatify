@@ -59,7 +59,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative flex h-full flex-col bg-background">
+    <div className="relative flex h-full flex-col">
       {/* Drag handle — empty div + native pointerdown listener above. */}
       <div
         data-tauri-drag-region
@@ -68,7 +68,7 @@ export default function App() {
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <Sidebar />
-        <main className="relative flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden">
+        <main className="relative flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden bg-background">
           {view === "library" && <LibraryView />}
           {view === "albums" && <AlbumsView />}
           {view === "artists" && <ArtistsView />}

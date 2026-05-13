@@ -97,7 +97,7 @@ export function TrackList({
   if (variant === "compact") {
     return (
       <div className="flex h-full flex-col">
-        <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-3">
+        <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-20">
           {sorted.map((track) => {
             const playing = currentTrack?.id === track.id;
             return (
@@ -172,7 +172,7 @@ export function TrackList({
 
   return (
     <div className="flex h-full flex-col min-h-0">
-      <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+      <div className="flex-1 min-h-0 overflow-y-auto pb-20">
         <div className="sticky top-0 z-10 grid grid-cols-[44px_36px_minmax(0,3fr)_minmax(0,2fr)_minmax(0,2fr)_64px_80px_60px_60px_44px] items-center gap-3 border-b border-border/40 bg-background px-6 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         <div />
         <div />

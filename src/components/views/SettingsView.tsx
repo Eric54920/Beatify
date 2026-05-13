@@ -43,7 +43,7 @@ export function SettingsView() {
         </h1>
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-8 pb-6">
+      <div className="flex-1 min-h-0 overflow-y-auto px-8 pb-20">
         <div className="mx-auto max-w-2xl space-y-8">
           <Section title={t("page.settings.appearance")}>
             <Field label={t("page.settings.theme")}>
