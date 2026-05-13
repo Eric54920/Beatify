@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -130,6 +129,10 @@ export function LyricsOverlay() {
   const hasLyrics = !!(lyrics && lyrics.lines.length > 0);
   // Right pane is shown while we look the lyrics up too, so the layout doesn't flicker.
   const showRightPane = !!currentTrack && (loadingLyrics || hasLyrics);
+
+  const onSeekToLine = useCallback((timeMs: number | null) => {
+    if (timeMs != null) seek(timeMs);
+  }, [seek]);
 
   const [scrubbing, setScrubbing] = useState<number | null>(null);
   const sliderValue = scrubbing ?? positionMs;
@@ -320,9 +323,7 @@ export function LyricsOverlay() {
               <LyricsList
                 lyrics={lyrics!}
                 activeIdx={activeIdx}
-                onSeekToLine={(timeMs) => {
-                  if (timeMs != null) seek(timeMs);
-                }}
+                onSeekToLine={onSeekToLine}
               />
             ) : null}
           </section>
@@ -355,44 +356,112 @@ function LyricsList({
   onSeekToLine: (timeMs: number | null) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
-  const [offsetY, setOffsetY] = useState(0);
+  const isManualRef = useRef(false);
+  const manualDeltaRef = useRef(0);
+  const autoOffsetRef = useRef(0);
+  const resumeRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const recalc = useCallback(() => {
+  // Direct DOM write — zero React re-render during scroll
+  const applyTransform = useCallback((animated: boolean) => {
+    const el = innerRef.current;
+    if (!el) return;
+    el.style.transition = animated
+      ? "transform 900ms cubic-bezier(0.4, 0, 0.2, 1)"
+      : "none";
+    el.style.transform = `translate3d(0, ${autoOffsetRef.current + manualDeltaRef.current}px, 0)`;
+  }, []);
+
+  const calcAuto = useCallback(() => {
     const container = containerRef.current;
-    if (!container) return;
-    if (activeIdx < 0) {
-      setOffsetY(0);
-      return;
-    }
+    if (!container || activeIdx < 0) return 0;
     const line = lineRefs.current.get(activeIdx);
-    if (!line) return;
-    const center = container.clientHeight / 2;
-    const lineCenter = line.offsetTop + line.offsetHeight / 2;
-    setOffsetY(center - lineCenter);
+    if (!line) return 0;
+    return container.clientHeight / 2 - (line.offsetTop + line.offsetHeight / 2);
   }, [activeIdx]);
 
-  useLayoutEffect(() => {
-    recalc();
-  }, [recalc, lyrics]);
+  // Keep a stable ref so the resume timeout always uses the latest active line
+  const calcAutoRef = useRef(calcAuto);
+  useEffect(() => { calcAutoRef.current = calcAuto; }, [calcAuto]);
+
+  // When lyrics change (new song): snap to position immediately, reset manual state.
+  useEffect(() => {
+    isManualRef.current = false;
+    manualDeltaRef.current = 0;
+    autoOffsetRef.current = calcAutoRef.current();
+    applyTransform(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lyrics, applyTransform]);
+
+  // When active line changes: smooth animated scroll.
+  // useEffect (not useLayoutEffect) so the browser has already painted the previous
+  // position — CSS transition then correctly animates from that committed state.
+  useEffect(() => {
+    if (!isManualRef.current) {
+      autoOffsetRef.current = calcAuto();
+      applyTransform(true);
+    }
+  }, [calcAuto, applyTransform]);
 
   useEffect(() => {
-    const ro = new ResizeObserver(() => recalc());
+    const ro = new ResizeObserver(() => {
+      if (!isManualRef.current) {
+        autoOffsetRef.current = calcAuto();
+        applyTransform(false);
+      }
+    });
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
-  }, [recalc]);
+  }, [calcAuto, applyTransform]);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    isManualRef.current = true;
+    manualDeltaRef.current -= e.deltaY;
+    applyTransform(false);
+
+    clearTimeout(resumeRef.current);
+    resumeRef.current = setTimeout(() => {
+      isManualRef.current = false;
+      manualDeltaRef.current = 0;
+      autoOffsetRef.current = calcAutoRef.current();
+      applyTransform(true);
+    }, 3000);
+  };
+
+  const handleLineClick = useCallback((idx: number, timeMs: number | null) => {
+    // Keep isManualRef.current = true so useLayoutEffect cannot override the
+    // clicked-line position while the backend seek is still in flight.
+    clearTimeout(resumeRef.current);
+    manualDeltaRef.current = 0;
+    isManualRef.current = true;
+    const container = containerRef.current;
+    const line = lineRefs.current.get(idx);
+    if (container && line) {
+      autoOffsetRef.current =
+        container.clientHeight / 2 - (line.offsetTop + line.offsetHeight / 2);
+      applyTransform(true);
+    }
+    onSeekToLine(timeMs);
+    // Resume auto-scroll after the seek has had time to take effect.
+    resumeRef.current = setTimeout(() => {
+      isManualRef.current = false;
+      manualDeltaRef.current = 0;
+      autoOffsetRef.current = calcAutoRef.current();
+      applyTransform(true);
+    }, 2000);
+  }, [applyTransform, onSeekToLine]);
 
   return (
     <div
       ref={containerRef}
+      onWheel={handleWheel}
       className="h-full w-full overflow-hidden px-12 pt-[calc(var(--titlebar-height)+24px)]"
     >
       <div
+        ref={innerRef}
         className="will-change-transform"
-        style={{
-          transform: `translate3d(0, ${offsetY}px, 0)`,
-          transition: "transform 600ms cubic-bezier(0.22, 1, 0.36, 1)",
-        }}
       >
         {lyrics.lines.map((line, idx) => {
           const active = idx === activeIdx;
@@ -416,16 +485,16 @@ function LyricsList({
               ref={(el) => {
                 lineRefs.current.set(idx, el);
               }}
-              onClick={() => onSeekToLine(line.time_ms)}
+              onClick={() => handleLineClick(idx, line.time_ms)}
               className={cn(
-                "origin-left cursor-pointer select-none py-5 text-2xl font-medium leading-snug text-white",
+                "origin-left cursor-pointer select-none py-4 text-3xl font-medium leading-snug text-white",
                 active && "font-bold drop-shadow"
               )}
               style={{
-                transform: active ? "scale(1.28)" : "scale(1)",
+                transform: active ? "scale(1.18)" : "scale(1)",
                 opacity,
                 transition:
-                  "transform 500ms cubic-bezier(0.22,1,0.36,1), opacity 500ms ease, color 300ms ease",
+                  "transform 1200ms cubic-bezier(0.4,0,0.2,1), opacity 1200ms cubic-bezier(0.4,0,0.2,1)",
               }}
             >
               {line.text || " "}

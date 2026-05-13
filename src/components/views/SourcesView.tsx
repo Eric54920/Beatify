@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Folder,
   Trash2,
@@ -7,7 +7,11 @@ import {
   Globe,
   HardDrive,
   Cloud,
+  Activity,
+  Pencil,
 } from "lucide-react";
+import type { RemoteSource } from "@/types";
+import { SpeedTestDialog } from "@/components/SpeedTestDialog";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +37,14 @@ export function SourcesView() {
   const { toast } = useToast();
   const confirm = useConfirm();
   const [webdavOpen, setWebdavOpen] = useState(false);
+  const [editing, setEditing] = useState<RemoteSource | null>(null);
   const [scanning, setScanning] = useState<number | "all" | null>(null);
+  const [speedTest, setSpeedTest] = useState<{
+    open: boolean;
+    title: string;
+    folderPath?: string;
+    sourceId?: number;
+  }>({ open: false, title: "" });
 
   const onAddFolder = async () => {
     try {
@@ -81,7 +92,7 @@ export function SourcesView() {
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-8 pb-6">
+      <div className="flex-1 min-h-0 overflow-y-auto px-8 pb-20">
         <Section title={t("page.sources.localFolders")} icon={HardDrive}>
           {folders.length === 0 && (
             <EmptyHint text={t("page.sources.emptyFolders")} />
@@ -100,6 +111,15 @@ export function SourcesView() {
                 addedLabel={t("page.sources.added", {
                   date: new Date(f.added_at).toLocaleDateString(),
                 })}
+                actionIcon={<Activity className="h-4 w-4" />}
+                actionTitle={t("speedtest.title")}
+                onAction={() =>
+                  setSpeedTest({
+                    open: true,
+                    title: f.path.split("/").filter(Boolean).pop() ?? f.path,
+                    folderPath: f.path,
+                  })
+                }
                 onRemove={async () => {
                   const ok = await confirm({
                     title: t("confirm.removeFolder.title"),
@@ -138,15 +158,21 @@ export function SourcesView() {
                 addedLabel={t("page.sources.added", {
                   date: new Date(s.added_at).toLocaleDateString(),
                 })}
-                actionIcon={
+                actionIcon={<Pencil className="h-4 w-4" />}
+                actionTitle={t("action.editWebdav")}
+                onAction={() => setEditing(s)}
+                action3Icon={<Activity className="h-4 w-4" />}
+                action3Title={t("speedtest.title")}
+                onAction3={() =>
+                  setSpeedTest({ open: true, title: s.name, sourceId: s.id })
+                }
+                action2Icon={
                   <RefreshCw
-                    className={`h-4 w-4 ${
-                      scanning === s.id ? "animate-spin" : ""
-                    }`}
+                    className={`h-4 w-4 ${scanning === s.id ? "animate-spin" : ""}`}
                   />
                 }
-                actionTitle={t("action.sync")}
-                onAction={async () => {
+                action2Title={t("action.sync")}
+                onAction2={async () => {
                   setScanning(s.id);
                   try {
                     const n = await api.syncRemoteSource(s.id);
@@ -181,6 +207,17 @@ export function SourcesView() {
       </div>
 
       <WebdavDialog open={webdavOpen} onOpenChange={setWebdavOpen} />
+      <WebdavEditDialog
+        source={editing}
+        onOpenChange={(o) => { if (!o) setEditing(null); }}
+      />
+      <SpeedTestDialog
+        open={speedTest.open}
+        onOpenChange={(o) => setSpeedTest((s) => ({ ...s, open: o }))}
+        title={speedTest.title}
+        folderPath={speedTest.folderPath}
+        sourceId={speedTest.sourceId}
+      />
     </div>
   );
 }
@@ -224,6 +261,12 @@ function SourceCard({
   onAction,
   actionIcon,
   actionTitle,
+  onAction2,
+  action2Icon,
+  action2Title,
+  onAction3,
+  action3Icon,
+  action3Title,
 }: {
   title: string;
   subtitle: string;
@@ -234,7 +277,19 @@ function SourceCard({
   onAction?: () => void;
   actionIcon?: React.ReactNode;
   actionTitle?: string;
+  onAction2?: () => void;
+  action2Icon?: React.ReactNode;
+  action2Title?: string;
+  onAction3?: () => void;
+  action3Icon?: React.ReactNode;
+  action3Title?: string;
 }) {
+  const extraActions = [
+    { handler: onAction, icon: actionIcon, title: actionTitle },
+    { handler: onAction2, icon: action2Icon, title: action2Title },
+    { handler: onAction3, icon: action3Icon, title: action3Title },
+  ].filter((a) => !!a.handler);
+
   return (
     <div className="group flex items-center justify-between rounded-xl border bg-card px-4 py-3 transition-colors hover:bg-foreground/[0.03]">
       <div className="flex min-w-0 items-center gap-3">
@@ -243,26 +298,25 @@ function SourceCard({
         </div>
         <div className="min-w-0">
           <div className="truncate text-sm font-medium">{title}</div>
-          <div className="truncate text-xs text-muted-foreground">
-            {subtitle}
-          </div>
+          <div className="truncate text-xs text-muted-foreground">{subtitle}</div>
           <div className="mt-0.5 text-[11px] text-muted-foreground/80">
             {meta} · {addedLabel}
           </div>
         </div>
       </div>
       <div className="flex items-center gap-1">
-        {onAction && (
+        {extraActions.map((a, i) => (
           <Button
+            key={i}
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            title={actionTitle}
-            onClick={onAction}
+            title={a.title}
+            onClick={a.handler}
           >
-            {actionIcon}
+            {a.icon}
           </Button>
-        )}
+        ))}
         <Button
           variant="ghost"
           size="icon"
@@ -361,6 +415,101 @@ function WebdavDialog({
           </Button>
           <Button onClick={onSubmit} disabled={submitting}>
             {submitting ? t("action.adding") : t("action.add")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function WebdavEditDialog({
+  source,
+  onOpenChange,
+}: {
+  source: RemoteSource | null;
+  onOpenChange: (o: boolean) => void;
+}) {
+  const t = useT();
+  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const open = source !== null;
+
+  useEffect(() => {
+    if (source) {
+      setName(source.name);
+      setUrl(source.url);
+      setUsername(source.username ?? "");
+      setPassword("");
+    }
+  }, [source]);
+
+  const onSubmit = async () => {
+    if (!source || !url.trim()) return;
+    setSubmitting(true);
+    try {
+      await api.updateWebdavSource({
+        id: source.id,
+        name: name.trim() || new URL(url.trim()).host,
+        url: url.trim(),
+        username: username || undefined,
+        password: password || undefined,
+      });
+      toast({ title: t("action.editWebdav"), description: name.trim() || url.trim() });
+      onOpenChange(false);
+    } catch (e: any) {
+      toast({ title: t("action.editWebdav"), description: e?.toString() });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("dialog.editWebdav.title")}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <Field label={t("form.displayName")}>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Field>
+          <Field label={t("form.serverUrl")}>
+            <Input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t("form.username")}>
+              <Input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </Field>
+            <Field label={t("form.password")}>
+              <Input
+                type="password"
+                placeholder={t("form.passwordKeep")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Field>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t("action.cancel")}
+          </Button>
+          <Button onClick={onSubmit} disabled={submitting}>
+            {submitting ? t("action.saving") : t("action.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

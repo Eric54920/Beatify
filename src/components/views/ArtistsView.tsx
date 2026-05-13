@@ -121,7 +121,7 @@ export function ArtistsView() {
                 tracks: totalTracks,
               })}
             />
-            <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+            <div className="flex-1 min-h-0 overflow-y-auto pb-20">
               {albumSections.map((section) => (
                 <AlbumSectionRow
                   key={section.album}
@@ -162,7 +162,7 @@ function ArtistList({
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         <p className="mt-0.5 text-xs text-muted-foreground">{countLabel}</p>
       </header>
-      <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-20">
         {artists.length === 0 ? (
           <div className="flex h-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
             {emptyLabel}

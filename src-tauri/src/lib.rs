@@ -20,6 +20,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let state = AppState::initialize(app.handle().clone())?;
             app.manage(state);
@@ -34,6 +35,7 @@ pub fn run() {
             commands::rescan_library,
             commands::list_remote_sources,
             commands::add_webdav_source,
+            commands::update_webdav_source,
             commands::remove_remote_source,
             commands::sync_remote_source,
             commands::sync_all_remote_sources,
@@ -56,6 +58,9 @@ pub fn run() {
             commands::update_track_metadata,
             commands::get_cover_art,
             commands::get_lyrics,
+            commands::speed_test_source,
+            commands::check_update,
+            commands::install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

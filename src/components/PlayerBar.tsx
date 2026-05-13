@@ -38,6 +38,8 @@ export function PlayerBar() {
   } = usePlayer();
 
   const [scrubbing, setScrubbing] = useState<number | null>(null);
+  const [scrubHover, setScrubHover] = useState(false);
+  const clearScrubTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [lastVolume, setLastVolume] = useState(volume);
   const t = useT();
   const shuffle = useSettings((s) => s.shuffle);
@@ -51,179 +53,154 @@ export function PlayerBar() {
 
   const sliderValue = scrubbing != null ? scrubbing : positionMs;
   const muted = volume === 0;
+  const scrubActive = scrubHover || scrubbing !== null;
 
   return (
-    <div data-no-drag className="shrink-0 px-3 pb-3 pt-1">
-      <div className="glass-floating flex h-[64px] items-center gap-2 rounded-2xl pl-2 pr-3">
-        {/* Transport */}
-        <div className="flex items-center gap-0.5">
-          <IconBtn onClick={previous} title={t("tooltip.previous")}>
-            <SkipBack className="h-[20px] w-[20px] fill-current" />
-          </IconBtn>
-          <button
-            onClick={togglePlay}
-            disabled={!currentTrack}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
-            title={isPlaying ? t("tooltip.pause") : t("tooltip.play")}
-          >
-            {isPlaying ? (
-              <Pause className="h-5 w-5 fill-current" />
-            ) : (
-              <Play className="ml-0.5 h-5 w-5 fill-current" />
-            )}
-          </button>
-          <IconBtn onClick={next} title={t("tooltip.next")}>
-            <SkipForward className="h-[20px] w-[20px] fill-current" />
-          </IconBtn>
-        </div>
+    <div data-no-drag className="absolute inset-x-0 bottom-0 z-10 px-3 py-2">
+      <div className="glass-floating overflow-hidden rounded-full">
+        <div className="flex items-center gap-2 px-4 py-1.5">
 
-        {/* Now playing block — cover on the left, two stacked rows on the right */}
-        <div className="flex h-full min-w-0 flex-1 items-center gap-3 px-2">
-          <CoverArt
-            trackId={currentTrack?.id}
-            hasCover={currentTrack?.has_cover}
-            size={44}
-            className="rounded-md shadow-sm"
-          />
-          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-            {/* Row 1: title · artist · album */}
-            <div className="flex min-w-0 items-baseline gap-1.5">
-              {currentTrack ? (
-                <>
-                  <span className="truncate text-[12.5px] font-semibold leading-tight">
-                    {currentTrack.title}
-                  </span>
-                  {currentTrack.artist && (
-                    <>
-                      <span className="text-[11px] text-muted-foreground/60">·</span>
-                      <span className="truncate text-[11px] text-muted-foreground">
-                        {currentTrack.artist}
-                      </span>
-                    </>
-                  )}
-                  {currentTrack.album && (
-                    <>
-                      <span className="text-[11px] text-muted-foreground/60">·</span>
-                      <span className="truncate text-[11px] text-muted-foreground">
-                        {currentTrack.album}
-                      </span>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  <span className="truncate text-[12.5px] font-semibold leading-tight">
-                    {t("common.nothingPlaying")}
-                  </span>
-                  <span className="truncate text-[11px] text-muted-foreground">
-                    {t("common.startHint")}
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Row 2: scrubber · elapsed/duration (both times right of the bar) */}
-            <div className="flex items-center gap-3 text-[10px] tabular-nums text-muted-foreground/80">
-              <ScrubBar
-                value={sliderValue}
-                max={Math.max(durationMs, 1)}
-                disabled={!currentTrack}
-                onChange={(v) => setScrubbing(v)}
-                onCommit={(v) => {
-                  setScrubbing(null);
-                  seek(v);
-                }}
-              />
-              <span className="shrink-0 whitespace-nowrap">
-                {formatTime(sliderValue)}
-                <span className="px-1 opacity-50">/</span>
-                {formatTime(durationMs)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right actions */}
-        <div className="flex items-center gap-0.5">
-          <IconBtn
-            title={shuffle ? t("tooltip.shuffleOn") : t("tooltip.shuffleOff")}
-            active={shuffle}
-            onClick={toggleShuffle}
-          >
-            <Shuffle className="h-[18px] w-[18px]" />
-          </IconBtn>
-          <IconBtn
-            title={
-              repeat === "off"
-                ? t("tooltip.repeatOff")
-                : repeat === "all"
-                ? t("tooltip.repeatAll")
-                : t("tooltip.repeatOne")
-            }
-            active={repeat !== "off"}
-            onClick={cycleRepeat}
-          >
-            {repeat === "one" ? (
-              <Repeat1 className="h-[18px] w-[18px]" />
-            ) : (
-              <Repeat className="h-[18px] w-[18px]" />
-            )}
-          </IconBtn>
-          <IconBtn
-            title={t("tooltip.lyrics")}
-            active={lyricsOpen}
-            onClick={toggleLyrics}
-            disabled={!currentTrack}
-          >
-            <Mic2 className="h-[18px] w-[18px]" />
-          </IconBtn>
-          <IconBtn
-            title={t("side.combined.title")}
-            active={panelOpen}
-            onClick={togglePanel}
-          >
-            <ListMusic className="h-[18px] w-[18px]" />
-          </IconBtn>
-          <div className="ml-2 flex items-center gap-1.5 pl-2 border-l border-foreground/10">
+          {/* ── Left: transport ── */}
+          <div className="flex shrink-0 items-center gap-0.5">
+            <IconBtn onClick={previous} title={t("tooltip.previous")} className="text-black hover:text-black">
+              <SkipBack className="h-5 w-5 fill-current" />
+            </IconBtn>
             <button
-              onClick={() => setVolume(muted ? lastVolume || 0.5 : 0)}
-              className="text-muted-foreground hover:text-foreground"
-              title={muted ? t("tooltip.unmute") : t("tooltip.mute")}
+              onClick={togglePlay}
+              disabled={!currentTrack}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-black transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+              title={isPlaying ? t("tooltip.pause") : t("tooltip.play")}
             >
-              {muted ? (
-                <VolumeX className="h-[18px] w-[18px]" />
-              ) : (
-                <Volume2 className="h-[18px] w-[18px]" />
-              )}
+              {isPlaying
+                ? <Pause className="h-6 w-6 fill-current" />
+                : <Play className="ml-0.5 h-6 w-6 fill-current" />}
             </button>
-            <Slider
-              min={0}
-              max={1}
-              step={0.01}
-              value={[volume]}
-              onValueChange={([v]) => setVolume(v)}
-              className="w-20"
-            />
+            <IconBtn onClick={next} title={t("tooltip.next")} className="text-black hover:text-black">
+              <SkipForward className="h-5 w-5 fill-current" />
+            </IconBtn>
           </div>
+
+          {/* ── Center: cover + info + scrub ── */}
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-2">
+
+            {/* Cover + title / artist (blurs when scrubbing) */}
+            <div
+              className={cn(
+                "flex items-center gap-2 transition-all duration-200",
+                scrubActive && "pointer-events-none select-none opacity-30 blur-sm"
+              )}
+            >
+              <CoverArt
+                trackId={currentTrack?.id}
+                hasCover={currentTrack?.has_cover}
+                size={38}
+                className="shrink-0 rounded-md shadow-sm"
+              />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[14px] font-semibold leading-snug">
+                  {currentTrack ? currentTrack.title : t("common.nothingPlaying")}
+                </span>
+                <span className="truncate text-[12px] leading-snug text-foreground/60">
+                  {currentTrack
+                    ? [currentTrack.artist, currentTrack.album].filter(Boolean).join(" · ")
+                    : t("common.startHint")}
+                </span>
+              </div>
+            </div>
+
+            {/* Progress bar — tooltip is absolute inside, zero layout impact */}
+            <ScrubBar
+              value={sliderValue}
+              max={Math.max(durationMs, 1)}
+              disabled={!currentTrack}
+              forceExpanded={scrubActive}
+              onChange={(v) => setScrubbing(v)}
+              onCommit={(v) => {
+                seek(v);
+                clearTimeout(clearScrubTimerRef.current);
+                clearScrubTimerRef.current = setTimeout(
+                  () => setScrubbing((prev) => (prev === v ? null : prev)),
+                  1500
+                );
+              }}
+              onHoverChange={setScrubHover}
+              startLabel={formatTime(sliderValue)}
+              endLabel={formatTime(durationMs)}
+            />
+
+          </div>
+
+          {/* ── Right: action controls ── */}
+          <div className="flex shrink-0 items-center gap-0.5">
+            <IconBtn
+              title={shuffle ? t("tooltip.shuffleOn") : t("tooltip.shuffleOff")}
+              active={shuffle}
+              onClick={toggleShuffle}
+            >
+              <Shuffle className="h-[17px] w-[17px]" />
+            </IconBtn>
+            <IconBtn
+              title={
+                repeat === "off" ? t("tooltip.repeatOff")
+                : repeat === "all" ? t("tooltip.repeatAll")
+                : t("tooltip.repeatOne")
+              }
+              active={repeat !== "off"}
+              onClick={cycleRepeat}
+            >
+              {repeat === "one"
+                ? <Repeat1 className="h-[17px] w-[17px]" />
+                : <Repeat className="h-[17px] w-[17px]" />}
+            </IconBtn>
+            <IconBtn
+              title={t("tooltip.lyrics")}
+              active={lyricsOpen}
+              onClick={toggleLyrics}
+              disabled={!currentTrack}
+            >
+              <Mic2 className="h-[17px] w-[17px]" />
+            </IconBtn>
+            <IconBtn
+              title={t("side.combined.title")}
+              active={panelOpen}
+              onClick={togglePanel}
+            >
+              <ListMusic className="h-[17px] w-[17px]" />
+            </IconBtn>
+            <div className="ml-2 flex items-center gap-1.5 border-l border-foreground/10 pl-2">
+              <button
+                onClick={() => setVolume(muted ? lastVolume || 0.5 : 0)}
+                className="text-foreground/80 hover:text-foreground"
+                title={muted ? t("tooltip.unmute") : t("tooltip.mute")}
+              >
+                {muted
+                  ? <VolumeX className="h-[17px] w-[17px]" />
+                  : <Volume2 className="h-[17px] w-[17px]" />}
+              </button>
+              <Slider
+                min={0} max={1} step={0.01}
+                value={[volume]}
+                onValueChange={([v]) => setVolume(v)}
+                className="w-20"
+              />
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
   );
 }
 
-/** Pointer-driven inline progress / scrubber. */
 function ScrubBar({
-  value,
-  max,
-  disabled,
-  onChange,
-  onCommit,
+  value, max, disabled, onChange, onCommit, forceExpanded, onHoverChange, startLabel, endLabel,
 }: {
-  value: number;
-  max: number;
-  disabled?: boolean;
-  onChange: (v: number) => void;
-  onCommit: (v: number) => void;
+  value: number; max: number; disabled?: boolean;
+  onChange: (v: number) => void; onCommit: (v: number) => void;
+  forceExpanded?: boolean;
+  onHoverChange?: (h: boolean) => void;
+  startLabel?: string;
+  endLabel?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -231,9 +208,8 @@ function ScrubBar({
 
   const valueAtX = (x: number) => {
     if (!ref.current) return value;
-    const rect = ref.current.getBoundingClientRect();
-    const ratio = Math.min(1, Math.max(0, (x - rect.left) / rect.width));
-    return ratio * max;
+    const { left, width } = ref.current.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (x - left) / width)) * max;
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -253,49 +229,59 @@ function ScrubBar({
     onCommit(valueAtX(e.clientX));
   };
 
+  const handleHover = (h: boolean) => {
+    setHover(h);
+    onHoverChange?.(h);
+  };
+
   const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
-  const tall = hover || dragging;
+  const tall = hover || dragging || forceExpanded;
 
   return (
+    // Fixed h-3 hit area — height never changes, no reflow
     <div
       ref={ref}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      onMouseEnter={() => handleHover(true)}
+      onMouseLeave={() => handleHover(false)}
       className={cn(
-        "flex h-3 flex-1 cursor-pointer items-center",
+        "relative h-1 w-full cursor-pointer",
         disabled && "pointer-events-none opacity-60"
       )}
     >
+      {/* Tooltip — absolute above the track, zero layout contribution */}
       <div
         className={cn(
-          "w-full overflow-hidden rounded-full transition-all",
-          tall ? "h-[4px] bg-foreground/15" : "h-[3px] bg-foreground/[0.10]"
+          "pointer-events-none absolute bottom-full left-0 right-0 flex justify-between pb-0.5 text-[11px] tabular-nums text-foreground/60 transition-opacity duration-150",
+          tall ? "opacity-100" : "opacity-0"
         )}
       >
-        <div
-          className="h-full rounded-full bg-foreground/70"
-          style={{ width: `${pct}%` }}
-        />
+        <span>{startLabel}</span>
+        <span>{endLabel}</span>
+      </div>
+
+      {/* Visual track — absolute + centered; height change via inline style, no layout impact */}
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 overflow-hidden rounded-full bg-foreground/10 transition-all duration-150"
+        style={{ height: tall ? '6px' : '3px' }}
+      >
+        <div className="h-full rounded-full bg-foreground/70" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
 }
 
 function IconBtn({
-  children,
-  active,
-  className,
-  ...props
+  children, active, className, ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
   return (
     <button
       {...props}
       className={cn(
-        "flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent",
+        "flex h-8 w-8 items-center justify-center rounded-full text-foreground/80 transition-colors hover:bg-foreground/[0.08] hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent",
         active && "bg-foreground/[0.08] text-foreground",
         className
       )}
