@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🎵 Beatify
+<img src="./src-tauri/icons/icon.svg" alt="Beatify" width="100" style="border-radius:22px" />
+
+# Beatify
 
 **A modern, native desktop music player built with Tauri 2, Rust, and React.**
 
