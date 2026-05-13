@@ -16,6 +16,7 @@
     "core:path:default",
     "core:app:default",
     "dialog:default",
-    "opener:default"
+    "opener:default",
+    "updater:default"
   ]
 }

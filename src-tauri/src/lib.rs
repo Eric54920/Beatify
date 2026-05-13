@@ -20,6 +20,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let state = AppState::initialize(app.handle().clone())?;
             app.manage(state);
@@ -58,6 +59,8 @@ pub fn run() {
             commands::get_cover_art,
             commands::get_lyrics,
             commands::speed_test_source,
+            commands::check_update,
+            commands::install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

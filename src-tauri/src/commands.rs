@@ -1,4 +1,4 @@
-use std::io::{Read, Seek, SeekFrom};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -25,6 +25,14 @@ pub struct SpeedSample {
 pub struct SpeedTestDone {
     pub peak_kbps: f64,
     pub avg_kbps: f64,
+}
+
+#[derive(serde::Serialize)]
+pub struct UpdateInfo {
+    pub current_version: String,
+    pub latest_version: String,
+    pub has_update: bool,
+    pub release_url: String,
 }
 
 use crate::error::{AppError, AppResult};
@@ -702,4 +710,93 @@ pub async fn speed_test_source(
         samples.iter().sum::<f64>() / samples.len() as f64
     };
     Ok(SpeedTestDone { peak_kbps: peak, avg_kbps: avg })
+}
+
+// ---------- Update check ----------
+
+#[tauri::command]
+pub fn check_update() -> AppResult<UpdateInfo> {
+    let client = reqwest::blocking::Client::builder()
+        .user_agent(concat!("Beatify/", env!("CARGO_PKG_VERSION")))
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .map_err(AppError::Http)?;
+
+    let text = client
+        .get("https://api.github.com/repos/Eric54920/Beatify/releases/latest")
+        .send()?
+        .error_for_status()?
+        .text()?;
+
+    let body: serde_json::Value =
+        serde_json::from_str(&text).map_err(|e| AppError::Other(e.to_string()))?;
+
+    let tag = body["tag_name"].as_str().unwrap_or("").trim_start_matches('v');
+    let release_url = body["html_url"]
+        .as_str()
+        .unwrap_or("https://github.com/Eric54920/Beatify/releases")
+        .to_string();
+
+    let current = env!("CARGO_PKG_VERSION").to_string();
+    let has_update = !tag.is_empty() && version_gt(tag, &current);
+
+    Ok(UpdateInfo {
+        current_version: current,
+        latest_version: tag.to_string(),
+        has_update,
+        release_url,
+    })
+}
+
+fn version_gt(a: &str, b: &str) -> bool {
+    let parse = |s: &str| -> Vec<u64> {
+        s.split('.').filter_map(|p| p.parse().ok()).collect()
+    };
+    parse(a) > parse(b)
+}
+
+// ---------- Install update ----------
+
+#[derive(Clone, serde::Serialize)]
+pub struct DownloadProgress {
+    pub downloaded: u64,
+    pub total: Option<u64>,
+}
+
+#[tauri::command]
+pub async fn install_update(app: AppHandle) -> AppResult<()> {
+    use tauri_plugin_updater::UpdaterExt;
+
+    let updater = app
+        .updater_builder()
+        .build()
+        .map_err(|e| AppError::Other(e.to_string()))?;
+
+    let update = updater
+        .check()
+        .await
+        .map_err(|e| AppError::Other(e.to_string()))?
+        .ok_or_else(|| AppError::Other("no update available".into()))?;
+
+    let app_clone = app.clone();
+    let mut downloaded: u64 = 0;
+
+    update
+        .download_and_install(
+            move |chunk, total| {
+                downloaded += chunk as u64;
+                let _ = app_clone.emit(
+                    "update:progress",
+                    DownloadProgress {
+                        downloaded,
+                        total: total.map(|t| t as u64),
+                    },
+                );
+            },
+            || {},
+        )
+        .await
+        .map_err(|e| AppError::Other(e.to_string()))?;
+
+    app.restart();
 }

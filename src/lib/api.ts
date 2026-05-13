@@ -74,4 +74,14 @@ export const api = {
       folderPath: opts.folderPath ?? null,
       sourceId: opts.sourceId ?? null,
     }),
+
+  checkUpdate: () =>
+    invoke<{
+      current_version: string;
+      latest_version: string;
+      has_update: boolean;
+      release_url: string;
+    }>("check_update"),
+
+  installUpdate: () => invoke<void>("install_update"),
 };
