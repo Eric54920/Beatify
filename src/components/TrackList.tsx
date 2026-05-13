@@ -97,7 +97,7 @@ export function TrackList({
   if (variant === "compact") {
     return (
       <div className="flex h-full flex-col">
-        <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-3">
+        <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-20">
           {sorted.map((track) => {
             const playing = currentTrack?.id === track.id;
             return (
@@ -172,7 +172,9 @@ export function TrackList({
 
   return (
     <div className="flex h-full flex-col min-h-0">
-      <div className="grid shrink-0 grid-cols-[44px_minmax(0,3fr)_minmax(0,2fr)_minmax(0,2fr)_64px_80px_60px_60px_44px] items-center gap-3 border-b border-border/40 px-6 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex-1 min-h-0 overflow-y-auto pb-20">
+        <div className="sticky top-0 z-10 grid grid-cols-[44px_36px_minmax(0,3fr)_minmax(0,2fr)_minmax(0,2fr)_64px_80px_60px_60px_44px] items-center gap-3 border-b border-border/40 bg-background px-6 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <div />
         <div />
         {headerCols.map((c) => (
           <SortHeader
@@ -186,8 +188,7 @@ export function TrackList({
           />
         ))}
         <div />
-      </div>
-      <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+        </div>
         {sorted.map((track) => {
           const playing = currentTrack?.id === track.id;
           const plays = playCounts.get(track.id) ?? 0;
@@ -195,7 +196,7 @@ export function TrackList({
             <div
               key={track.id}
               className={cn(
-                "group grid grid-cols-[44px_minmax(0,3fr)_minmax(0,2fr)_minmax(0,2fr)_64px_80px_60px_60px_44px] items-center gap-3 px-6 py-1.5 transition-colors",
+                "group grid grid-cols-[44px_36px_minmax(0,3fr)_minmax(0,2fr)_minmax(0,2fr)_64px_80px_60px_60px_44px] items-center gap-3 px-6 py-1.5 transition-colors",
                 playing
                   ? "now-playing-glow"
                   : "hover:bg-foreground/[0.04]"
@@ -221,28 +222,26 @@ export function TrackList({
                 </Button>
               </div>
 
-              <div className="flex min-w-0 items-center gap-3">
-                <CoverArt
-                  trackId={track.id}
-                  hasCover={track.has_cover}
-                  size={36}
-                  className="rounded-md shadow-sm"
-                />
-                <div className="min-w-0">
-                  <div
-                    className={cn(
-                      "truncate text-sm font-medium",
-                      playing && "text-rose-400"
-                    )}
-                  >
-                    {track.title}
-                    {track.source === "remote" && (
-                      <Cloud className="ml-1 inline h-3 w-3 text-muted-foreground" />
-                    )}
-                    {track.missing && (
-                      <AlertCircle className="ml-1 inline h-3 w-3 text-destructive" />
-                    )}
-                  </div>
+              <CoverArt
+                trackId={track.id}
+                hasCover={track.has_cover}
+                size={36}
+                className="rounded-md shadow-sm"
+              />
+              <div className="min-w-0">
+                <div
+                  className={cn(
+                    "truncate text-sm font-medium",
+                    playing && "text-rose-400"
+                  )}
+                >
+                  {track.title}
+                  {track.source === "remote" && (
+                    <Cloud className="ml-1 inline h-3 w-3 text-muted-foreground" />
+                  )}
+                  {track.missing && (
+                    <AlertCircle className="ml-1 inline h-3 w-3 text-destructive" />
+                  )}
                 </div>
               </div>
 

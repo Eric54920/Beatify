@@ -186,6 +186,22 @@ impl Db {
         .map_err(Into::into)
     }
 
+    pub fn update_remote_source(
+        &self,
+        id: i64,
+        name: &str,
+        url: &str,
+        username: Option<&str>,
+        password: Option<&str>,
+    ) -> AppResult<()> {
+        let conn = self.conn.lock();
+        conn.execute(
+            "UPDATE remote_sources SET name=?1, url=?2, username=?3, password=?4 WHERE id=?5",
+            params![name, url, username, password, id],
+        )?;
+        Ok(())
+    }
+
     pub fn remove_remote_source(&self, id: i64) -> AppResult<()> {
         let conn = self.conn.lock();
         conn.execute("DELETE FROM remote_sources WHERE id = ?1", params![id])?;

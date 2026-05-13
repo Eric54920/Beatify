@@ -86,10 +86,12 @@ impl AudioEngine {
     pub fn play(&self, db: &Db, track: Track) -> AppResult<()> {
         let input = open_input(db, &track)?;
         let decoder = Decoder::new(input).map_err(|e| AppError::Audio(e.to_string()))?;
-        let total_duration_ms = decoder
-            .total_duration()
-            .map(|d| d.as_millis() as u64)
-            .unwrap_or_else(|| track.duration_ms.unwrap_or(0));
+        let total_duration_ms = track.duration_ms.unwrap_or_else(|| {
+            decoder
+                .total_duration()
+                .map(|d| d.as_millis() as u64)
+                .unwrap_or(0)
+        });
 
         let mut g = self.inner.lock();
         if let Some(sink) = g.sink.take() {
@@ -175,7 +177,7 @@ impl AudioEngine {
         Ok(())
     }
 
-    pub fn seek(&self, db: &Db, position_ms: u64) -> AppResult<()> {
+    pub fn seek(&self, db: Arc<Db>, position_ms: u64) -> AppResult<()> {
         let track = {
             let g = self.inner.lock();
             match g.current_track.clone() {
@@ -183,50 +185,94 @@ impl AudioEngine {
                 None => return Ok(()),
             }
         };
-        // Try in-place seek first.
-        {
-            let g = self.inner.lock();
-            if let Some(sink) = &g.sink {
-                let target = Duration::from_millis(position_ms);
-                if sink.try_seek(target).is_ok() {
-                    drop(g);
-                    let mut g = self.inner.lock();
-                    g.base_position_ms = position_ms;
-                    g.started_at = Some(Instant::now());
-                    g.paused_at = None;
-                    drop(g);
-                    self.emit_state();
-                    return Ok(());
-                }
-            }
-        }
-        // Fallback: rebuild source and skip.
-        let input = open_input(db, &track)?;
-        let decoder = Decoder::new(input).map_err(|e| AppError::Audio(e.to_string()))?;
-        let total_duration_ms = decoder
-            .total_duration()
-            .map(|d| d.as_millis() as u64)
-            .unwrap_or_else(|| track.duration_ms.unwrap_or(0));
-        let skipped = decoder.skip_duration(Duration::from_millis(position_ms));
 
-        let mut g = self.inner.lock();
-        if let Some(sink) = g.sink.take() {
-            sink.stop();
+        // Optimistically update the position display so the UI feels instant.
+        {
+            let mut g = self.inner.lock();
+            g.base_position_ms = position_ms;
+            g.started_at = Some(Instant::now());
+            g.paused_at = None;
+            // Bump generation so the old progress task stops immediately.
+            g.progress_generation = g.progress_generation.wrapping_add(1);
         }
-        let new_sink = Sink::try_new(&self.handle).map_err(|e| AppError::Audio(e.to_string()))?;
-        new_sink.set_volume(g.volume);
-        new_sink.append(skipped);
-        new_sink.play();
-        g.sink = Some(new_sink);
-        g.base_position_ms = position_ms;
-        g.duration_ms = total_duration_ms;
-        g.started_at = Some(Instant::now());
-        g.paused_at = None;
-        g.progress_generation = g.progress_generation.wrapping_add(1);
-        let gen = g.progress_generation;
-        drop(g);
-        self.spawn_progress_task(gen);
         self.emit_state();
+
+        let inner = self.inner.clone();
+        let app = self.app.clone();
+        let handle = self.handle.clone();
+
+        std::thread::spawn(move || {
+            // Try in-place seek first (fast path).
+            let fast_ok = {
+                let g = inner.lock();
+                if let Some(sink) = &g.sink {
+                    sink.try_seek(Duration::from_millis(position_ms)).is_ok()
+                } else {
+                    false
+                }
+            };
+
+            if fast_ok {
+                let gen = {
+                    let g = inner.lock();
+                    g.progress_generation
+                };
+                spawn_progress_task_static(gen, app, inner);
+                return;
+            }
+
+            // Slow path: rebuild source and skip to position.
+            let input = match open_input(&db, &track) {
+                Ok(i) => i,
+                Err(_) => return,
+            };
+            let decoder = match Decoder::new(input) {
+                Ok(d) => d,
+                Err(_) => return,
+            };
+            let total_duration_ms = track.duration_ms.unwrap_or_else(|| {
+                decoder
+                    .total_duration()
+                    .map(|d| d.as_millis() as u64)
+                    .unwrap_or(0)
+            });
+            let skipped = decoder.skip_duration(Duration::from_millis(position_ms));
+
+            let gen = {
+                let mut g = inner.lock();
+                if let Some(sink) = g.sink.take() {
+                    sink.stop();
+                }
+                let new_sink = match Sink::try_new(&handle) {
+                    Ok(s) => s,
+                    Err(_) => return,
+                };
+                new_sink.set_volume(g.volume);
+                new_sink.append(skipped);
+                new_sink.play();
+                g.sink = Some(new_sink);
+                g.base_position_ms = position_ms;
+                g.duration_ms = total_duration_ms;
+                g.started_at = Some(Instant::now());
+                g.paused_at = None;
+                g.progress_generation = g.progress_generation.wrapping_add(1);
+                g.progress_generation
+            };
+            let _ = app.emit("player:state", &{
+                let g = inner.lock();
+                let position_ms = compute_position(&g);
+                PlayerSnapshot {
+                    current_track: g.current_track.clone(),
+                    is_playing: g.sink.as_ref().map(|s| !s.is_paused() && !s.empty()).unwrap_or(false),
+                    position_ms,
+                    duration_ms: g.duration_ms,
+                    volume: g.volume,
+                    finished: g.sink.as_ref().map(|s| s.empty()).unwrap_or(true),
+                }
+            });
+            spawn_progress_task_static(gen, app, inner);
+        });
+
         Ok(())
     }
 
@@ -265,43 +311,60 @@ impl AudioEngine {
     }
 
     fn spawn_progress_task(&self, generation: u64) {
-        let app = self.app.clone();
-        let inner = self.inner.clone();
-        std::thread::spawn(move || loop {
-            std::thread::sleep(Duration::from_millis(500));
-            let (snap, finished, current_gen) = {
-                let g = inner.lock();
-                let is_playing = g
-                    .sink
-                    .as_ref()
-                    .map(|s| !s.is_paused() && !s.empty())
-                    .unwrap_or(false);
-                let position_ms = compute_position(&g);
-                let finished = g.sink.as_ref().map(|s| s.empty()).unwrap_or(true);
-                (
-                    PlayerSnapshot {
-                        current_track: g.current_track.clone(),
-                        is_playing,
-                        position_ms,
-                        duration_ms: g.duration_ms,
-                        volume: g.volume,
-                        finished,
-                    },
-                    finished,
-                    g.progress_generation,
-                )
-            };
-            if current_gen != generation {
-                // Newer playback session is in charge.
-                break;
-            }
-            let _ = app.emit("player:state", &snap);
-            if finished {
-                let _ = app.emit("player:ended", &snap.current_track);
-                break;
-            }
-        });
+        spawn_progress_task_static(generation, self.app.clone(), self.inner.clone());
     }
+}
+
+fn spawn_progress_task_static(generation: u64, app: AppHandle, inner: Arc<Mutex<Inner>>) {
+    std::thread::spawn(move || loop {
+        std::thread::sleep(Duration::from_millis(500));
+        let (snap, finished, current_gen) = {
+            let g = inner.lock();
+            let is_playing = g
+                .sink
+                .as_ref()
+                .map(|s| !s.is_paused() && !s.empty())
+                .unwrap_or(false);
+            let position_ms = compute_position(&g);
+            let finished = g.sink.as_ref().map(|s| s.empty()).unwrap_or(true);
+            (
+                PlayerSnapshot {
+                    current_track: g.current_track.clone(),
+                    is_playing,
+                    position_ms,
+                    duration_ms: g.duration_ms,
+                    volume: g.volume,
+                    finished,
+                },
+                finished,
+                g.progress_generation,
+            )
+        };
+        if current_gen != generation {
+            break;
+        }
+        let _ = app.emit("player:state", &snap);
+        if finished {
+            let corrected = {
+                let mut g = inner.lock();
+                let elapsed = compute_elapsed(&g);
+                if elapsed > 0 && elapsed != g.duration_ms {
+                    g.duration_ms = elapsed;
+                }
+                PlayerSnapshot {
+                    current_track: g.current_track.clone(),
+                    is_playing: false,
+                    position_ms: g.duration_ms,
+                    duration_ms: g.duration_ms,
+                    volume: g.volume,
+                    finished: true,
+                }
+            };
+            let _ = app.emit("player:state", &corrected);
+            let _ = app.emit("player:ended", &corrected.current_track);
+            break;
+        }
+    });
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -314,16 +377,21 @@ pub struct PlayerSnapshot {
     pub finished: bool,
 }
 
-fn compute_position(g: &Inner) -> u64 {
-    if g.sink.is_none() {
-        return 0;
-    }
+/// Raw elapsed playback time without any clamping — used to correct duration on finish.
+fn compute_elapsed(g: &Inner) -> u64 {
     let elapsed_ms = match (g.started_at, g.paused_at) {
         (Some(start), Some(paused)) => paused.duration_since(start).as_millis() as u64,
         (Some(start), None) => start.elapsed().as_millis() as u64,
         _ => 0,
     };
-    let pos = g.base_position_ms + elapsed_ms;
+    g.base_position_ms + elapsed_ms
+}
+
+fn compute_position(g: &Inner) -> u64 {
+    if g.sink.is_none() {
+        return 0;
+    }
+    let pos = compute_elapsed(g);
     if g.duration_ms > 0 {
         pos.min(g.duration_ms)
     } else {

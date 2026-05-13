@@ -24,6 +24,13 @@ export const api = {
     username?: string;
     password?: string;
   }) => invoke<RemoteSource>("add_webdav_source", input),
+  updateWebdavSource: (input: {
+    id: number;
+    name: string;
+    url: string;
+    username?: string;
+    password?: string;
+  }) => invoke<import("@/types").RemoteSource>("update_webdav_source", input),
   removeRemoteSource: (id: number) =>
     invoke<void>("remove_remote_source", { id }),
   syncRemoteSource: (id: number) =>
@@ -62,4 +69,19 @@ export const api = {
     invoke<string | null>("get_cover_art", { trackId }),
   getLyrics: (trackId: string) =>
     invoke<Lyrics | null>("get_lyrics", { trackId }),
+  speedTestSource: (opts: { folderPath?: string; sourceId?: number }) =>
+    invoke<{ peak_kbps: number; avg_kbps: number }>("speed_test_source", {
+      folderPath: opts.folderPath ?? null,
+      sourceId: opts.sourceId ?? null,
+    }),
+
+  checkUpdate: () =>
+    invoke<{
+      current_version: string;
+      latest_version: string;
+      has_update: boolean;
+      release_url: string;
+    }>("check_update"),
+
+  installUpdate: () => invoke<void>("install_update"),
 };
