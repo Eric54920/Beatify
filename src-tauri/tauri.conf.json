@@ -23,7 +23,8 @@
         "decorations": true,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
-        "transparent": false
+        "transparent": false,
+        "trafficLightPosition": { "x": 20.0, "y": 20.0 }
       }
     ],
     "security": {
