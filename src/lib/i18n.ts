@@ -46,6 +46,8 @@ const en: Record<string, string> = {
   "page.settings.language": "Language",
   "page.settings.about": "About",
   "page.settings.version": "Beatify v0.1.4",
+  "page.settings.sourceCode": "Source Code",
+  "page.settings.copyright": "© 2026 Eric54920. All rights reserved.",
 
   "side.combined.title": "Up Next & History",
   "side.queue.title": "Up Next",
@@ -57,6 +59,8 @@ const en: Record<string, string> = {
   "col.artist": "Artist",
   "col.album": "Album",
   "col.genre": "Genre",
+  "col.format": "Format",
+  "col.size": "Size",
   "col.time": "Time",
   "col.plays": "Plays",
 
@@ -104,6 +108,7 @@ const en: Record<string, string> = {
   "tooltip.repeatAll": "Repeat all",
   "tooltip.repeatOne": "Repeat one",
 
+  "form.file": "File",
   "form.displayName": "Display name (optional)",
   "form.serverUrl": "Server URL",
   "form.username": "Username",
@@ -179,7 +184,9 @@ const zh: Record<string, string> = {
   "page.settings.themeSystemHint": "跟随系统外观偏好。",
   "page.settings.language": "语言",
   "page.settings.about": "关于",
-  "page.settings.version": "Beatify v0.1.0",
+  "page.settings.version": "Beatify v0.1.4",
+  "page.settings.sourceCode": "源代码",
+  "page.settings.copyright": "© 2026 Eric54920。保留所有权利。",
 
   "side.combined.title": "待播与历史",
   "side.queue.title": "待播",
@@ -191,6 +198,8 @@ const zh: Record<string, string> = {
   "col.artist": "艺人",
   "col.album": "专辑",
   "col.genre": "流派",
+  "col.format": "格式",
+  "col.size": "大小",
   "col.time": "时长",
   "col.plays": "播放次数",
 
@@ -238,6 +247,7 @@ const zh: Record<string, string> = {
   "tooltip.repeatAll": "列表循环",
   "tooltip.repeatOne": "单曲循环",
 
+  "form.file": "文件名",
   "form.displayName": "显示名称（可选）",
   "form.serverUrl": "服务器地址",
   "form.username": "用户名",

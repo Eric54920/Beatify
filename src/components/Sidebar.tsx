@@ -3,12 +3,12 @@ import {
   Disc3,
   Users,
   Layers3,
-  Music2,
   Settings as SettingsIcon,
 } from "lucide-react";
 import { usePlayer } from "@/store/player";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import appIcon from "@/icon.svg";
 
 export function Sidebar() {
   const { view, setView } = usePlayer();
@@ -22,12 +22,10 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="glass relative z-10 flex h-full w-60 shrink-0 flex-col border-r border-border/50">
-      <div className="flex items-center gap-2 px-5 pt-[calc(var(--titlebar-height)+8px)] pb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 text-white shadow-sm">
-          <Music2 className="h-4 w-4" />
-        </div>
-        <span className="text-base font-semibold tracking-tight">
+    <aside className="glass relative z-10 flex h-full w-44 shrink-0 flex-col border-r border-border/50">
+      <div className="flex flex-col items-center px-3 pt-[calc(var(--titlebar-height)+12px)] pb-4">
+        <img src={appIcon} alt="Beatify" className="h-11 w-11 rounded-xl" />
+        <span className="mt-1.5 text-sm font-semibold tracking-tight">
           {t("app.name")}
         </span>
       </div>

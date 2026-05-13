@@ -1,7 +1,9 @@
-import { Monitor, Moon, Sun, Check } from "lucide-react";
+import { Monitor, Moon, Sun, Check, ExternalLink } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettings, type Theme, type Locale } from "@/store/settings";
 import { cn } from "@/lib/utils";
+import appIcon from "@/icon.svg";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 export function SettingsView() {
   const t = useT();
@@ -100,8 +102,17 @@ export function SettingsView() {
           </Section>
 
           <Section title={t("page.settings.about")}>
-            <div className="rounded-xl border bg-card px-4 py-3 text-sm text-muted-foreground">
-              {t("page.settings.version")}
+            <div className="rounded-xl border bg-card px-4 py-4 flex flex-col items-center gap-3 text-sm text-muted-foreground">
+              <img src={appIcon} alt="Beatify" className="h-14 w-14 rounded-2xl" />
+              <span className="font-medium text-foreground">{t("page.settings.version")}</span>
+              <button
+                onClick={() => openUrl("https://github.com/Eric54920/Beatify")}
+                className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                {t("page.settings.sourceCode")}
+              </button>
+              <span className="text-xs">{t("page.settings.copyright")}</span>
             </div>
           </Section>
         </div>
