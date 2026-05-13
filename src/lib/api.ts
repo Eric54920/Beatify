@@ -24,6 +24,13 @@ export const api = {
     username?: string;
     password?: string;
   }) => invoke<RemoteSource>("add_webdav_source", input),
+  updateWebdavSource: (input: {
+    id: number;
+    name: string;
+    url: string;
+    username?: string;
+    password?: string;
+  }) => invoke<import("@/types").RemoteSource>("update_webdav_source", input),
   removeRemoteSource: (id: number) =>
     invoke<void>("remove_remote_source", { id }),
   syncRemoteSource: (id: number) =>

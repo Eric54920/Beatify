@@ -34,6 +34,7 @@ pub fn run() {
             commands::rescan_library,
             commands::list_remote_sources,
             commands::add_webdav_source,
+            commands::update_webdav_source,
             commands::remove_remote_source,
             commands::sync_remote_source,
             commands::sync_all_remote_sources,

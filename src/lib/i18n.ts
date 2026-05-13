@@ -74,6 +74,8 @@ const en: Record<string, string> = {
 
   "search.placeholder": "Search title, artist, album",
 
+  "action.editWebdav": "Edit",
+  "dialog.editWebdav.title": "Edit WebDAV server",
   "action.addFolder": "Add folder",
   "action.addWebdav": "Add WebDAV",
   "action.sync": "Sync",
@@ -121,6 +123,7 @@ const en: Record<string, string> = {
   "form.serverUrl": "Server URL",
   "form.username": "Username",
   "form.password": "Password",
+  "form.passwordKeep": "Leave blank to keep current",
   "form.title": "Title",
   "form.artist": "Artist",
   "form.album": "Album",
@@ -221,6 +224,8 @@ const zh: Record<string, string> = {
 
   "search.placeholder": "搜索 标题、艺人、专辑",
 
+  "action.editWebdav": "编辑",
+  "dialog.editWebdav.title": "编辑 WebDAV 服务器",
   "action.addFolder": "添加文件夹",
   "action.addWebdav": "添加 WebDAV",
   "action.sync": "同步",
@@ -268,6 +273,7 @@ const zh: Record<string, string> = {
   "form.serverUrl": "服务器地址",
   "form.username": "用户名",
   "form.password": "密码",
+  "form.passwordKeep": "留空以保留原密码",
   "form.title": "标题",
   "form.artist": "艺人",
   "form.album": "专辑",

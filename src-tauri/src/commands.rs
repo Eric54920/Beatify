@@ -190,6 +190,47 @@ pub fn add_webdav_source(
 }
 
 #[tauri::command]
+pub fn update_webdav_source(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: i64,
+    name: String,
+    url: String,
+    username: Option<String>,
+    password: Option<String>,
+) -> AppResult<RemoteSource> {
+    // Only update password when the caller sends a non-empty value.
+    // An empty string means "unchanged" because the UI never receives the real password.
+    let new_password = if password.as_deref().unwrap_or("").is_empty() {
+        state
+            .db
+            .get_remote_source(id)?
+            .and_then(|s| s.password)
+    } else {
+        password
+    };
+
+    state.db.update_remote_source(
+        id,
+        &name,
+        &url,
+        username.as_deref(),
+        new_password.as_deref(),
+    )?;
+
+    let source = state
+        .db
+        .get_remote_source(id)?
+        .ok_or_else(|| AppError::NotFound(id.to_string()))?;
+
+    let _ = app.emit("library:changed", ());
+    Ok(RemoteSource {
+        password: source.password.as_ref().map(|_| String::new()),
+        ..source
+    })
+}
+
+#[tauri::command]
 pub fn remove_remote_source(
     app: AppHandle,
     state: State<'_, AppState>,
