@@ -62,4 +62,9 @@ export const api = {
     invoke<string | null>("get_cover_art", { trackId }),
   getLyrics: (trackId: string) =>
     invoke<Lyrics | null>("get_lyrics", { trackId }),
+  speedTestSource: (opts: { folderPath?: string; sourceId?: number }) =>
+    invoke<{ peak_kbps: number; avg_kbps: number }>("speed_test_source", {
+      folderPath: opts.folderPath ?? null,
+      sourceId: opts.sourceId ?? null,
+    }),
 };

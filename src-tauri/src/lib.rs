@@ -56,6 +56,7 @@ pub fn run() {
             commands::update_track_metadata,
             commands::get_cover_art,
             commands::get_lyrics,
+            commands::speed_test_source,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

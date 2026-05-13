@@ -64,6 +64,14 @@ const en: Record<string, string> = {
   "col.time": "Time",
   "col.plays": "Plays",
 
+  "speedtest.title": "Speed Test",
+  "speedtest.measuring": "Measuring…",
+  "speedtest.waiting": "Starting…",
+  "speedtest.current": "Current",
+  "speedtest.peak": "Peak",
+  "speedtest.avg": "Average",
+  "speedtest.retest": "Retest",
+
   "search.placeholder": "Search title, artist, album",
 
   "action.addFolder": "Add folder",
@@ -202,6 +210,14 @@ const zh: Record<string, string> = {
   "col.size": "大小",
   "col.time": "时长",
   "col.plays": "播放次数",
+
+  "speedtest.title": "速度测试",
+  "speedtest.measuring": "测速中…",
+  "speedtest.waiting": "正在启动…",
+  "speedtest.current": "当前",
+  "speedtest.peak": "峰值",
+  "speedtest.avg": "平均",
+  "speedtest.retest": "重新测试",
 
   "search.placeholder": "搜索 标题、艺人、专辑",
 

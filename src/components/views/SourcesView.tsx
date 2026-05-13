@@ -7,7 +7,9 @@ import {
   Globe,
   HardDrive,
   Cloud,
+  Activity,
 } from "lucide-react";
+import { SpeedTestDialog } from "@/components/SpeedTestDialog";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +36,12 @@ export function SourcesView() {
   const confirm = useConfirm();
   const [webdavOpen, setWebdavOpen] = useState(false);
   const [scanning, setScanning] = useState<number | "all" | null>(null);
+  const [speedTest, setSpeedTest] = useState<{
+    open: boolean;
+    title: string;
+    folderPath?: string;
+    sourceId?: number;
+  }>({ open: false, title: "" });
 
   const onAddFolder = async () => {
     try {
@@ -100,6 +108,15 @@ export function SourcesView() {
                 addedLabel={t("page.sources.added", {
                   date: new Date(f.added_at).toLocaleDateString(),
                 })}
+                actionIcon={<Activity className="h-4 w-4" />}
+                actionTitle={t("speedtest.title")}
+                onAction={() =>
+                  setSpeedTest({
+                    open: true,
+                    title: f.path.split("/").filter(Boolean).pop() ?? f.path,
+                    folderPath: f.path,
+                  })
+                }
                 onRemove={async () => {
                   const ok = await confirm({
                     title: t("confirm.removeFolder.title"),
@@ -138,15 +155,18 @@ export function SourcesView() {
                 addedLabel={t("page.sources.added", {
                   date: new Date(s.added_at).toLocaleDateString(),
                 })}
-                actionIcon={
+                actionIcon={<Activity className="h-4 w-4" />}
+                actionTitle={t("speedtest.title")}
+                onAction={() =>
+                  setSpeedTest({ open: true, title: s.name, sourceId: s.id })
+                }
+                action2Icon={
                   <RefreshCw
-                    className={`h-4 w-4 ${
-                      scanning === s.id ? "animate-spin" : ""
-                    }`}
+                    className={`h-4 w-4 ${scanning === s.id ? "animate-spin" : ""}`}
                   />
                 }
-                actionTitle={t("action.sync")}
-                onAction={async () => {
+                action2Title={t("action.sync")}
+                onAction2={async () => {
                   setScanning(s.id);
                   try {
                     const n = await api.syncRemoteSource(s.id);
@@ -181,6 +201,13 @@ export function SourcesView() {
       </div>
 
       <WebdavDialog open={webdavOpen} onOpenChange={setWebdavOpen} />
+      <SpeedTestDialog
+        open={speedTest.open}
+        onOpenChange={(o) => setSpeedTest((s) => ({ ...s, open: o }))}
+        title={speedTest.title}
+        folderPath={speedTest.folderPath}
+        sourceId={speedTest.sourceId}
+      />
     </div>
   );
 }
@@ -224,6 +251,9 @@ function SourceCard({
   onAction,
   actionIcon,
   actionTitle,
+  onAction2,
+  action2Icon,
+  action2Title,
 }: {
   title: string;
   subtitle: string;
@@ -234,6 +264,9 @@ function SourceCard({
   onAction?: () => void;
   actionIcon?: React.ReactNode;
   actionTitle?: string;
+  onAction2?: () => void;
+  action2Icon?: React.ReactNode;
+  action2Title?: string;
 }) {
   return (
     <div className="group flex items-center justify-between rounded-xl border bg-card px-4 py-3 transition-colors hover:bg-foreground/[0.03]">
@@ -261,6 +294,17 @@ function SourceCard({
             onClick={onAction}
           >
             {actionIcon}
+          </Button>
+        )}
+        {onAction2 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            title={action2Title}
+            onClick={onAction2}
+          >
+            {action2Icon}
           </Button>
         )}
         <Button

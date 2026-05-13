@@ -1,7 +1,31 @@
+use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
+
+#[cfg(target_os = "macos")]
+extern "C" {
+    fn fcntl(fd: i32, cmd: i32, ...) -> i32;
+}
+
+#[cfg(target_os = "macos")]
+unsafe fn libc_fcntl(fd: i32, cmd: i32, arg: i32) -> i32 {
+    fcntl(fd, cmd, arg)
+}
 
 use tauri::{AppHandle, Emitter, State};
 use uuid::Uuid;
+
+#[derive(serde::Serialize, Clone)]
+pub struct SpeedSample {
+    pub speed_kbps: f64,
+    pub idx: usize,
+}
+
+#[derive(serde::Serialize)]
+pub struct SpeedTestDone {
+    pub peak_kbps: f64,
+    pub avg_kbps: f64,
+}
 
 use crate::error::{AppError, AppResult};
 use crate::library;
@@ -484,4 +508,157 @@ pub fn get_cover_art(state: State<'_, AppState>, track_id: String) -> AppResult<
         None => return Ok(None),
     };
     metadata::read_cover_data_url(&track, &state.covers_dir)
+}
+
+// ---------- Speed test ----------
+
+#[tauri::command]
+pub async fn speed_test_source(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    folder_path: Option<String>,
+    source_id: Option<i64>,
+) -> AppResult<SpeedTestDone> {
+    const TEST_MS: u128 = 8_000;
+    const SAMPLE_MS: u128 = 500;
+    const CHUNK: usize = 512 * 1024; // 512 KB per read
+
+    let mut samples: Vec<f64> = Vec::new();
+
+    if let Some(path) = folder_path {
+        let db = Arc::clone(&state.db);
+        let app2 = app.clone();
+
+        let result = tokio::task::spawn_blocking(move || {
+            let tracks = db.list_tracks_for_folder(&path)?;
+            // Collect all accessible file URIs, sorted by size desc so large files
+            // contribute more data early in the test.
+            let uris: Vec<String> = {
+                let mut v: Vec<_> = tracks
+                    .iter()
+                    .filter(|t| !t.missing && std::path::Path::new(&t.uri).exists())
+                    .collect();
+                v.sort_by_key(|t| std::cmp::Reverse(t.file_size.unwrap_or(0)));
+                v.iter().map(|t| t.uri.clone()).collect()
+            };
+            if uris.is_empty() {
+                return Err(crate::error::AppError::Other("No accessible tracks in folder".into()));
+            }
+
+            let mut buf = vec![0u8; CHUNK];
+            let start = std::time::Instant::now();
+            let mut last_sample = start;
+            let mut bytes_in_interval = 0usize;
+            let mut idx = 0usize;
+            let mut samples: Vec<f64> = Vec::new();
+
+            'outer: for uri in uris.iter().cycle() {
+                let mut file = match std::fs::File::open(uri) {
+                    Ok(f) => f,
+                    Err(_) => continue,
+                };
+
+                // Bypass macOS page cache so we measure actual disk throughput.
+                #[cfg(target_os = "macos")]
+                {
+                    use std::os::unix::io::AsRawFd;
+                    const F_NOCACHE: i32 = 48;
+                    unsafe { libc_fcntl(file.as_raw_fd(), F_NOCACHE, 1i32); }
+                }
+
+                loop {
+                    if start.elapsed().as_millis() >= TEST_MS {
+                        break 'outer;
+                    }
+                    let n = match file.read(&mut buf) {
+                        Ok(0) => break, // EOF — move to next file
+                        Ok(n) => n,
+                        Err(_) => break,
+                    };
+                    bytes_in_interval += n;
+
+                    let elapsed = last_sample.elapsed();
+                    if elapsed.as_millis() >= SAMPLE_MS {
+                        let kbps = (bytes_in_interval as f64 / 1024.0) / elapsed.as_secs_f64();
+                        let _ = app2.emit("speed:sample", SpeedSample { speed_kbps: kbps, idx });
+                        samples.push(kbps);
+                        bytes_in_interval = 0;
+                        last_sample = std::time::Instant::now();
+                        idx += 1;
+                    }
+                }
+            }
+            Ok::<_, crate::error::AppError>(samples)
+        })
+        .await
+        .map_err(|e| crate::error::AppError::Other(e.to_string()))??;
+
+        samples = result;
+    } else if let Some(id) = source_id {
+        let source = state
+            .db
+            .get_remote_source(id)?
+            .ok_or_else(|| crate::error::AppError::NotFound(id.to_string()))?;
+
+        let tracks = state.db.list_tracks_for_remote_source(id)?;
+        let uri = tracks
+            .iter()
+            .max_by_key(|t| t.file_size.unwrap_or(0))
+            .map(|t| t.uri.clone())
+            .ok_or_else(|| crate::error::AppError::Other("No tracks in source".into()))?;
+
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(30))
+            .danger_accept_invalid_certs(true)
+            .build()?;
+
+        let start = std::time::Instant::now();
+        let mut last_sample = start;
+        let mut bytes_in_interval = 0usize;
+        let mut idx = 0usize;
+        let mut offset: u64 = 0;
+
+        while start.elapsed().as_millis() < TEST_MS {
+            let range_end = offset + CHUNK as u64 - 1;
+            let mut req = client
+                .get(&uri)
+                .header("Range", format!("bytes={}-{}", offset, range_end));
+            if let Some(user) = &source.username {
+                req = req.basic_auth(user, source.password.as_ref());
+            }
+
+            match req.send().await {
+                Ok(resp) => match resp.bytes().await {
+                    Ok(bytes) => {
+                        let n = bytes.len();
+                        if n == 0 {
+                            break;
+                        }
+                        bytes_in_interval += n;
+                        offset += n as u64;
+                    }
+                    Err(_) => break,
+                },
+                Err(_) => break,
+            }
+
+            let elapsed = last_sample.elapsed();
+            if elapsed.as_millis() >= SAMPLE_MS {
+                let kbps = (bytes_in_interval as f64 / 1024.0) / elapsed.as_secs_f64();
+                let _ = app.emit("speed:sample", SpeedSample { speed_kbps: kbps, idx });
+                samples.push(kbps);
+                bytes_in_interval = 0;
+                last_sample = std::time::Instant::now();
+                idx += 1;
+            }
+        }
+    }
+
+    let peak = samples.iter().cloned().fold(0f64, f64::max);
+    let avg = if samples.is_empty() {
+        0.0
+    } else {
+        samples.iter().sum::<f64>() / samples.len() as f64
+    };
+    Ok(SpeedTestDone { peak_kbps: peak, avg_kbps: avg })
 }
