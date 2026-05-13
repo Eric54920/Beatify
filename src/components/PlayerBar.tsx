@@ -39,6 +39,7 @@ export function PlayerBar() {
 
   const [scrubbing, setScrubbing] = useState<number | null>(null);
   const [scrubHover, setScrubHover] = useState(false);
+  const clearScrubTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [lastVolume, setLastVolume] = useState(volume);
   const t = useT();
   const shuffle = useSettings((s) => s.shuffle);
@@ -114,7 +115,14 @@ export function PlayerBar() {
               disabled={!currentTrack}
               forceExpanded={scrubActive}
               onChange={(v) => setScrubbing(v)}
-              onCommit={(v) => { setScrubbing(null); seek(v); }}
+              onCommit={(v) => {
+                seek(v);
+                clearTimeout(clearScrubTimerRef.current);
+                clearScrubTimerRef.current = setTimeout(
+                  () => setScrubbing((prev) => (prev === v ? null : prev)),
+                  1500
+                );
+              }}
               onHoverChange={setScrubHover}
               startLabel={formatTime(sliderValue)}
               endLabel={formatTime(durationMs)}

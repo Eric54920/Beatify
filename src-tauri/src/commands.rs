@@ -376,7 +376,7 @@ pub fn previous_track(state: State<'_, AppState>) -> AppResult<Option<Track>> {
 
 #[tauri::command]
 pub fn seek(state: State<'_, AppState>, position_ms: u64) -> AppResult<()> {
-    state.audio.seek(&state.db, position_ms)
+    state.audio.seek(state.db.clone(), position_ms)
 }
 
 #[tauri::command]
