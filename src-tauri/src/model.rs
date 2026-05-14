@@ -67,6 +67,9 @@ pub struct Track {
     pub missing: bool,
     /// For remote tracks: links to a remote_source row.
     pub source_id: Option<i64>,
+    pub bit_depth: Option<u32>,
+    pub sample_rate: Option<u32>,
+    pub bit_rate: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

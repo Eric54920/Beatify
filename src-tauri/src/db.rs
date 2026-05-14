@@ -74,6 +74,14 @@ impl Db {
         // Best-effort migration for older DBs missing source_id.
         let _ = conn.execute("ALTER TABLE tracks ADD COLUMN source_id INTEGER", []);
         let _ = conn.execute("ALTER TABLE tracks ADD COLUMN lyrics TEXT", []);
+        let _ = conn.execute("ALTER TABLE tracks ADD COLUMN bit_depth INTEGER", []);
+        let _ = conn.execute("ALTER TABLE tracks ADD COLUMN sample_rate INTEGER", []);
+        let _ = conn.execute("ALTER TABLE tracks ADD COLUMN bit_rate INTEGER", []);
+        // Force a metadata re-read for local tracks that predate audio-property fields.
+        let _ = conn.execute(
+            "UPDATE tracks SET last_modified = NULL WHERE source = 'local' AND bit_depth IS NULL",
+            [],
+        );
 
         // Indexes (run after possible ALTER TABLE so source_id exists).
         conn.execute_batch(
@@ -212,7 +220,7 @@ impl Db {
         let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT id, source, uri, title, artist, album, album_artist, genre, year,
-                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id
+                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id, bit_depth, sample_rate, bit_rate
                 FROM tracks WHERE source_id = ?1"#,
         )?;
         let rows = stmt.query_map(params![source_id], track_from_row)?;
@@ -226,8 +234,8 @@ impl Db {
         conn.execute(
             r#"INSERT INTO tracks(
                 id, source, uri, title, artist, album, album_artist, genre, year,
-                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id
-            ) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18)
+                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id, bit_depth, sample_rate, bit_rate
+            ) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,?21)
             ON CONFLICT(uri) DO UPDATE SET
                 title=excluded.title,
                 artist=excluded.artist,
@@ -242,7 +250,10 @@ impl Db {
                 has_cover=excluded.has_cover,
                 last_modified=excluded.last_modified,
                 missing=excluded.missing,
-                source_id=excluded.source_id"#,
+                source_id=excluded.source_id,
+                bit_depth=excluded.bit_depth,
+                sample_rate=excluded.sample_rate,
+                bit_rate=excluded.bit_rate"#,
             params![
                 t.id,
                 t.source.as_str(),
@@ -262,6 +273,9 @@ impl Db {
                 t.last_modified,
                 t.missing as i32,
                 t.source_id,
+                t.bit_depth.map(|v| v as i64),
+                t.sample_rate.map(|v| v as i64),
+                t.bit_rate.map(|v| v as i64),
             ],
         )?;
         Ok(())
@@ -329,7 +343,7 @@ impl Db {
         let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT id, source, uri, title, artist, album, album_artist, genre, year,
-                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id
+                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id, bit_depth, sample_rate, bit_rate
                 FROM tracks ORDER BY added_at DESC"#,
         )?;
         let rows = stmt.query_map([], track_from_row)?;
@@ -346,7 +360,7 @@ impl Db {
         let pattern = format!("{}%", prefix);
         let mut stmt = conn.prepare(
             r#"SELECT id, source, uri, title, artist, album, album_artist, genre, year,
-                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id
+                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id, bit_depth, sample_rate, bit_rate
                 FROM tracks WHERE source = 'local' AND uri LIKE ?1"#,
         )?;
         let rows = stmt.query_map(params![pattern], track_from_row)?;
@@ -357,7 +371,7 @@ impl Db {
         let conn = self.conn.lock();
         conn.query_row(
             r#"SELECT id, source, uri, title, artist, album, album_artist, genre, year,
-                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id
+                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id, bit_depth, sample_rate, bit_rate
                 FROM tracks WHERE id = ?1"#,
             params![id],
             track_from_row,
@@ -370,7 +384,7 @@ impl Db {
         let conn = self.conn.lock();
         conn.query_row(
             r#"SELECT id, source, uri, title, artist, album, album_artist, genre, year,
-                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id
+                track_number, duration_ms, file_size, format, has_cover, added_at, last_modified, missing, source_id, bit_depth, sample_rate, bit_rate
                 FROM tracks WHERE uri = ?1"#,
             params![uri],
             track_from_row,
@@ -457,5 +471,8 @@ fn track_from_row(r: &rusqlite::Row) -> rusqlite::Result<Track> {
         last_modified: r.get(15)?,
         missing: r.get::<_, i32>(16)? != 0,
         source_id: r.get(17)?,
+        bit_depth: r.get::<_, Option<i64>>(18)?.map(|v| v as u32),
+        sample_rate: r.get::<_, Option<i64>>(19)?.map(|v| v as u32),
+        bit_rate: r.get::<_, Option<i64>>(20)?.map(|v| v as u32),
     })
 }
