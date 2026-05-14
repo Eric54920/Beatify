@@ -1,134 +1,93 @@
 <div align="center">
 
-<img src="./src-tauri/icons/icon.svg" alt="Beatify" width="100" style="border-radius:22px" />
+<img src="./src-tauri/icons/icon.svg" alt="Beatify" width="96" style="border-radius:22px" />
 
 # Beatify
 
-**A modern, native desktop music player built with Tauri 2, Rust, and React.**
+**A clean, native desktop music player for local libraries and WebDAV servers.**
 
-Inspired by Apple Music — sortable library, sources (local + WebDAV), albums & artists views, synced lyrics with a blurred-cover overlay, shuffle / repeat, light/dark/system themes, and English/中文 UI.
-
-[**English**](./README.md) · [中文](./README.zh.md)
+[English](./README.md) · [中文](./README.zh.md)
 
 </div>
 
 <p align="center">
-  <img alt="Tauri" src="https://img.shields.io/badge/Tauri-24C8DB?logo=tauri&logoColor=white" />
-  <img alt="Rust" src="https://img.shields.io/badge/Rust-DEA584?logo=rust&logoColor=white" />
-  <img alt="React" src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=white" />
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" />
-  <img alt="Vite" src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" />
-  <img alt="Tailwind" src="https://img.shields.io/badge/Tailwind-38B2AC?logo=tailwindcss&logoColor=white" />
-  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-bundled-003B57?logo=sqlite&logoColor=white" />
-  <img alt="License" src="https://img.shields.io/badge/License-PolyForm_Noncommercial-blue" />
+  <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" />
+  <img alt="Tauri" src="https://img.shields.io/badge/built%20with-Tauri%202-24C8DB?logo=tauri&logoColor=white" />
+  <img alt="License" src="https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue" />
 </p>
 
 ---
 
-## Table of contents
-
-- [🎵 Beatify](#-beatify)
-  - [Table of contents](#table-of-contents)
-  - [Features](#features)
-    - [Library](#library)
-    - [Playback](#playback)
-    - [Lyrics](#lyrics)
-    - [Settings \& polish](#settings--polish)
-  - [Screenshots](#screenshots)
-  - [Prerequisites](#prerequisites)
-  - [Getting started](#getting-started)
-  - [Build for production](#build-for-production)
-  - [Supported audio formats](#supported-audio-formats)
-  - [Contributing](#contributing)
-  - [License](#license)
-
 ## Features
 
-### Library
-- Multi-folder local library; recursive scan that ignores file changes that haven't actually changed (modification-time check) for fast re-scans
-- File-system watching (`notify`): folders rescan automatically when files are added / changed / deleted; missing tracks are removed
-- Multiple **WebDAV** remote sources alongside local folders. Each source can have its own credentials; lyrics + cover art are extracted and cached during sync
-- Library, **Albums** (grid + detail), and **Artists** (left list + right detail) views
-- Sortable Library columns: Title / Artist / Album / Format / Size / Time / Plays — click headers to sort, click again to reverse
-
-### Playback
-- Cross-format playback (FLAC, MP3, AAC/M4A, OGG, Opus, WAV, ALAC, AIFF …) via [`rodio`](https://crates.io/crates/rodio) with the [`symphonia-all`](https://crates.io/crates/symphonia) backend
-- Remote playback authenticates and streams from WebDAV servers
-- Persistent **Up Next** queue + **Recently Played** history; combined side panel (history on top, queue below)
-- **Shuffle** + 3-state **repeat** (off / list / one) with persisted preference
-- Apple Music-style floating glass player bar; track title, artist and album on one line with a thin inline scrubber
-
-### Lyrics
-- Lyrics extracted from tag metadata (ID3 `USLT`, Vorbis `LYRICS` / `UNSYNCEDLYRICS`, MP4 `©lyr`) and cached to the database
-- Full-window slide-up overlay with a blurred album cover background
-- Synced **LRC** support (`[mm:ss.xx]`): active line auto-scrolls and scales up; unsynced lyrics fall back to plain rendering
-- Smooth GPU-accelerated transform-based scroll (no native `scrollTop` jitter)
-- Drag from anywhere on the lyrics page to move the window
-
-### Settings & polish
-- **Light / dark / system** theme with no flash-of-wrong-colors at startup
-- **English / 中文** language switch with a small built-in dictionary — switches instantly
-- Per-source confirmation dialogs for any destructive action (remove folder, remove server, clear queue, clear history)
-- Frameless window on macOS (overlay title bar) — drag the window from any non-interactive area at the top
-- Cover art cached as data URLs; embedded covers extracted from tags
+- **Local + remote library** — add local folders or WebDAV servers; the library updates automatically when files change on disk
+- **Multi-view browsing** — Library (sortable columns), Albums (grid + tracklist), Artists (list + detail)
+- **Broad format support** — FLAC, MP3, AAC/M4A, OGG, Opus, WAV, ALAC, AIFF, and more
+- **Synced lyrics** — full-screen overlay with blurred album art; LRC timestamps scroll and highlight the active line smoothly
+- **Up Next & History** — persistent queue and play history in a collapsible side panel
+- **Shuffle & repeat** — off / list / one; remembered across sessions
+- **Light / dark / system theme** — applied before first paint, no flash
+- **English / 中文** — switch instantly, no restart needed
 
 ## Screenshots
 
-![Library view](docs/screenshots/library.jpg)
-![Album view](docs/screenshots/album.jpg)
-![Artist view](docs/screenshots/artist.jpg)
-![Resource view](docs/screenshots/resource.jpg)
-![Lyrics view](docs/screenshots/lyrics.jpg)
+![Library](docs/screenshots/library.jpg)
+![Albums](docs/screenshots/album.jpg)
+![Artists](docs/screenshots/artist.jpg)
+![Sources](docs/screenshots/resource.jpg)
+![Lyrics](docs/screenshots/lyrics.jpg)
 
-## Prerequisites
+## Download
 
-- **Rust** ≥ 1.77 (latest stable recommended) — install via [rustup](https://rustup.rs/)
-- **Node.js** ≥ 20 (we test on 21.x) and **npm** ≥ 10
-- **Tauri 2 platform dependencies** — see the [Tauri prerequisites guide](https://v2.tauri.app/start/prerequisites/) for your OS
-  - macOS: Xcode Command Line Tools (`xcode-select --install`)
-  - Linux: `webkit2gtk-4.1`, `librsvg2-dev`, `libssl-dev`, `gcc`, `pkg-config`, … (full list in the Tauri docs)
-  - Windows: Microsoft Edge WebView2 + MSVC build tools
+Pre-built installers for macOS, Windows, and Linux are on the [Releases](https://github.com/Eric54920/Beatify/releases) page.
 
-## Getting started
+## Development
+
+**Prerequisites**
+
+- [Rust](https://rustup.rs/) ≥ 1.77
+- Node.js ≥ 20 + npm ≥ 10
+- Platform-specific deps from the [Tauri prerequisites guide](https://v2.tauri.app/start/prerequisites/)
+
+**Run locally**
 
 ```bash
-# 1. install JS deps
 npm install
-
-# 2. run dev (spawns Vite + cargo run; opens the native window)
 npm run tauri dev
 ```
 
-The first `cargo build` will be slow (compiling Tauri + rodio + symphonia from source). Subsequent rebuilds are incremental and quick.
+The first build takes a few minutes while Cargo compiles dependencies. Subsequent runs are incremental and fast.
 
-Vite serves the UI on `http://localhost:1420` and hot-reloads frontend changes. Rust changes trigger an automatic `cargo build` + relaunch via the Tauri CLI's file watcher.
-
-## Build for production
+**Build for production**
 
 ```bash
 npm run tauri build
 ```
 
-This produces a notarisation-ready bundle under `src-tauri/target/release/bundle/` (`.dmg` on macOS, `.msi` / `.exe` on Windows, `.deb` / `.AppImage` on Linux). Replace the placeholder icons under [`src-tauri/icons/`](src-tauri/icons/) before shipping.
+Output bundles land in `src-tauri/target/release/bundle/` — `.dmg` on macOS, `.msi`/`.exe` on Windows, `.deb`/`.AppImage` on Linux.
 
-## Supported audio formats
+## FAQ
 
-`mp3`, `flac`, `m4a`, `m4b`, `aac`, `ogg`, `oga`, `opus`, `wav`, `wma`, `alac`, `ape`, `aiff`.
+**Why won't a certain file play?**  
+Beatify decodes audio via [Symphonia](https://github.com/pdeljanov/Symphonia). If your file uses a codec or container variant Symphonia doesn't support, playback will fail silently. Check the Symphonia repo for the full format matrix.
 
-If the format isn't decoded by `symphonia` (or your build doesn't include the feature), playback will fail gracefully with an error toast.
+**Does it work on Windows and Linux?**  
+The app builds and runs on all three platforms. Active testing is primarily on macOS, so Windows/Linux may have rough edges — bug reports are welcome.
+
+**My WebDAV server uses a self-signed certificate. Will it connect?**  
+Not currently — TLS validation is strict by default. Support for custom CA certificates is planned.
+
+**Where does Beatify store its data?**  
+Everything (library database, cached covers, settings) lives in the OS app data directory: `~/Library/Application Support/com.beatify.app` on macOS, `%APPDATA%\com.beatify.app` on Windows.
 
 ## Contributing
 
-Issues and PRs are welcome for noncommercial use. Please:
+Issues and PRs are welcome for noncommercial use.
 
-1. Run `npm run build` and `cargo build` before opening a PR to make sure the project builds cleanly
-2. Match the existing code style; the project deliberately uses no comments unless the *why* is non-obvious
-3. For any new strings, add entries to **both** `en` and `zh` dictionaries in [`src/lib/i18n.ts`](src/lib/i18n.ts)
+1. Ensure `npm run build` and `cargo build` both pass before opening a PR
+2. Any new UI strings must be added to both `en` and `zh` in [`src/lib/i18n.ts`](src/lib/i18n.ts)
+3. Follow the existing code style — comments only when the *why* is non-obvious
 
 ## License
 
-Beatify is licensed under the [PolyForm Noncommercial License 1.0.0](./LICENSE). You may use, copy, modify, and redistribute it freely for **any noncommercial purpose** — personal use, hobby projects, research, education and noncommercial organisations.
-
-**Commercial use is not permitted under this license.** If you need a commercial licence, please open an issue to start a conversation.
-
-The license does not affect any "fair use" rights you have under applicable law.
+[PolyForm Noncommercial License 1.0.0](./LICENSE) — free for personal, educational, and other noncommercial use. Commercial use is not permitted under this license; open an issue if you need to discuss a commercial arrangement.

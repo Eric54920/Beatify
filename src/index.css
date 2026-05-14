@@ -25,7 +25,7 @@
     --ring: 222 47% 11%;
     --radius: 0.75rem;
 
-    --sidebar: 220 14% 97%;
+    --sidebar: 220 16% 93%;
     --panel: 0 0% 100%;
     --titlebar-height: 38px;
   }
@@ -50,7 +50,7 @@
     --input: 220 14% 18%;
     --ring: 215 18% 70%;
 
-    --sidebar: 220 18% 7%;
+    --sidebar: 220 18% 13%;
     --panel: 220 18% 9%;
   }
 }
@@ -62,7 +62,7 @@
   html, body, #root {
     height: 100%;
     margin: 0;
-    background: transparent;
+    background: hsl(var(--background));
   }
   body {
     @apply text-foreground;
@@ -124,9 +124,9 @@
 
 /* Glassy backdrop */
 .glass {
-  background: hsl(var(--sidebar) / 0.55);
-  backdrop-filter: saturate(200%) blur(40px);
-  -webkit-backdrop-filter: saturate(200%) blur(40px);
+  background: hsl(var(--sidebar) / 0.38);
+  backdrop-filter: saturate(180%) blur(32px);
+  -webkit-backdrop-filter: saturate(180%) blur(32px);
 }
 
 /* Floating player bar */
