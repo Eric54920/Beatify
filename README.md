@@ -20,6 +20,7 @@
 
 ## Features
 
+- **Home dashboard** — library stats, recently played tracks & albums, most played, recently added, and a daily mix that refreshes every day
 - **Local + remote library** — add local folders or WebDAV servers; the library updates automatically when files change on disk
 - **Multi-view browsing** — Library (sortable columns), Albums (grid + tracklist), Artists (list + detail)
 - **Broad format support** — FLAC, MP3, AAC/M4A, OGG, Opus, WAV, ALAC, AIFF, and more
@@ -31,6 +32,7 @@
 
 ## Screenshots
 
+![Home](docs/screenshots/home.jpg)
 ![Library](docs/screenshots/library.jpg)
 ![Albums](docs/screenshots/album.jpg)
 ![Artists](docs/screenshots/artist.jpg)

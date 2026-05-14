@@ -11,6 +11,7 @@ import { api } from "@/lib/api";
 import { useSettings } from "@/store/settings";
 
 export type View =
+  | "home"
   | "library"
   | "albums"
   | "artists"
@@ -69,7 +70,7 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
   positionMs: 0,
   durationMs: 0,
   volume: 1,
-  view: "library",
+  view: "home",
   panelOpen: false,
   lyricsOpen: false,
   search: "",
