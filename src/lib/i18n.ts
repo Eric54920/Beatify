@@ -4,11 +4,24 @@ import { useSettings, type Locale } from "@/store/settings";
 const en: Record<string, string> = {
   "app.name": "Beatify",
 
+  "nav.home": "Home",
   "nav.library": "Library",
   "nav.albums": "Albums",
   "nav.artists": "Artists",
   "nav.sources": "Sources",
   "nav.settings": "Settings",
+
+  "page.home.title": "Home",
+  "page.home.recentlyPlayed": "Recently Played",
+  "page.home.mostPlayed": "Most Played",
+  "page.home.recentlyAdded": "Recently Added",
+  "page.home.empty": "Add a folder or WebDAV server to get started.",
+  "page.home.stats.tracks": "Tracks",
+  "page.home.stats.albums": "Albums",
+  "page.home.stats.artists": "Artists",
+  "page.home.stats.duration": "Total Time",
+  "page.home.recentAlbums": "Recently Played Albums",
+  "page.home.dailyPick": "Daily Mix",
 
   "page.library.title": "Library",
   "page.library.tracks": "{n} tracks",
@@ -162,11 +175,24 @@ const en: Record<string, string> = {
 const zh: Record<string, string> = {
   "app.name": "Beatify",
 
+  "nav.home": "主页",
   "nav.library": "资料库",
   "nav.albums": "专辑",
   "nav.artists": "艺人",
   "nav.sources": "媒体源",
   "nav.settings": "设置",
+
+  "page.home.title": "主页",
+  "page.home.recentlyPlayed": "最近播放",
+  "page.home.mostPlayed": "最常播放",
+  "page.home.recentlyAdded": "最近添加",
+  "page.home.empty": "在 媒体源 中添加文件夹或 WebDAV 服务器以开始使用。",
+  "page.home.stats.tracks": "曲目",
+  "page.home.stats.albums": "专辑",
+  "page.home.stats.artists": "艺人",
+  "page.home.stats.duration": "总时长",
+  "page.home.recentAlbums": "最近播放的专辑",
+  "page.home.dailyPick": "每日推荐",
 
   "page.library.title": "资料库",
   "page.library.tracks": "{n} 首",

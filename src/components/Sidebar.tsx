@@ -1,4 +1,5 @@
 import {
+  Home,
   Library,
   Disc3,
   Users,
@@ -15,6 +16,7 @@ export function Sidebar() {
   const t = useT();
 
   const items = [
+    { id: "home" as const, label: t("nav.home"), icon: Home },
     { id: "library" as const, label: t("nav.library"), icon: Library },
     { id: "albums" as const, label: t("nav.albums"), icon: Disc3 },
     { id: "artists" as const, label: t("nav.artists"), icon: Users },

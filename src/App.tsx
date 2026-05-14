@@ -3,6 +3,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Sidebar } from "@/components/Sidebar";
 import { PlayerBar } from "@/components/PlayerBar";
 import { LyricsOverlay } from "@/components/LyricsOverlay";
+import { HomeView } from "@/components/views/HomeView";
 import { LibraryView } from "@/components/views/LibraryView";
 import { AlbumsView } from "@/components/views/AlbumsView";
 import { ArtistsView } from "@/components/views/ArtistsView";
@@ -69,11 +70,12 @@ export default function App() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <Sidebar />
         <main className="relative flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden bg-background">
-          {view === "library" && <LibraryView />}
-          {view === "albums" && <AlbumsView />}
-          {view === "artists" && <ArtistsView />}
-          {view === "sources" && <SourcesView />}
-          {view === "settings" && <SettingsView />}
+          <div className={view === "home"     ? "flex flex-1 flex-col min-h-0 overflow-hidden" : "hidden"}><HomeView /></div>
+          <div className={view === "library"  ? "flex flex-1 flex-col min-h-0 overflow-hidden" : "hidden"}><LibraryView /></div>
+          <div className={view === "albums"   ? "flex flex-1 flex-col min-h-0 overflow-hidden" : "hidden"}><AlbumsView /></div>
+          <div className={view === "artists"  ? "flex flex-1 flex-col min-h-0 overflow-hidden" : "hidden"}><ArtistsView /></div>
+          <div className={view === "sources"  ? "flex flex-1 flex-col min-h-0 overflow-hidden" : "hidden"}><SourcesView /></div>
+          <div className={view === "settings" ? "flex flex-1 flex-col min-h-0 overflow-hidden" : "hidden"}><SettingsView /></div>
           <PlayerBar />
         </main>
         <SidePanel />
