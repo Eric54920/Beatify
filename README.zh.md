@@ -20,6 +20,7 @@
 
 ## 功能特性
 
+- **主页概览** — 资料库统计、最近播放的曲目与专辑、最常播放、最近添加，以及每天刷新的每日推荐
 - **本地 + 远程资料库** — 添加本地文件夹或 WebDAV 服务器；文件变化时资料库自动同步
 - **多视图浏览** — 资料库（可排序列表）、专辑（网格 + 曲目列表）、艺人（左侧列表 + 右侧详情）
 - **广泛格式支持** — FLAC、MP3、AAC/M4A、OGG、Opus、WAV、ALAC、AIFF 等
@@ -31,6 +32,7 @@
 
 ## 截图
 
+![主页](docs/screenshots/home.jpg)
 ![资料库](docs/screenshots/library.jpg)
 ![专辑](docs/screenshots/album.jpg)
 ![艺人](docs/screenshots/artist.jpg)
