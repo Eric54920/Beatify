@@ -96,8 +96,14 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
     await listen<PlayerSnapshot>("player:state", (event) => {
       const s = event.payload;
+      const { tracks } = get();
+      // Prefer the freshest track data from the library over the snapshot
+      // embedded in the event (which was locked at play time and may be stale).
+      const currentTrack = s.current_track
+        ? (tracks.find((t) => t.id === s.current_track!.id) ?? s.current_track)
+        : null;
       set({
-        currentTrack: s.current_track,
+        currentTrack,
         isPlaying: s.is_playing,
         positionMs: s.position_ms,
         durationMs: s.duration_ms,

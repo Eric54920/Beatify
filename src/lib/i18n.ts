@@ -102,6 +102,7 @@ const en: Record<string, string> = {
   "action.sync": "Sync",
   "action.syncDone": "Library synced",
   "action.syncDoneDesc": "Local: {local} tracks · Remote: {remote} tracks",
+  "action.syncDoneLocalDesc": "Updated {n} tracks",
   "action.syncFailed": "Sync failed",
   "action.clear": "Clear",
   "action.cancel": "Cancel",
@@ -125,6 +126,11 @@ const en: Record<string, string> = {
   "confirm.clearQueue.description": "All queued tracks will be removed. Playback continues.",
   "confirm.clearHistory.title": "Clear play history?",
   "confirm.clearHistory.description": "All play history will be erased. This can't be undone.",
+
+  "tooltip.lossless.label": "Lossless",
+  "tooltip.lossless.bitDepth": "Bit Depth",
+  "tooltip.lossless.sampleRate": "Sample Rate",
+  "tooltip.lossless.bitRate": "Bit Rate",
 
   "tooltip.previous": "Previous",
   "tooltip.next": "Next",
@@ -276,6 +282,7 @@ const zh: Record<string, string> = {
   "action.sync": "同步",
   "action.syncDone": "资料库已同步",
   "action.syncDoneDesc": "本地 {local} 首 · 远程 {remote} 首",
+  "action.syncDoneLocalDesc": "已更新 {n} 首曲目",
   "action.syncFailed": "同步失败",
   "action.clear": "清空",
   "action.cancel": "取消",
@@ -299,6 +306,11 @@ const zh: Record<string, string> = {
   "confirm.clearQueue.description": "所有待播曲目将被移除，当前播放不受影响。",
   "confirm.clearHistory.title": "清空播放记录？",
   "confirm.clearHistory.description": "所有播放记录将被清除，此操作无法撤销。",
+
+  "tooltip.lossless.label": "无损",
+  "tooltip.lossless.bitDepth": "位深度",
+  "tooltip.lossless.sampleRate": "采样率",
+  "tooltip.lossless.bitRate": "码率",
 
   "tooltip.previous": "上一曲",
   "tooltip.next": "下一曲",

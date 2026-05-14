@@ -38,7 +38,7 @@ export function SourcesView() {
   const confirm = useConfirm();
   const [webdavOpen, setWebdavOpen] = useState(false);
   const [editing, setEditing] = useState<RemoteSource | null>(null);
-  const [scanning, setScanning] = useState<number | "all" | null>(null);
+  const [scanning, setScanning] = useState<number | "local" | "all" | null>(null);
   const [speedTest, setSpeedTest] = useState<{
     open: boolean;
     title: string;
@@ -111,6 +111,27 @@ export function SourcesView() {
                 addedLabel={t("page.sources.added", {
                   date: new Date(f.added_at).toLocaleDateString(),
                 })}
+                action2Icon={
+                  <RefreshCw
+                    className={`h-4 w-4 ${scanning === "local" ? "animate-spin" : ""}`}
+                  />
+                }
+                action2Title={t("action.sync")}
+                onAction2={async () => {
+                  setScanning("local");
+                  await new Promise((r) => requestAnimationFrame(r));
+                  try {
+                    const n = await api.rescanLibrary();
+                    toast({
+                      title: t("action.syncDone"),
+                      description: t("action.syncDoneLocalDesc", { n }),
+                    });
+                  } catch (e: any) {
+                    toast({ title: t("action.syncFailed"), description: e?.toString() });
+                  } finally {
+                    setScanning(null);
+                  }
+                }}
                 actionIcon={<Activity className="h-4 w-4" />}
                 actionTitle={t("speedtest.title")}
                 onAction={() =>
@@ -174,15 +195,16 @@ export function SourcesView() {
                 action2Title={t("action.sync")}
                 onAction2={async () => {
                   setScanning(s.id);
+                  await new Promise((r) => requestAnimationFrame(r));
                   try {
                     const n = await api.syncRemoteSource(s.id);
                     toast({
-                      title: t("action.sync"),
-                      description: `${n}`,
+                      title: t("action.syncDone"),
+                      description: t("action.syncDoneLocalDesc", { n }),
                     });
                   } catch (e: any) {
                     toast({
-                      title: t("action.sync"),
+                      title: t("action.syncFailed"),
                       description: e?.toString(),
                     });
                   } finally {
