@@ -81,6 +81,9 @@ pub fn scan_folder(db: &Db, folder: &Path) -> AppResult<ScanReport> {
             last_modified,
             missing: false,
             source_id: None,
+            bit_depth: info.bit_depth,
+            sample_rate: info.sample_rate,
+            bit_rate: info.bit_rate,
         };
 
         db.upsert_track(&track)?;

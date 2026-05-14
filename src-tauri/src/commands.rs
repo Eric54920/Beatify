@@ -95,8 +95,11 @@ pub fn remove_folder(
 }
 
 #[tauri::command]
-pub fn rescan_library(app: AppHandle, state: State<'_, AppState>) -> AppResult<usize> {
-    let report = library::rescan_all(&state.db)?;
+pub async fn rescan_library(app: AppHandle, state: State<'_, AppState>) -> AppResult<usize> {
+    let db = state.db.clone();
+    let report = tokio::task::spawn_blocking(move || library::rescan_all(&db))
+        .await
+        .map_err(|e| AppError::Other(e.to_string()))??;
     let _ = app.emit("library:changed", ());
     Ok(report.added + report.updated + report.removed)
 }
@@ -144,6 +147,9 @@ pub fn add_remote_track(
         last_modified: None,
         missing: false,
         source_id: None,
+        bit_depth: None,
+        sample_rate: None,
+        bit_rate: None,
     };
     state.db.upsert_track(&track)?;
     let _ = app.emit("library:changed", ());

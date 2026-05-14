@@ -33,6 +33,9 @@ pub struct ReadResult {
     pub has_cover: bool,
     pub format: Option<String>,
     pub lyrics: Option<String>,
+    pub bit_depth: Option<u32>,
+    pub sample_rate: Option<u32>,
+    pub bit_rate: Option<u32>,
 }
 
 pub fn read_local(path: &Path) -> AppResult<ReadResult> {
@@ -71,6 +74,9 @@ fn build_read_result(
 ) -> ReadResult {
     let properties = tagged.properties();
     let duration_ms = Some(properties.duration().as_millis() as u64);
+    let bit_depth = properties.bit_depth().map(|b| b as u32);
+    let sample_rate = properties.sample_rate();
+    let bit_rate = properties.audio_bitrate();
     let tag = tagged.primary_tag().or_else(|| tagged.first_tag());
 
     let (title, artist, album, album_artist, genre, year, track_number, has_cover) =
@@ -89,6 +95,9 @@ fn build_read_result(
         has_cover,
         format,
         lyrics,
+        bit_depth,
+        sample_rate,
+        bit_rate,
     }
 }
 

@@ -277,7 +277,11 @@ pub fn sync_source(db: &Db, source: &RemoteSource, covers_dir: &Path) -> AppResu
         // hasn't been parsed yet") or this is brand new.
         let needs_extract = existing
             .as_ref()
-            .map(|t| t.duration_ms.is_none() || !t.has_cover && t.title == fallback_title_from_entry(&entry))
+            .map(|t| {
+                t.duration_ms.is_none()
+                    || (!t.has_cover && t.title == fallback_title_from_entry(&entry))
+                    || t.sample_rate.is_none()
+            })
             .unwrap_or(true);
 
         let extracted = if needs_extract {
@@ -347,6 +351,9 @@ pub fn sync_source(db: &Db, source: &RemoteSource, covers_dir: &Path) -> AppResu
                 last_modified: None,
                 missing: false,
                 source_id: Some(source.id),
+                bit_depth: r.bit_depth,
+                sample_rate: r.sample_rate,
+                bit_rate: r.bit_rate,
             }
         } else if let Some(prev) = existing.clone() {
             // Use stored data, just refresh source linkage / format / size and clear missing flag.
@@ -378,6 +385,9 @@ pub fn sync_source(db: &Db, source: &RemoteSource, covers_dir: &Path) -> AppResu
                 last_modified: None,
                 missing: false,
                 source_id: Some(source.id),
+                bit_depth: None,
+                sample_rate: None,
+                bit_rate: None,
             }
         };
 

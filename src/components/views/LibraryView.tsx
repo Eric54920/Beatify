@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Search, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,11 @@ export function LibraryView() {
 
   const remoteCount = tracks.filter((tr) => tr.source === "remote").length;
 
+  const [syncing, setSyncing] = useState(false);
+
   const onRescan = async () => {
+    setSyncing(true);
+    await new Promise((r) => requestAnimationFrame(r));
     try {
       const local = await api.rescanLibrary();
       const remote = await api.syncAllRemoteSources();
@@ -36,6 +40,8 @@ export function LibraryView() {
       });
     } catch (e: any) {
       toast({ title: t("action.syncFailed"), description: e?.toString() });
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -68,9 +74,10 @@ export function LibraryView() {
             size="icon"
             className="h-9 w-9 rounded-full"
             onClick={onRescan}
+            disabled={syncing}
             title={t("action.sync")}
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </header>

@@ -18,6 +18,23 @@ import { Slider } from "@/components/ui/slider";
 import { CoverArt } from "@/components/CoverArt";
 import { cn, formatTime } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { AudioWaveform } from "lucide-react";
+import type { Track } from "@/types";
+
+const LOSSLESS_FORMATS = new Set(["FLAC", "WAV", "AIFF", "APE", "ALAC"]);
+
+function isLossless(track: Track): boolean {
+  const fmt = (track.format ?? "").toUpperCase();
+  if (LOSSLESS_FORMATS.has(fmt)) return true;
+  // M4A container: ALAC (lossless) has bit_depth, AAC does not
+  if (fmt === "M4A" && track.bit_depth != null) return true;
+  return false;
+}
+
+function formatSampleRate(hz: number): string {
+  return hz % 1000 === 0 ? `${hz / 1000} kHz` : `${(hz / 1000).toFixed(1)} kHz`;
+}
 
 export function PlayerBar() {
   const {
@@ -56,7 +73,7 @@ export function PlayerBar() {
   const scrubActive = scrubHover || scrubbing !== null;
 
   return (
-    <div data-no-drag className="absolute inset-x-0 bottom-0 z-10 px-3 py-2">
+    <div data-no-drag className="absolute inset-x-0 bottom-0 z-30 px-3 py-2">
       <div className="glass-floating overflow-hidden rounded-full">
         <div className="flex items-center gap-2 px-4 py-1.5">
 
@@ -106,6 +123,62 @@ export function PlayerBar() {
                     : t("common.startHint")}
                 </span>
               </div>
+              {currentTrack && isLossless(currentTrack) && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="shrink-0 cursor-default text-emerald-400 transition-opacity hover:opacity-80">
+                      <AudioWaveform className="h-4 w-4" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    sideOffset={10}
+                    className="p-0 bg-popover text-popover-foreground border border-border shadow-xl rounded-xl min-w-[168px] overflow-hidden"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center gap-2 px-3.5 pt-3 pb-2.5">
+                      <AudioWaveform className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                      <span className="text-[13px] font-semibold tracking-wide text-emerald-400">
+                        {currentTrack.format ?? "Lossless"}
+                      </span>
+                      <span className="ml-auto text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        {t("tooltip.lossless.label")}
+                      </span>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="mx-3 h-px bg-border/60" />
+
+                    {/* Stats grid */}
+                    <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-1.5 px-3.5 py-2.5 text-[12px]">
+                      {currentTrack.bit_depth != null && (
+                        <>
+                          <span className="text-muted-foreground">{t("tooltip.lossless.bitDepth")}</span>
+                          <span className="text-right font-medium tabular-nums">
+                            {currentTrack.bit_depth}-bit
+                          </span>
+                        </>
+                      )}
+                      {currentTrack.sample_rate != null && (
+                        <>
+                          <span className="text-muted-foreground">{t("tooltip.lossless.sampleRate")}</span>
+                          <span className="text-right font-medium tabular-nums">
+                            {formatSampleRate(currentTrack.sample_rate)}
+                          </span>
+                        </>
+                      )}
+                      {currentTrack.bit_rate != null && (
+                        <>
+                          <span className="text-muted-foreground">{t("tooltip.lossless.bitRate")}</span>
+                          <span className="text-right font-medium tabular-nums">
+                            {currentTrack.bit_rate.toLocaleString()} kbps
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
 
             {/* Progress bar — tooltip is absolute inside, zero layout impact */}
