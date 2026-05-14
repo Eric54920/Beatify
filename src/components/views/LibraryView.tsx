@@ -28,14 +28,14 @@ export function LibraryView() {
 
   const onRescan = async () => {
     try {
-      const a = await api.rescanLibrary();
-      const b = await api.syncAllRemoteSources();
+      const local = await api.rescanLibrary();
+      const remote = await api.syncAllRemoteSources();
       toast({
-        title: t("action.sync"),
-        description: `${a} · ${b}`,
+        title: t("action.syncDone"),
+        description: t("action.syncDoneDesc", { local, remote }),
       });
     } catch (e: any) {
-      toast({ title: t("action.sync"), description: e?.toString() });
+      toast({ title: t("action.syncFailed"), description: e?.toString() });
     }
   };
 
