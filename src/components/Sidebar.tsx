@@ -23,7 +23,7 @@ export function Sidebar() {
 
   return (
     <div className="relative z-10 h-full w-48 shrink-0 p-2">
-      <aside className="glass flex h-full w-full flex-col overflow-hidden rounded-2xl border border-b-0 border-border/30 shadow-xl">
+      <aside className="glass flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border/45 shadow-sm">
         <div className="flex flex-col items-center px-3 pt-[calc(var(--titlebar-height)+12px)] pb-4">
           <img src={appIcon} alt="Beatify" className="h-11 w-11 rounded-xl" />
           <span className="mt-1.5 text-sm font-semibold tracking-tight">
