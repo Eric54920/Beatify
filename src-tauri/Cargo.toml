@@ -1,6 +1,6 @@
 [package]
 name = "beatify"
-version = "0.1.7"
+version = "0.1.8"
 description = "An Apple Music-like player built with Tauri + Rust + React"
 authors = ["beatify"]
 edition = "2021"
