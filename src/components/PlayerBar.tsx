@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { usePlayer } from "@/store/player";
 import { useSettings } from "@/store/settings";
-import { Slider } from "@/components/ui/slider";
 import { CoverArt } from "@/components/CoverArt";
 import { cn, formatTime } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -42,12 +41,10 @@ export function PlayerBar() {
     isPlaying,
     positionMs,
     durationMs,
-    volume,
     togglePlay,
     next,
     previous,
     seek,
-    setVolume,
     panelOpen,
     togglePanel,
     lyricsOpen,
@@ -57,19 +54,14 @@ export function PlayerBar() {
   const [scrubbing, setScrubbing] = useState<number | null>(null);
   const [scrubHover, setScrubHover] = useState(false);
   const clearScrubTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const [lastVolume, setLastVolume] = useState(volume);
+
   const t = useT();
   const shuffle = useSettings((s) => s.shuffle);
   const repeat = useSettings((s) => s.repeat);
   const toggleShuffle = useSettings((s) => s.toggleShuffle);
   const cycleRepeat = useSettings((s) => s.cycleRepeat);
 
-  useEffect(() => {
-    if (volume > 0) setLastVolume(volume);
-  }, [volume]);
-
   const sliderValue = scrubbing != null ? scrubbing : positionMs;
-  const muted = volume === 0;
   const scrubActive = scrubHover || scrubbing !== null;
 
   return (
@@ -193,7 +185,7 @@ export function PlayerBar() {
                 clearTimeout(clearScrubTimerRef.current);
                 clearScrubTimerRef.current = setTimeout(
                   () => setScrubbing((prev) => (prev === v ? null : prev)),
-                  1500
+                  400
                 );
               }}
               onHoverChange={setScrubHover}
@@ -240,27 +232,142 @@ export function PlayerBar() {
             >
               <ListMusic className="h-[17px] w-[17px]" />
             </IconBtn>
-            <div className="ml-2 flex items-center gap-1.5 border-l border-foreground/10 pl-2">
-              <button
-                onClick={() => setVolume(muted ? lastVolume || 0.5 : 0)}
-                className="text-foreground/80 hover:text-foreground"
-                title={muted ? t("tooltip.unmute") : t("tooltip.mute")}
-              >
-                {muted
-                  ? <VolumeX className="h-[17px] w-[17px]" />
-                  : <Volume2 className="h-[17px] w-[17px]" />}
-              </button>
-              <Slider
-                min={0} max={1} step={0.01}
-                value={[volume]}
-                onValueChange={([v]) => setVolume(v)}
-                className="w-20"
-              />
-            </div>
+            <VolumeControl muteLabel={t("tooltip.mute")} unmuteLabel={t("tooltip.unmute")} />
           </div>
 
         </div>
       </div>
+    </div>
+  );
+}
+
+function VolumeControl({ muteLabel, unmuteLabel }: { muteLabel: string; unmuteLabel: string }) {
+  const storeVolume = usePlayer((s) => s.volume);
+  const setVolume = usePlayer((s) => s.setVolume);
+
+  const [local, setLocal] = useState(storeVolume);
+  const [last, setLast] = useState(storeVolume > 0 ? storeVolume : 0.5);
+  const isDragging = useRef(false);
+
+  useEffect(() => {
+    if (!isDragging.current) setLocal(storeVolume);
+  }, [storeVolume]);
+
+  useEffect(() => {
+    if (local > 0) setLast(local);
+  }, [local]);
+
+  const muted = local === 0;
+
+  return (
+    <div className="ml-2 flex items-center gap-1.5 border-l border-foreground/10 pl-2">
+      <button
+        onClick={() => {
+          const v = muted ? last : 0;
+          setLocal(v);
+          setVolume(v);
+        }}
+        className="text-foreground/80 hover:text-foreground"
+        title={muted ? unmuteLabel : muteLabel}
+      >
+        {muted ? <VolumeX className="h-[17px] w-[17px]" /> : <Volume2 className="h-[17px] w-[17px]" />}
+      </button>
+      <VolumeBar
+        value={local}
+        onDragStart={() => { isDragging.current = true; }}
+        onDrag={(v) => setVolume(v)}
+        onCommit={(v) => { isDragging.current = false; setLocal(v); setVolume(v); }}
+      />
+    </div>
+  );
+}
+
+function VolumeBar({ value, onDragStart, onDrag, onCommit }: {
+  value: number;
+  onDragStart: () => void;
+  onDrag: (v: number) => void;
+  onCommit: (v: number) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const pending = useRef<number | null>(null);
+  const raf = useRef<number | null>(null);
+
+  // Sync visuals from prop when not dragging (mute/unmute, store changes).
+  useEffect(() => {
+    if (!dragging.current) setVisual(value);
+  }, [value]);
+
+  const setVisual = (v: number) => {
+    const pct = `${(v * 100).toFixed(2)}%`;
+    if (fillRef.current) fillRef.current.style.width = pct;
+    if (thumbRef.current) thumbRef.current.style.left = `calc(${pct} - 5px)`;
+  };
+
+  const valueAtX = (x: number) => {
+    if (!trackRef.current) return 0;
+    const { left, width } = trackRef.current.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (x - left) / width));
+  };
+
+  const scheduleIpc = (v: number) => {
+    pending.current = v;
+    if (raf.current === null) {
+      raf.current = requestAnimationFrame(() => {
+        raf.current = null;
+        if (pending.current !== null) { onDrag(pending.current); pending.current = null; }
+      });
+    }
+  };
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    dragging.current = true;
+    onDragStart();
+    trackRef.current?.setPointerCapture(e.pointerId);
+    const v = valueAtX(e.clientX);
+    setVisual(v);
+    scheduleIpc(v);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging.current) return;
+    const v = valueAtX(e.clientX);
+    setVisual(v);      // immediate DOM update — zero React overhead
+    scheduleIpc(v);    // throttled IPC via rAF
+  };
+
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging.current) return;
+    dragging.current = false;
+    trackRef.current?.releasePointerCapture(e.pointerId);
+    if (raf.current !== null) { cancelAnimationFrame(raf.current); raf.current = null; }
+    const v = valueAtX(e.clientX);
+    setVisual(v);
+    pending.current = null;
+    onCommit(v);
+  };
+
+  const initPct = `${(value * 100).toFixed(2)}%`;
+
+  return (
+    <div
+      ref={trackRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      className="relative flex h-4 w-20 cursor-pointer items-center"
+    >
+      <div className="absolute inset-x-0 h-1 rounded-full bg-foreground/10">
+        <div ref={fillRef} className="h-full rounded-full bg-foreground/70" style={{ width: initPct }} />
+      </div>
+      <div
+        ref={thumbRef}
+        className="absolute h-2.5 w-2.5 rounded-full bg-foreground shadow-sm pointer-events-none"
+        style={{ left: `calc(${initPct} - 5px)` }}
+      />
     </div>
   );
 }

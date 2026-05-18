@@ -13,7 +13,7 @@
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/平台-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" />
   <img alt="Tauri" src="https://img.shields.io/badge/基于-Tauri%202-24C8DB?logo=tauri&logoColor=white" />
-  <img alt="License" src="https://img.shields.io/badge/协议-PolyForm%20Noncommercial-blue" />
+  <img alt="License" src="https://img.shields.io/badge/协议-MIT-green" />
 </p>
 
 ---
@@ -82,9 +82,18 @@ Beatify 使用 [Symphonia](https://github.com/pdeljanov/Symphonia) 解码音频�
 **数据存储在哪里？**  
 资料库数据库、封面缓存和设置均存储在系统应用数据目录：macOS 为 `~/Library/Application Support/com.beatify.app`，Windows 为 `%APPDATA%\com.beatify.app`。
 
+**macOS 提示"'Beatify' 已损坏，无法打开，您应该将它移到废纸篓。"**  
+这是 macOS Gatekeeper 拦截了未签名的应用，应用本身没有问题。在终端执行以下命令移除隔离属性，然后再次双击打开即可：
+
+```bash
+xattr -cr /Applications/Beatify.app
+```
+
+如果安装位置不同，将路径替换为实际路径。
+
 ## 贡献
 
-欢迎在非商业范围内提 Issue 或 PR。
+欢迎提 Issue 或 PR。
 
 1. 提交前请确保 `npm run build` 与 `cargo build` 均通过
 2. 任何新增界面文字必须同时在 [`src/lib/i18n.ts`](src/lib/i18n.ts) 的 `en` 与 `zh` 字典中添加对应键值
@@ -92,4 +101,4 @@ Beatify 使用 [Symphonia](https://github.com/pdeljanov/Symphonia) 解码音频�
 
 ## 开源协议
 
-[PolyForm Noncommercial License 1.0.0](./LICENSE) — 可在个人、教育及其他非商业目的下自由使用。商业使用不在此协议范围内，如有需要请通过 Issue 联系作者。
+[MIT License](./LICENSE) — 可自由使用、修改与分发，无任何限制。

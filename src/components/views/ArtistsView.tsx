@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Cloud,
   Disc3,
   ListPlus,
   MoreHorizontal,
@@ -270,6 +271,12 @@ function AlbumSectionRow({
   );
 }
 
+function formatFileSize(bytes: number | null): string {
+  if (bytes == null || bytes <= 0) return "";
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function CompactTrackRow({
   track,
   contextTracks,
@@ -289,15 +296,19 @@ function CompactTrackRow({
 
   const playing = currentTrack?.id === track.id;
   const ids = contextTracks.map((tr) => tr.id);
+  const fmt = track.format?.toUpperCase() ?? null;
+  const size = formatFileSize(track.file_size);
+  const isRemote = track.source === "remote";
 
   return (
     <div
       onDoubleClick={() => playTrack(track.id, ids)}
       className={cn(
-        "group grid grid-cols-[28px_minmax(0,1fr)_56px_28px] items-center gap-3 rounded-md px-2 py-1.5 transition-colors",
+        "group grid grid-cols-[28px_minmax(0,1fr)_auto_auto_56px_28px] items-center gap-x-3 rounded-md px-2 py-1.5 transition-colors",
         playing ? "bg-foreground/[0.06]" : "hover:bg-foreground/[0.04]"
       )}
     >
+      {/* index / play button */}
       <button
         onClick={() => (playing ? togglePlay() : playTrack(track.id, ids))}
         className="flex h-7 w-7 items-center justify-center text-muted-foreground"
@@ -319,6 +330,8 @@ function CompactTrackRow({
           )}
         </span>
       </button>
+
+      {/* title */}
       <div
         className={cn(
           "truncate text-sm",
@@ -327,10 +340,36 @@ function CompactTrackRow({
       >
         {track.title}
       </div>
+
+      {/* format + source */}
+      <div className="flex items-center gap-1.5">
+        {isRemote && (
+          <span
+            title={t("page.sources.remote")}
+            className="inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium bg-sky-500/10 text-sky-500"
+          >
+            <Cloud className="h-2.5 w-2.5" />
+            WebDAV
+          </span>
+        )}
+        {fmt && (
+          <span className="rounded bg-foreground/[0.06] px-1 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
+            {fmt}
+          </span>
+        )}
+      </div>
+
+      {/* file size */}
+      <div className="text-right text-[11px] tabular-nums text-muted-foreground/60 min-w-[48px]">
+        {size}
+      </div>
+
+      {/* duration */}
       <div className="text-right text-xs tabular-nums text-muted-foreground">
         {formatTime(track.duration_ms ?? 0)}
       </div>
 
+      {/* menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

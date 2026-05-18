@@ -69,7 +69,7 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
   isPlaying: false,
   positionMs: 0,
   durationMs: 0,
-  volume: 1,
+  volume: 0.5,
   view: "home",
   panelOpen: false,
   lyricsOpen: false,

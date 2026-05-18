@@ -368,7 +368,7 @@ function LyricsList({
     const el = innerRef.current;
     if (!el) return;
     el.style.transition = animated
-      ? "transform 900ms cubic-bezier(0.4, 0, 0.2, 1)"
+      ? "transform 1200ms cubic-bezier(0.4, 0, 0.2, 1)"
       : "none";
     el.style.transform = `translate3d(0, ${autoOffsetRef.current + manualDeltaRef.current}px, 0)`;
   }, []);
@@ -407,13 +407,14 @@ function LyricsList({
   useEffect(() => {
     const ro = new ResizeObserver(() => {
       if (!isManualRef.current) {
-        autoOffsetRef.current = calcAuto();
+        autoOffsetRef.current = calcAutoRef.current();
         applyTransform(false);
       }
     });
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
-  }, [calcAuto, applyTransform]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
