@@ -1,5 +1,6 @@
 mod audio;
 mod commands;
+mod decoder;
 mod db;
 mod error;
 mod library;

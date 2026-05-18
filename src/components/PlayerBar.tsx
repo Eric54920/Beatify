@@ -193,7 +193,7 @@ export function PlayerBar() {
                 clearTimeout(clearScrubTimerRef.current);
                 clearScrubTimerRef.current = setTimeout(
                   () => setScrubbing((prev) => (prev === v ? null : prev)),
-                  1500
+                  400
                 );
               }}
               onHoverChange={setScrubHover}
