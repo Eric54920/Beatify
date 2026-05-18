@@ -72,7 +72,7 @@ impl AudioEngine {
             started_at: None,
             base_position_ms: 0,
             duration_ms: 0,
-            volume: 1.0,
+            volume: 0.5,
             paused_at: None,
             progress_generation: 0,
         };
