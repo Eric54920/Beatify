@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, Cursor, Read, Seek, SeekFrom};
+use std::panic::{self, AssertUnwindSafe};
 use std::path::Path;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -85,7 +86,9 @@ impl AudioEngine {
 
     pub fn play(&self, db: &Db, track: Track) -> AppResult<()> {
         let input = open_input(db, &track)?;
-        let decoder = Decoder::new(input).map_err(|e| AppError::Audio(e.to_string()))?;
+        let decoder = panic::catch_unwind(AssertUnwindSafe(|| Decoder::new(input)))
+            .map_err(|_| AppError::Audio("decoder panicked on this file".into()))?
+            .map_err(|e| AppError::Audio(e.to_string()))?;
         let total_duration_ms = track.duration_ms.unwrap_or_else(|| {
             decoder
                 .total_duration()
@@ -226,9 +229,9 @@ impl AudioEngine {
                 Ok(i) => i,
                 Err(_) => return,
             };
-            let decoder = match Decoder::new(input) {
-                Ok(d) => d,
-                Err(_) => return,
+            let decoder = match panic::catch_unwind(AssertUnwindSafe(|| Decoder::new(input))) {
+                Ok(Ok(d)) => d,
+                _ => return,
             };
             let total_duration_ms = track.duration_ms.unwrap_or_else(|| {
                 decoder
