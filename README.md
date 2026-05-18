@@ -82,6 +82,15 @@ Not currently — TLS validation is strict by default. Support for custom CA cer
 **Where does Beatify store its data?**  
 Everything (library database, cached covers, settings) lives in the OS app data directory: `~/Library/Application Support/com.beatify.app` on macOS, `%APPDATA%\com.beatify.app` on Windows.
 
+**macOS says "Beatify is damaged and can't be opened. You should move it to the Trash."**  
+This is macOS Gatekeeper blocking an unsigned app — the binary itself is fine. Run the following command in Terminal to remove the quarantine flag, then double-click the app again:
+
+```bash
+xattr -cr /Applications/Beatify.app
+```
+
+If you installed it somewhere else, replace the path accordingly.
+
 ## Contributing
 
 Issues and PRs are welcome for noncommercial use.

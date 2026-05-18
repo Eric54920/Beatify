@@ -82,6 +82,15 @@ Beatify 使用 [Symphonia](https://github.com/pdeljanov/Symphonia) 解码音频�
 **数据存储在哪里？**  
 资料库数据库、封面缓存和设置均存储在系统应用数据目录：macOS 为 `~/Library/Application Support/com.beatify.app`，Windows 为 `%APPDATA%\com.beatify.app`。
 
+**macOS 提示"'Beatify' 已损坏，无法打开，您应该将它移到废纸篓。"**  
+这是 macOS Gatekeeper 拦截了未签名的应用，应用本身没有问题。在终端执行以下命令移除隔离属性，然后再次双击打开即可：
+
+```bash
+xattr -cr /Applications/Beatify.app
+```
+
+如果安装位置不同，将路径替换为实际路径。
+
 ## 贡献
 
 欢迎在非商业范围内提 Issue 或 PR。
