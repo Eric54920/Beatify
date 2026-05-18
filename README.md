@@ -13,7 +13,7 @@
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" />
   <img alt="Tauri" src="https://img.shields.io/badge/built%20with-Tauri%202-24C8DB?logo=tauri&logoColor=white" />
-  <img alt="License" src="https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green" />
 </p>
 
 ---
@@ -82,9 +82,18 @@ Not currently — TLS validation is strict by default. Support for custom CA cer
 **Where does Beatify store its data?**  
 Everything (library database, cached covers, settings) lives in the OS app data directory: `~/Library/Application Support/com.beatify.app` on macOS, `%APPDATA%\com.beatify.app` on Windows.
 
+**macOS says "Beatify is damaged and can't be opened. You should move it to the Trash."**  
+This is macOS Gatekeeper blocking an unsigned app — the binary itself is fine. Run the following command in Terminal to remove the quarantine flag, then double-click the app again:
+
+```bash
+xattr -cr /Applications/Beatify.app
+```
+
+If you installed it somewhere else, replace the path accordingly.
+
 ## Contributing
 
-Issues and PRs are welcome for noncommercial use.
+Issues and PRs are welcome.
 
 1. Ensure `npm run build` and `cargo build` both pass before opening a PR
 2. Any new UI strings must be added to both `en` and `zh` in [`src/lib/i18n.ts`](src/lib/i18n.ts)
@@ -92,4 +101,4 @@ Issues and PRs are welcome for noncommercial use.
 
 ## License
 
-[PolyForm Noncommercial License 1.0.0](./LICENSE) — free for personal, educational, and other noncommercial use. Commercial use is not permitted under this license; open an issue if you need to discuss a commercial arrangement.
+[MIT License](./LICENSE) — free to use, modify, and distribute for any purpose.

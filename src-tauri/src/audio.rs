@@ -5,10 +5,11 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use parking_lot::Mutex;
-use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink, Source};
+use rodio::{OutputStream, OutputStreamHandle, Sink, Source};
 use tauri::{AppHandle, Emitter};
 
 use crate::db::Db;
+use crate::decoder::SymphDecoder;
 use crate::error::{AppError, AppResult};
 use crate::model::{SourceKind, Track};
 use crate::webdav;
@@ -71,7 +72,7 @@ impl AudioEngine {
             started_at: None,
             base_position_ms: 0,
             duration_ms: 0,
-            volume: 1.0,
+            volume: 0.5,
             paused_at: None,
             progress_generation: 0,
         };
@@ -85,7 +86,8 @@ impl AudioEngine {
 
     pub fn play(&self, db: &Db, track: Track) -> AppResult<()> {
         let input = open_input(db, &track)?;
-        let decoder = Decoder::new(input).map_err(|e| AppError::Audio(e.to_string()))?;
+        let ext = track.uri.rsplit('.').next().map(|e| e.to_lowercase());
+        let decoder = SymphDecoder::new(input, ext.as_deref())?;
         let total_duration_ms = track.duration_ms.unwrap_or_else(|| {
             decoder
                 .total_duration()
@@ -192,7 +194,6 @@ impl AudioEngine {
             g.base_position_ms = position_ms;
             g.started_at = Some(Instant::now());
             g.paused_at = None;
-            // Bump generation so the old progress task stops immediately.
             g.progress_generation = g.progress_generation.wrapping_add(1);
         }
         self.emit_state();
@@ -202,14 +203,15 @@ impl AudioEngine {
         let handle = self.handle.clone();
 
         std::thread::spawn(move || {
-            // Try in-place seek first (fast path).
+            // Fast path: ask the running sink to seek in place.
+            // For formats with a seek index (FLAC SEEKTABLE, MP3 Xing/VBRI TOC,
+            // WAV) this is O(1) and completes in one audio-thread callback (~10ms).
             let fast_ok = {
                 let g = inner.lock();
-                if let Some(sink) = &g.sink {
-                    sink.try_seek(Duration::from_millis(position_ms)).is_ok()
-                } else {
-                    false
-                }
+                g.sink
+                    .as_ref()
+                    .map(|s| sink_try_seek(s, Duration::from_millis(position_ms)))
+                    .unwrap_or(false)
             };
 
             if fast_ok {
@@ -221,12 +223,14 @@ impl AudioEngine {
                 return;
             }
 
-            // Slow path: rebuild source and skip to position.
+            // Slow path: rebuild decoder with O(1) native seek via symphonia.
+            // Only reached for formats/files where in-place seek is unsupported.
             let input = match open_input(&db, &track) {
                 Ok(i) => i,
                 Err(_) => return,
             };
-            let decoder = match Decoder::new(input) {
+            let ext = track.uri.rsplit('.').next().map(|e| e.to_lowercase());
+            let mut decoder = match SymphDecoder::new(input, ext.as_deref()) {
                 Ok(d) => d,
                 Err(_) => return,
             };
@@ -236,19 +240,19 @@ impl AudioEngine {
                     .map(|d| d.as_millis() as u64)
                     .unwrap_or(0)
             });
-            let skipped = decoder.skip_duration(Duration::from_millis(position_ms));
+            let _ = decoder.try_seek(Duration::from_millis(position_ms));
 
             let gen = {
                 let mut g = inner.lock();
-                if let Some(sink) = g.sink.take() {
-                    sink.stop();
+                if let Some(old) = g.sink.take() {
+                    old.stop();
                 }
                 let new_sink = match Sink::try_new(&handle) {
                     Ok(s) => s,
                     Err(_) => return,
                 };
                 new_sink.set_volume(g.volume);
-                new_sink.append(skipped);
+                new_sink.append(decoder);
                 new_sink.play();
                 g.sink = Some(new_sink);
                 g.base_position_ms = position_ms;
@@ -260,14 +264,13 @@ impl AudioEngine {
             };
             let _ = app.emit("player:state", &{
                 let g = inner.lock();
-                let position_ms = compute_position(&g);
                 PlayerSnapshot {
                     current_track: g.current_track.clone(),
                     is_playing: g.sink.as_ref().map(|s| !s.is_paused() && !s.empty()).unwrap_or(false),
-                    position_ms,
+                    position_ms: compute_position(&g),
                     duration_ms: g.duration_ms,
                     volume: g.volume,
-                    finished: g.sink.as_ref().map(|s| s.empty()).unwrap_or(true),
+                    finished: false,
                 }
             });
             spawn_progress_task_static(gen, app, inner);
@@ -389,7 +392,8 @@ fn compute_elapsed(g: &Inner) -> u64 {
 
 fn compute_position(g: &Inner) -> u64 {
     if g.sink.is_none() {
-        return 0;
+        // Sink is absent during seek setup; report the target position, not 0.
+        return g.base_position_ms;
     }
     let pos = compute_elapsed(g);
     if g.duration_ms > 0 {
@@ -397,6 +401,15 @@ fn compute_position(g: &Inner) -> u64 {
     } else {
         pos
     }
+}
+
+/// Wrapper around `Sink::try_seek` that treats an empty sink (sound_count == 0)
+/// as a failure so the caller falls through to the rebuild path.
+fn sink_try_seek(sink: &Sink, pos: Duration) -> bool {
+    if sink.empty() {
+        return false;
+    }
+    sink.try_seek(pos).is_ok()
 }
 
 fn open_input(db: &Db, track: &Track) -> AppResult<AudioInput> {

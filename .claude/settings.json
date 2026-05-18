@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo check *)",
+      "Bash(file /Users/maguodong/Music/*.m4a)",
+      "Bash(xargs -I{} ffprobe -v quiet -print_format json -show_streams {})",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(s.get\\('codec_name','?'\\)\\) for s in d.get\\('streams',[]\\)]\")"
+    ]
+  }
+}
