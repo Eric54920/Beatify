@@ -224,6 +224,13 @@ export function SettingsView() {
                 <ExternalLink className="h-3.5 w-3.5" />
                 {t("page.settings.sourceCode")}
               </button>
+              <button
+                onClick={() => openUrl("https://github.com/Eric54920/Beatify/blob/main/LICENSE")}
+                className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                {t("page.settings.license")}
+              </button>
               <span className="text-xs">{t("page.settings.copyright")}</span>
             </div>
           </Section>
